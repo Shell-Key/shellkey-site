@@ -1,0 +1,12 @@
+:root{
+  --bg:#06132c;
+  --bg2:#071a3a;
+  --card:#0b214a;
+  --text:#e9f0ff;
+  --muted:#b9c7ea;
+  --line:rgba(255,255,255,.10);
+  --accent:#3DFF7A;       /* neon green */
+  --accent2:#6BE7FF;      /* cyan */
+  --shadow: 0 18px 50px rgba(0,0,0,.35);
+  --radius:18px;
+  --max
