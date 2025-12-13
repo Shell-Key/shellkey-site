@@ -1,324 +1,165 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8" />
   <title>Shell Key | Digital Project Controls</title>
-  <meta name="description" content="Digital Project Controls using Power BI, Power Apps, Adalo, and SharePoint. Real-time dashboards, field data capture, and reporting systems for projects and turnarounds." />
-  <meta name="theme-color" content="#071a3a" />
-  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="/assets/styles.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/styles.css" />
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f5f7fa;
+      color: #1e293b;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      background: rgba(15, 23, 42, 0.9);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 40px;
+      z-index: 1000;
+    }
+
+    header img {
+      height: 40px;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin-left: 24px;
+      font-weight: 600;
+    }
+
+    .hero {
+      height: 100vh;
+      background:
+        linear-gradient(rgba(15,23,42,0.6), rgba(15,23,42,0.6)),
+        url("assets/img/hero/Home.png") center / cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      padding: 40px;
+    }
+
+    .hero h1 {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+
+    .hero p {
+      font-size: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+
+    section {
+      padding: 80px 60px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+
+    .card div {
+      padding: 20px;
+    }
+
+    footer {
+      background: #0f172a;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      margin-top: 80px;
+    }
+  </style>
 </head>
+
 <body>
-  <a class="skip" href="#main">Skip to content</a>
 
-  <header class="topbar">
-    <div class="container topbar__inner">
-      <a class="brand" href="#top" aria-label="Shell Key Home">
-        <span class="brand__mark" aria-hidden="true">SK</span>
-        <span class="brand__text">
-          <span class="brand__name">Shell Key</span>
-          <span class="brand__tag">Digital Project Controls</span>
-        </span>
-      </a>
+<header>
+  <img src="assets/img/logo/ShellKeyWhiteTrace.png" alt="Shell Key Logo">
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Dashboards</a>
+    <a href="#">Applications</a>
+    <a href="#">About</a>
+    <a href="#">Contact</a>
+  </nav>
+</header>
 
-      <button class="navbtn" id="navBtn" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
-        <span class="navbtn__bar"></span>
-        <span class="navbtn__bar"></span>
-        <span class="navbtn__bar"></span>
-      </button>
+<div class="hero">
+  <div>
+    <h1>Digital Project Controls</h1>
+    <p>
+      Real-time dashboards, mobile applications, and project intelligence
+      built for industrial execution, turnarounds, and leadership visibility.
+    </p>
+  </div>
+</div>
 
-      <nav class="nav" id="nav" aria-label="Primary">
-        <a href="#services">Services</a>
-        <a href="#solutions">Solutions</a>
-        <a href="#apps">Apps</a>
-        <a href="#about">About</a>
-        <a class="btn btn--ghost" href="mailto:support@shellkey.company?subject=Shell%20Key%20Inquiry">Contact</a>
-      </nav>
-    </div>
-  </header>
+<section>
+  <h2>What We Deliver</h2>
+  <div class="cards">
 
-  <main id="main">
-    <!-- HERO -->
-    <section class="hero" id="top">
-      <div class="container hero__grid">
-        <div class="hero__copy">
-          <p class="pill">Power BI • Power Apps • Adalo • SharePoint</p>
-          <h1>Run projects with real-time visibility — not spreadsheets and surprises.</h1>
-          <p class="lede">
-            Shell Key builds <strong>Digital Project Controls</strong> systems: live dashboards, field data capture,
-            daily reporting, staffing pipelines, and executive-ready progress tracking.
-          </p>
-
-          <div class="hero__cta">
-            <a class="btn" href="#contact">Request a demo</a>
-            <a class="btn btn--ghost" href="#apps">Open Recruiting App</a>
-          </div>
-
-          <div class="hero__stats">
-            <div class="stat">
-              <div class="stat__k">24–48 hrs</div>
-              <div class="stat__l">to stand up a prototype</div>
-            </div>
-            <div class="stat">
-              <div class="stat__k">Field → Dashboard</div>
-              <div class="stat__l">daily progress pipeline</div>
-            </div>
-            <div class="stat">
-              <div class="stat__k">Turnarounds</div>
-              <div class="stat__l">planning → execution → turnover</div>
-            </div>
-          </div>
-        </div>
-
-        <div class="hero__panel" aria-hidden="true">
-          <div class="panel">
-            <div class="panel__top">
-              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-              <span class="panel__title">BlueLink — Live Progress Tracking</span>
-            </div>
-            <div class="panel__body">
-              <div class="mini">
-                <div class="mini__row">
-                  <div class="chip">Daily Reports</div>
-                  <div class="chip">Work Package Readiness</div>
-                  <div class="chip">EVM / Productivity</div>
-                </div>
-                <div class="mini__cards">
-                  <div class="card card--glow">
-                    <div class="card__k">Today</div>
-                    <div class="card__v">Progress Logged</div>
-                    <div class="card__s">Field entries synced</div>
-                  </div>
-                  <div class="card">
-                    <div class="card__k">This Week</div>
-                    <div class="card__v">Constraints</div>
-                    <div class="card__s">Blocking items flagged</div>
-                  </div>
-                  <div class="card">
-                    <div class="card__k">Turnover</div>
-                    <div class="card__v">Punchlist</div>
-                    <div class="card__s">Closeout tracking</div>
-                  </div>
-                </div>
-                <div class="barlist">
-                  <div class="bar"><span>Mechanical</span><i style="width:74%"></i></div>
-                  <div class="bar"><span>Electrical</span><i style="width:52%"></i></div>
-                  <div class="bar"><span>QA/QC</span><i style="width:63%"></i></div>
-                  <div class="bar"><span>Commissioning</span><i style="width:41%"></i></div>
-                </div>
-              </div>
-              <div class="note">Replace this mock panel with your real Power BI screenshots anytime.</div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="hero__bg" aria-hidden="true"></div>
-    </section>
-
-    <!-- SERVICES -->
-    <section class="section" id="services">
-      <div class="container">
-        <div class="section__head">
-          <h2>Services</h2>
-          <p>Full lifecycle support — planning to turnover — with systems that actually get used.</p>
-        </div>
-
-        <div class="grid grid--3">
-          <article class="tile">
-            <h3>Digital Project Controls</h3>
-            <p>Power BI dashboards, productivity tracking, earned value, progress curves, and executive reporting.</p>
-            <ul class="list">
-              <li>Daily/weekly progress snapshots</li>
-              <li>Constraint & risk tracking</li>
-              <li>Variance + forecast controls</li>
-            </ul>
-          </article>
-
-          <article class="tile">
-            <h3>Mobile Field Data Capture</h3>
-            <p>Power Apps or Adalo front-ends to collect progress, staffing, issues, and photos from the field.</p>
-            <ul class="list">
-              <li>Offline-friendly workflows</li>
-              <li>Role-based forms</li>
-              <li>Photo + notes + approvals</li>
-            </ul>
-          </article>
-
-          <article class="tile">
-            <h3>SharePoint Data Backbone</h3>
-            <p>Structured lists & document control that feed reporting and keeps everything auditable.</p>
-            <ul class="list">
-              <li>Work packages / WBS structure</li>
-              <li>Turnover packages</li>
-              <li>Permissions + history</li>
-            </ul>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- SOLUTIONS -->
-    <section class="section section--alt" id="solutions">
-      <div class="container">
-        <div class="section__head">
-          <h2>What we build</h2>
-          <p>Pick one, or combine into a full “single source of truth” system.</p>
-        </div>
-
-        <div class="grid grid--2">
-          <article class="tile tile--wide">
-            <h3>BlueLink Live Progress Tracking</h3>
-            <p>Field updates roll into Power BI automatically — progress, blockers, and daily reports.</p>
-            <div class="tags">
-              <span class="tag">Power BI</span>
-              <span class="tag">Power Apps / Adalo</span>
-              <span class="tag">SharePoint</span>
-              <span class="tag">Turnarounds</span>
-            </div>
-          </article>
-
-          <article class="tile tile--wide">
-            <h3>Staffing + Recruiting Pipeline</h3>
-            <p>Applicants → screening → placement, with a clean dashboard view of your talent network.</p>
-            <div class="tags">
-              <span class="tag">Adalo</span>
-              <span class="tag">Email routing</span>
-              <span class="tag">Talent pools</span>
-            </div>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- APPS -->
-    <section class="section" id="apps">
-      <div class="container">
-        <div class="section__head">
-          <h2>Apps</h2>
-          <p>Link directly to your Adalo apps. Replace the URLs below with your real app links.</p>
-        </div>
-
-        <div class="grid grid--3">
-          <article class="tile">
-            <h3>Recruiter App</h3>
-            <p>Collect resumes, categorize roles, and route candidates fast.</p>
-            <a class="btn btn--small" href="https://YOUR-ADALO-RECRUITER-LINK" target="_blank" rel="noreferrer">Open app</a>
-          </article>
-
-          <article class="tile">
-            <h3>Applicant Form</h3>
-            <p>Simple public form — submit once, track status.</p>
-            <a class="btn btn--small btn--ghost" href="https://YOUR-ADALO-APPLY-LINK" target="_blank" rel="noreferrer">Apply</a>
-          </article>
-
-          <article class="tile">
-            <h3>Client Progress Portal</h3>
-            <p>Optional client view: KPIs + progress + blockers.</p>
-            <a class="btn btn--small btn--ghost" href="https://YOUR-PORTAL-LINK" target="_blank" rel="noreferrer">View portal</a>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- ABOUT -->
-    <section class="section section--alt" id="about">
-      <div class="container">
-        <div class="section__head">
-          <h2>About Shell Key</h2>
-          <p>Practical systems for industrial projects — built to support the field and reporting at the same time.</p>
-        </div>
-
-        <div class="about">
-          <div class="about__box">
-            <h3>Mission</h3>
-            <p>
-              Create dependable, transparent tracking so leadership sees the truth daily — and the field has a simple way to report it.
-            </p>
-          </div>
-          <div class="about__box">
-            <h3>What makes this different</h3>
-            <ul class="list">
-              <li>Designed around real work packages and daily progress habits</li>
-              <li>Built fast — prototype first, then refine</li>
-              <li>Clean handoff: dashboards + data structure + SOPs</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- CONTACT -->
-    <section class="section" id="contact">
-      <div class="container">
-        <div class="section__head">
-          <h2>Contact</h2>
-          <p>Send a quick message and we’ll respond with next steps.</p>
-        </div>
-
-        <div class="contact">
-          <div class="contact__card">
-            <div class="contact__row">
-              <div class="contact__label">Email</div>
-              <a class="contact__value" href="mailto:support@shellkey.company">support@shellkey.company</a>
-            </div>
-            <div class="contact__row">
-              <div class="contact__label">Phone</div>
-              <a class="contact__value" href="tel:+13372548321">+1 (337) 254-8321</a>
-            </div>
-            <div class="contact__row">
-              <div class="contact__label">Location</div>
-              <div class="contact__value">Louisiana, USA</div>
-            </div>
-
-            <div class="contact__actions">
-              <a class="btn" href="mailto:support@shellkey.company?subject=Shell%20Key%20Demo%20Request&body=Name%3A%0ACompany%3A%0ARole%3A%0AWhat%20are%20you%20trying%20to%20track%3F%0A%0A">
-                Email to request a demo
-              </a>
-              <a class="btn btn--ghost" href="/privacy.html">Privacy Policy</a>
-            </div>
-          </div>
-
-          <form class="form" id="quickForm">
-            <h3>Quick message</h3>
-            <label>
-              Name
-              <input name="name" type="text" placeholder="Your name" required />
-            </label>
-            <label>
-              Company
-              <input name="company" type="text" placeholder="Company name" />
-            </label>
-            <label>
-              Message
-              <textarea name="message" rows="5" placeholder="What do you want to track? (progress, staffing, work packages, QA/QC, turnover...)" required></textarea>
-            </label>
-            <button class="btn" type="submit">Send</button>
-            <p class="fineprint">
-              This form opens your email client (no server needed). If you want a real embedded form later, we can add a free endpoint.
-            </p>
-          </form>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="container footer__inner">
-      <div class="footer__left">
-        <div class="footer__brand">Shell Key</div>
-        <div class="footer__sub">Digital Project Controls • Power BI • Power Apps • Adalo • SharePoint</div>
-      </div>
-      <div class="footer__right">
-        <a href="mailto:support@shellkey.company">support@shellkey.company</a>
-        <span class="sep">•</span>
-        <a href="/privacy.html">Privacy</a>
-        <span class="sep">•</span>
-        <span>© <span id="year"></span></span>
+    <div class="card">
+      <img src="assets/img/cards/digital1.jpg">
+      <div>
+        <h3>Executive Dashboards</h3>
+        <p>Instant visibility into cost, schedule, productivity, and risk.</p>
       </div>
     </div>
-  </footer>
 
-  <script src="/assets/app.js"></script>
+    <div class="card">
+      <img src="assets/img/cards/digital2.jpg">
+      <div>
+        <h3>Field Intelligence</h3>
+        <p>Daily logs, work packs, test packs, and progress tracking.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <img src="assets/img/cards/digital3.jpg">
+      <div>
+        <h3>Mobile Applications</h3>
+        <p>Purpose-built apps for site execution and reporting.</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  © 2025 Shell Key · Digital Project Controls
+</footer>
+
 </body>
 </html>
