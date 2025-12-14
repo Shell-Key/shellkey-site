@@ -4,29 +4,39 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shell Key | Digital Project Controls</title>
-  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="./assets/styles.css" />
 </head>
 
 <body>
-  <!-- Header / Nav -->
+  <!-- Header -->
   <header class="site-header">
     <div class="container header-inner">
-      <a class="brand" href="#home" aria-label="Shell Key Home">
+      <a class="brand" href="#home" aria-label="Go to Home">
         <img
-          src="assets/img/logo/ShellKeyWhiteTrace.png"
+          src="./assets/img/logo/ShellKeyWhiteTrace.png"
           alt="Shell Key"
           class="brand-logo"
         />
       </a>
 
-      <!-- Hamburger Button (shown on tablet/mobile) -->
-      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
-        <span class="bar"></span>
-        <span class="bar"></span>
-        <span class="bar"></span>
-      </button>
+      <!-- Desktop Nav -->
+      <nav class="nav-desktop" aria-label="Primary">
+        <a href="#home">Home</a>
+        <a href="#dashboards">Dashboards</a>
+        <a href="#applications">Applications</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
 
-      <nav class="nav" id="siteNav" aria-label="Primary navigation">
+      <!-- Mobile Hamburger -->
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="mobileMenu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Menu Panel -->
+    <div class="mobile-menu" id="mobileMenu" hidden>
+      <nav class="nav-mobile" aria-label="Mobile Primary">
         <a href="#home">Home</a>
         <a href="#dashboards">Dashboards</a>
         <a href="#applications">Applications</a>
@@ -34,34 +44,23 @@
         <a href="#contact">Contact</a>
       </nav>
     </div>
-
-    <!-- Mobile dropdown panel -->
-    <div class="nav-panel" id="navPanel">
-      <div class="container nav-panel-inner">
-        <a href="#home">Home</a>
-        <a href="#dashboards">Dashboards</a>
-        <a href="#applications">Applications</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
-      </div>
-    </div>
   </header>
 
-  <main id="home">
-    <!-- HERO (image only, responsive, not dark) -->
-    <section class="hero">
-      <div class="container hero-card">
-        <div class="hero-media">
-          <img
-            src="assets/img/hero/Home.png"
-            alt="Shell Key banner"
-            loading="eager"
-          />
-        </div>
+  <main>
+    <!-- HERO -->
+    <section id="home" class="hero">
+      <div class="container">
+        <!-- This shows the FULL image and scales down on mobile/tablet -->
+        <img
+          class="hero-img"
+          src="./assets/img/hero/Home.png"
+          alt="Shell Key header image"
+          loading="eager"
+        />
       </div>
     </section>
 
-    <!-- Banner BELOW hero -->
+    <!-- Banner (below hero image) -->
     <section class="banner">
       <div class="container banner-inner">
         <h1>Digital Project Controls</h1>
@@ -72,110 +71,126 @@
       </div>
     </section>
 
-    <!-- Content -->
-    <section class="section" id="dashboards">
+    <!-- Built for Industrial Projects (CENTERED like you requested) -->
+    <section class="section section-center">
       <div class="container">
-        <div class="section-head">
+        <h2>Built for Industrial Projects</h2>
+        <p class="lead">
+          Designed for owners, planners, and leadership teams who need clarity, accountability,
+          and real-time insight — without spreadsheets.
+        </p>
+      </div>
+    </section>
+
+    <!-- Dashboards -->
+    <section id="dashboards" class="section">
+      <div class="container">
+        <div class="section-head section-center">
           <h2>Dashboards</h2>
-          <p>Examples of project tracking dashboards and reporting outputs.</p>
+          <p class="lead">Examples you can swap anytime (images already in your repo).</p>
         </div>
 
-        <div class="grid cards-3">
-          <a class="card" href="#" aria-label="Project Summary">
-            <img src="assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard" />
+        <div class="grid">
+          <a class="card" href="./assets/img/dashboards/001-ProjectSummary.jpg" target="_blank" rel="noopener">
+            <img src="./assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary Dashboard" />
             <div class="card-body">
               <h3>Project Summary</h3>
-              <p>Executive snapshot: KPIs, curves, and visibility.</p>
+              <p>Executive-ready view of progress, cost, and schedule.</p>
             </div>
           </a>
 
-          <a class="card" href="#" aria-label="Equipment">
-            <img src="assets/img/dashboards/002-Equipment.jpg" alt="Equipment dashboard" />
+          <a class="card" href="./assets/img/dashboards/008-DailyLog.jpg" target="_blank" rel="noopener">
+            <img src="./assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log Dashboard" />
             <div class="card-body">
-              <h3>Equipment</h3>
-              <p>Status, constraints, and readiness tracking.</p>
+              <h3>Daily Log</h3>
+              <p>Field updates and reporting visibility.</p>
             </div>
           </a>
 
-          <a class="card" href="#" aria-label="Piping">
-            <img src="assets/img/dashboards/004-Piping.jpg" alt="Piping dashboard" />
+          <a class="card" href="./assets/img/dashboards/WallChart1.PNG" target="_blank" rel="noopener">
+            <img src="./assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart" />
             <div class="card-body">
-              <h3>Piping</h3>
-              <p>Spools, progress, punch, and turnover signals.</p>
+              <h3>Digital Wall Chart</h3>
+              <p>Big-picture plan and readiness tracking.</p>
             </div>
           </a>
         </div>
       </div>
     </section>
 
-    <section class="section" id="applications">
+    <!-- Applications -->
+    <section id="applications" class="section section-alt">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head section-center">
           <h2>Applications</h2>
-          <p>Mobile and desktop tools for field capture, work packs, and reporting.</p>
+          <p class="lead">Mobile + desktop tools that keep teams aligned.</p>
         </div>
 
-        <div class="grid cards-3">
-          <a class="card" href="#" aria-label="Mobile App">
-            <img src="assets/img/apps/CodeProMobile.JPG" alt="Mobile app preview" />
+        <div class="grid">
+          <a class="card" href="./assets/img/apps/SKAppHand.PNG" target="_blank" rel="noopener">
+            <img src="./assets/img/apps/SKAppHand.PNG" alt="Mobile app" />
             <div class="card-body">
               <h3>Mobile Field App</h3>
-              <p>Capture progress, photos, issues, and status in the field.</p>
+              <p>Capture updates, photos, and status in the field.</p>
             </div>
           </a>
 
-          <a class="card" href="#" aria-label="Desktop App">
-            <img src="assets/img/apps/CodeProDesk.JPG" alt="Desktop app preview" />
+          <a class="card" href="./assets/img/apps/CodeProDesk.JPG" target="_blank" rel="noopener">
+            <img src="./assets/img/apps/CodeProDesk.JPG" alt="Desktop app" />
             <div class="card-body">
-              <h3>Desktop / Admin</h3>
-              <p>Review, approve, and monitor real-time submission pipelines.</p>
+              <h3>Desktop Companion</h3>
+              <p>Work packages, reporting, and dashboards in one view.</p>
             </div>
           </a>
 
-          <a class="card" href="#" aria-label="Shell Key App">
-            <img src="assets/img/apps/SKApp1.jpg" alt="Shell Key app mock" />
+          <a class="card" href="./assets/img/apps/CodeProMobile.JPG" target="_blank" rel="noopener">
+            <img src="./assets/img/apps/CodeProMobile.JPG" alt="Mobile app screen" />
             <div class="card-body">
-              <h3>Project-Specific Builds</h3>
-              <p>Configured per site: work packs, turnover, QA/QC, reporting.</p>
+              <h3>Quick Actions</h3>
+              <p>Fast navigation for key workflows.</p>
             </div>
           </a>
         </div>
       </div>
     </section>
 
-    <section class="section" id="about">
+    <!-- About -->
+    <section id="about" class="section">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head section-center">
           <h2>About</h2>
-          <p>Built for owners, planners, and leadership teams who need clarity—without spreadsheets.</p>
+          <p class="lead">Simple, clear, and built to be updated later.</p>
         </div>
 
         <div class="about">
-          <img class="avatar" src="assets/img/people/profilePic.jpg" alt="Profile" />
-          <div>
-            <h3>Shell Key</h3>
+          <img class="about-pic" src="./assets/img/people/profilePic.jpg" alt="Profile" />
+          <div class="about-text">
             <p>
-              We build project controls systems that teams actually use: dashboards, field data capture,
-              daily reporting, staffing pipelines, and executive-ready progress tracking.
+              Shell Key builds practical digital project controls — dashboards, reporting pipelines,
+              mobile apps, and visibility systems that leadership can trust.
+            </p>
+            <p class="muted">
+              Want to change text later? You only edit this file (index.html) — no complex tools needed.
             </p>
           </div>
         </div>
       </div>
     </section>
 
-    <section class="section" id="contact">
+    <!-- Contact -->
+    <section id="contact" class="section section-alt">
       <div class="container">
-        <div class="section-head">
+        <div class="section-head section-center">
           <h2>Contact</h2>
-          <p>Let’s talk about your project and what you need visibility on.</p>
+          <p class="lead">Let’s talk about your project and what you need visibility on.</p>
         </div>
 
-        <div class="contact-box">
-          <div>
+        <div class="contact">
+          <div class="contact-card">
             <h3>Email</h3>
             <p><a href="mailto:support@shellkey.company">support@shellkey.company</a></p>
           </div>
-          <div>
+          <div class="contact-card">
             <h3>Phone</h3>
             <p><a href="tel:+13372548321">+1 (337) 254-8321</a></p>
           </div>
@@ -184,39 +199,50 @@
     </section>
 
     <footer class="footer">
-      <div class="container footer-inner">
-        <span>© <span id="year"></span> Shell Key</span>
-        <span class="muted">Digital Project Controls</span>
+      <div class="container">
+        <p>© <span id="year"></span> Shell Key. All rights reserved.</p>
       </div>
     </footer>
   </main>
 
   <script>
-    // footer year
+    // Year
     document.getElementById("year").textContent = new Date().getFullYear();
 
-    // mobile menu toggle
-    const toggle = document.getElementById("navToggle");
-    const panel = document.getElementById("navPanel");
+    // Mobile menu toggle
+    const btn = document.getElementById("navToggle");
+    const menu = document.getElementById("mobileMenu");
 
-    function closeMenu(){
-      panel.classList.remove("open");
-      toggle.setAttribute("aria-expanded", "false");
+    function closeMenu() {
+      btn.setAttribute("aria-expanded", "false");
+      menu.hidden = true;
+      document.body.classList.remove("menu-open");
     }
 
-    toggle.addEventListener("click", () => {
-      const isOpen = panel.classList.toggle("open");
-      toggle.setAttribute("aria-expanded", String(isOpen));
+    function openMenu() {
+      btn.setAttribute("aria-expanded", "true");
+      menu.hidden = false;
+      document.body.classList.add("menu-open");
+    }
+
+    btn.addEventListener("click", () => {
+      const expanded = btn.getAttribute("aria-expanded") === "true";
+      expanded ? closeMenu() : openMenu();
     });
 
-    // close menu after clicking a link
-    panel.querySelectorAll("a").forEach(a => {
+    // Close menu after click
+    document.querySelectorAll(".nav-mobile a").forEach(a => {
       a.addEventListener("click", closeMenu);
     });
 
-    // close menu if resizing up to desktop
+    // Close on escape
+    window.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeMenu();
+    });
+
+    // Close if resizing to desktop
     window.addEventListener("resize", () => {
-      if (window.innerWidth > 980) closeMenu();
+      if (window.innerWidth >= 900) closeMenu();
     });
   </script>
 </body>
