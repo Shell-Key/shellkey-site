@@ -1,22 +1,18 @@
 /* ================= RESET ================= */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+img { max-width: 100%; height: auto; display: block; }
 
-/* ================= BODY ================= */
+html { scroll-behavior: smooth; }
+
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(180deg, #020b1c, #071a3a);
   color: #ffffff;
 }
+
+/* prevent sticky header from covering anchor sections */
+section { scroll-margin-top: 90px; }
 
 /* ================= HEADER ================= */
 .site-header {
@@ -24,6 +20,7 @@ body {
   position: sticky;
   top: 0;
   z-index: 1000;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
 }
 
 .nav-container {
@@ -33,11 +30,10 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  position: relative;
 }
 
-.logo img {
-  height: 36px;
-}
+.logo img { height: 36px; }
 
 .nav-links {
   display: flex;
@@ -47,8 +43,11 @@ body {
 .nav-links a {
   color: white;
   text-decoration: none;
-  font-weight: 500;
+  font-weight: 600;
+  opacity: 0.95;
 }
+
+.nav-links a:hover { opacity: 1; text-decoration: underline; }
 
 .hamburger {
   display: none;
@@ -56,6 +55,7 @@ body {
   background: none;
   border: none;
   color: white;
+  cursor: pointer;
 }
 
 /* ================= HERO ================= */
@@ -67,14 +67,15 @@ body {
 .hero-img {
   width: 100%;
   height: auto;
-  max-height: 90vh;
+  /* This is the key: no cropping, always fully visible */
   object-fit: contain;
+  max-height: 92vh;
 }
 
 /* ================= BANNER ================= */
 .banner {
   text-align: center;
-  padding: 80px 20px;
+  padding: 70px 20px;
   background: linear-gradient(180deg, #071a3a, #020b1c);
 }
 
@@ -88,6 +89,7 @@ body {
   margin: auto;
   font-size: 18px;
   opacity: 0.9;
+  line-height: 1.5;
 }
 
 /* ================= SECTIONS ================= */
@@ -100,16 +102,19 @@ body {
 
 .section-dark {
   background: linear-gradient(180deg, #020b1c, #071a3a);
+  max-width: none;
 }
 
 .section h2 {
   font-size: 32px;
-  margin-bottom: 20px;
+  margin-bottom: 18px;
 }
 
 .section-sub {
-  margin-bottom: 50px;
+  margin: 0 auto 50px;
+  max-width: 900px;
   opacity: 0.85;
+  line-height: 1.5;
 }
 
 .center-text {
@@ -117,6 +122,7 @@ body {
   margin: auto;
   font-size: 18px;
   opacity: 0.9;
+  line-height: 1.6;
 }
 
 /* ================= CARDS ================= */
@@ -124,62 +130,124 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 28px;
+  text-align: left;
 }
 
 .card {
   background: #071a3a;
   border-radius: 16px;
   padding: 20px;
-  text-align: left;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
-.card img {
+.card h3 { margin: 12px 0 8px; }
+.card p { opacity: 0.85; line-height: 1.5; }
+
+.media {
+  width: 100%;
+  background: rgba(0,0,0,0.25);
+  border-radius: 12px;
+  padding: 10px;
+}
+
+/* THIS is the “fix images” part: never crop */
+.media img {
   width: 100%;
   height: auto;
   object-fit: contain;
-  background: #000;
-  border-radius: 10px;
-  margin-bottom: 16px;
+  border-radius: 8px;
 }
 
-.card h3 {
+/* ================= CONTACT ================= */
+.contact-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  text-align: left;
+}
+
+.contact-card {
+  background: #071a3a;
+  border-radius: 16px;
+  padding: 22px;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.contact-card a { color: #ffffff; opacity: 0.95; }
+.contact-card a:hover { text-decoration: underline; opacity: 1; }
+
+.contact-form label {
+  display: block;
+  font-size: 14px;
+  opacity: 0.9;
   margin-bottom: 10px;
 }
 
-.card p {
-  opacity: 0.85;
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.25);
+  color: #fff;
+  outline: none;
 }
+
+.btn {
+  margin-top: 14px;
+  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.10);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.btn:hover { background: rgba(255,255,255,0.16); }
+
+.muted { opacity: 0.75; margin-top: 10px; }
+.small { font-size: 13px; }
 
 /* ================= FOOTER ================= */
 .footer {
   text-align: center;
-  padding: 30px;
+  padding: 30px 20px;
   background: #020b1c;
-  opacity: 0.8;
+  opacity: 0.9;
+  border-top: 1px solid rgba(255,255,255,0.06);
 }
 
-/* ================= MOBILE ================= */
+/* ================= MOBILE NAV ================= */
 @media (max-width: 900px) {
+  .hamburger { display: block; }
+
   .nav-links {
     position: absolute;
     top: 64px;
     right: 0;
+    left: 0;
     background: #020b1c;
     flex-direction: column;
     width: 100%;
     display: none;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
   }
 
-  .nav-links.open {
-    display: flex;
-  }
+  .nav-links.open { display: flex; }
 
   .nav-links a {
     padding: 14px 20px;
-    border-top: 1px solid #112;
+    border-top: 1px solid rgba(255,255,255,0.08);
   }
 
-  .hamburger {
-    display: block;
-  }
+  .contact-grid { grid-template-columns: 1fr; }
 }
