@@ -4,19 +4,19 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shell Key | Digital Project Controls</title>
-
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
+
 <body>
 
 <!-- ================= HEADER ================= -->
 <header class="site-header">
   <div class="nav-container">
-    <div class="logo">
+    <a class="logo" href="#home" aria-label="Go to Home">
       <img src="assets/img/logo/ShellKeyWhiteTrace.png" alt="Shell Key" />
-    </div>
+    </a>
 
-    <nav class="nav-links" id="navLinks">
+    <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
       <a href="#home">Home</a>
       <a href="#dashboards">Dashboards</a>
       <a href="#applications">Applications</a>
@@ -24,7 +24,7 @@
       <a href="#contact">Contact</a>
     </nav>
 
-    <button class="hamburger" onclick="toggleMenu()">
+    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false">
       ☰
     </button>
   </div>
@@ -34,7 +34,7 @@
 <section id="home" class="hero">
   <img
     src="assets/img/hero/Home.png"
-    alt="Hero Background"
+    alt="Shell Key Hero"
     class="hero-img"
   />
 </section>
@@ -54,19 +54,25 @@
 
   <div class="card-grid">
     <div class="card">
-      <img src="assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary">
+      <div class="media">
+        <img src="assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard">
+      </div>
       <h3>Project Summary</h3>
       <p>Executive-ready view of progress, cost, and schedule.</p>
     </div>
 
     <div class="card">
-      <img src="assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log">
+      <div class="media">
+        <img src="assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log dashboard">
+      </div>
       <h3>Daily Log</h3>
       <p>Field updates and reporting visibility.</p>
     </div>
 
     <div class="card">
-      <img src="assets/img/dashboards/WallChart1.PNG" alt="Wall Chart">
+      <div class="media">
+        <img src="assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart dashboard">
+      </div>
       <h3>Digital Wall Chart</h3>
       <p>Big-picture planning and readiness tracking.</p>
     </div>
@@ -76,25 +82,29 @@
 <!-- ================= APPLICATIONS ================= -->
 <section id="applications" class="section section-dark">
   <h2>Applications</h2>
-  <p class="section-sub">
-    Mobile + Desktop tools that keep teams aligned.
-  </p>
+  <p class="section-sub">Mobile + desktop tools that keep teams aligned.</p>
 
   <div class="card-grid">
     <div class="card">
-      <img src="assets/img/apps/SKAppHand.PNG" alt="Mobile App">
+      <div class="media">
+        <img src="assets/img/apps/SKAppHand.PNG" alt="Mobile Field App">
+      </div>
       <h3>Mobile Field App</h3>
       <p>Capture updates, photos, and status in the field.</p>
     </div>
 
     <div class="card">
-      <img src="assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion">
+      <div class="media">
+        <img src="assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion">
+      </div>
       <h3>Desktop Companion</h3>
       <p>Work packages, reporting, and dashboards in one view.</p>
     </div>
 
     <div class="card">
-      <img src="assets/img/apps/CodeProMobile.JPG" alt="Quick Actions">
+      <div class="media">
+        <img src="assets/img/apps/CodeProMobile.JPG" alt="Quick Actions">
+      </div>
       <h3>Quick Actions</h3>
       <p>Fast navigation for key workflows.</p>
     </div>
@@ -110,16 +120,92 @@
   </p>
 </section>
 
+<!-- ================= CONTACT ================= -->
+<section id="contact" class="section section-dark">
+  <h2>Contact</h2>
+  <p class="section-sub">Request a demo or ask a question. We’ll respond fast.</p>
+
+  <div class="contact-grid">
+    <div class="contact-card">
+      <h3>Direct</h3>
+      <p><strong>Email:</strong> <a href="mailto:support@shellkey.company">support@shellkey.company</a></p>
+      <p><strong>Phone:</strong> <a href="tel:+13372548321">+1 (337) 254-8321</a></p>
+      <p class="muted">Business hours: Mon–Fri</p>
+    </div>
+
+    <div class="contact-card">
+      <h3>Quick Message</h3>
+      <!-- Note: this is a simple form shell. To actually send emails from GitHub Pages,
+           you’ll either use Formspree/Netlify Forms or a mailto link. -->
+      <form class="contact-form" onsubmit="return false;">
+        <label>
+          Name
+          <input type="text" placeholder="Your name" />
+        </label>
+        <label>
+          Email
+          <input type="email" placeholder="you@company.com" />
+        </label>
+        <label>
+          Message
+          <textarea rows="4" placeholder="What do you need built?"></textarea>
+        </label>
+
+        <button class="btn" type="button" onclick="openEmailDraft()">
+          Send Email
+        </button>
+        <p class="muted small">
+          This button opens your email app with the message (works everywhere).
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
 <!-- ================= FOOTER ================= -->
-<footer id="contact" class="footer">
+<footer class="footer">
   <p>© Shell Key. All rights reserved.</p>
 </footer>
 
 <script>
-function toggleMenu() {
-  document.getElementById("navLinks").classList.toggle("open");
-}
+  const navLinks = document.getElementById("navLinks");
+  const hamburgerBtn = document.getElementById("hamburgerBtn");
+
+  function closeMenu() {
+    navLinks.classList.remove("open");
+    hamburgerBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleMenu() {
+    const isOpen = navLinks.classList.toggle("open");
+    hamburgerBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+  }
+
+  hamburgerBtn.addEventListener("click", toggleMenu);
+
+  // Close menu when clicking a nav link
+  navLinks.querySelectorAll("a").forEach(a => {
+    a.addEventListener("click", () => closeMenu());
+  });
+
+  // Close menu if clicking outside
+  document.addEventListener("click", (e) => {
+    const clickedInsideNav = navLinks.contains(e.target) || hamburgerBtn.contains(e.target);
+    if (!clickedInsideNav) closeMenu();
+  });
+
+  // Close menu on resize back to desktop
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 900) closeMenu();
+  });
+
+  function openEmailDraft() {
+    const subject = encodeURIComponent("Shell Key Website Inquiry");
+    const body = encodeURIComponent("Hi Shell Key,\n\nI’d like to request a demo / ask a question:\n\n");
+    window.location.href = `mailto:support@shellkey.company?subject=${subject}&body=${body}`;
+  }
 </script>
 
 </body>
 </html>
+
