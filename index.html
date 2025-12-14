@@ -5,13 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shell Key | Digital Project Controls</title>
 
-  <!-- IMPORTANT: cache-busting + simpler path -->
-  <link rel="stylesheet" href="styles.css?v=7" />
+  <!-- CRITICAL: GitHub Pages project site base path -->
+  <base href="/shellkey-site/">
 
-  <!-- Safety net: if CSS fails to load, page won't look broken/giant-logo -->
+  <!-- CRITICAL: absolute path + cache bust -->
+  <link rel="stylesheet" href="/shellkey-site/styles.css?v=99" />
+
+  <!-- safety fallback so page never goes "giant image" even if CSS fails -->
   <style>
     body{margin:0;background:#071021;color:#eaf2ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
-    img{max-width:100%;height:auto;}
+    img{max-width:100%;height:auto;display:block;}
   </style>
 </head>
 
@@ -20,10 +23,10 @@
     <div class="container header-inner">
       <a class="brand" href="#home" aria-label="Shell Key Home">
         <img
-          src="assets/img/logo/ShellKeyWhiteTrace.png"
+          src="/shellkey-site/assets/img/logo/ShellKeyWhiteTrace.png"
           alt="Shell Key"
           class="brand-logo"
-          style="height:28px;width:auto;display:block;"
+          style="height:28px;width:auto;"
           loading="eager"
         />
       </a>
@@ -63,7 +66,7 @@
       <div class="container hero-inner">
         <img
           class="hero-image"
-          src="assets/img/hero/Home.png"
+          src="/shellkey-site/assets/img/hero/Home.png"
           alt="Shell Key hero"
           loading="eager"
         />
@@ -90,7 +93,7 @@
         <div class="grid cards-3">
           <article class="card">
             <div class="card-media">
-              <img src="assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard" loading="lazy" />
+              <img src="/shellkey-site/assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Project Summary</h3>
@@ -100,7 +103,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log dashboard" loading="lazy" />
+              <img src="/shellkey-site/assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log dashboard" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Daily Log</h3>
@@ -110,7 +113,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart" loading="lazy" />
+              <img src="/shellkey-site/assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Digital Wall Chart</h3>
@@ -131,7 +134,7 @@
         <div class="grid cards-3">
           <article class="card">
             <div class="card-media">
-              <img src="assets/img/apps/SKAppHand.PNG" alt="Mobile Field App" loading="lazy" />
+              <img src="/shellkey-site/assets/img/apps/SKAppHand.PNG" alt="Mobile Field App" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Mobile Field App</h3>
@@ -141,7 +144,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion" loading="lazy" />
+              <img src="/shellkey-site/assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Desktop Companion</h3>
@@ -151,7 +154,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="assets/img/apps/CodeProMobile.JPG" alt="Quick Actions" loading="lazy" />
+              <img src="/shellkey-site/assets/img/apps/CodeProMobile.JPG" alt="Quick Actions" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Quick Actions</h3>
@@ -189,7 +192,7 @@
               <a href="mailto:support@shellkey.company">support@shellkey.company</a><br />
               <strong>Phone:</strong>
               <a href="tel:+13372548321">+1 (337) 254-8321</a><br /><br />
-              <span class="muted">Business hours: Mon–Fri</span>
+              <span class="muted">Business hours: Mon–Fri 7am-5pm </span>
             </p>
           </div>
 
@@ -243,21 +246,15 @@
       btn.setAttribute("aria-expanded", "false");
       btn.classList.remove("is-open");
     }
-
-    btn.addEventListener("click", () => {
-      mobileNav.classList.contains("open") ? closeNav() : openNav();
-    });
-
+    btn.addEventListener("click", () => mobileNav.classList.contains("open") ? closeNav() : openNav());
     backdrop.addEventListener("click", closeNav);
     mobileNav.querySelectorAll("a").forEach(a => a.addEventListener("click", closeNav));
 
     document.getElementById("contactForm").addEventListener("submit", function (e) {
       e.preventDefault();
-
       const name = document.getElementById("cName").value.trim();
       const email = document.getElementById("cEmail").value.trim();
       const msg = document.getElementById("cMsg").value.trim();
-
       const to = "support@shellkey.company";
       const subject = "Shell Key Website Inquiry";
 
