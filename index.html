@@ -1,27 +1,33 @@
-
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shell Key | Digital Project Controls</title>
-  <link rel="stylesheet" href="./styles.css" />
+
+  <!-- IMPORTANT: cache-busting + simpler path -->
+  <link rel="stylesheet" href="styles.css?v=7" />
+
+  <!-- Safety net: if CSS fails to load, page won't look broken/giant-logo -->
+  <style>
+    body{margin:0;background:#071021;color:#eaf2ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
+    img{max-width:100%;height:auto;}
+  </style>
 </head>
 
 <body>
-  <!-- Header -->
   <header class="site-header" id="top">
     <div class="container header-inner">
       <a class="brand" href="#home" aria-label="Shell Key Home">
         <img
-          src="./assets/img/logo/ShellKeyWhiteTrace.png"
+          src="assets/img/logo/ShellKeyWhiteTrace.png"
           alt="Shell Key"
           class="brand-logo"
+          style="height:28px;width:auto;display:block;"
           loading="eager"
         />
       </a>
 
-      <!-- Desktop nav -->
       <nav class="nav-desktop" aria-label="Primary navigation">
         <a href="#home">Home</a>
         <a href="#dashboards">Dashboards</a>
@@ -30,7 +36,6 @@
         <a href="#contact">Contact</a>
       </nav>
 
-      <!-- Mobile hamburger -->
       <button
         class="hamburger"
         id="hamburgerBtn"
@@ -42,7 +47,6 @@
       </button>
     </div>
 
-    <!-- Mobile drawer -->
     <nav class="nav-mobile" id="mobileNav" aria-label="Mobile navigation">
       <a href="#home">Home</a>
       <a href="#dashboards">Dashboards</a>
@@ -54,21 +58,18 @@
     <div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
   </header>
 
-  <!-- HERO -->
   <main>
     <section class="hero" id="home" aria-label="Hero">
       <div class="container hero-inner">
-        <!-- This shows the FULL image (no crop). It will shrink to fit every screen. -->
         <img
           class="hero-image"
-          src="./assets/img/hero/Home.png"
+          src="assets/img/hero/Home.png"
           alt="Shell Key hero"
           loading="eager"
         />
       </div>
     </section>
 
-    <!-- Banner below hero (your text goes here, NOT on top of the image) -->
     <section class="banner">
       <div class="container banner-inner">
         <h1>Digital Project Controls</h1>
@@ -79,7 +80,6 @@
       </div>
     </section>
 
-    <!-- Dashboards -->
     <section class="section" id="dashboards">
       <div class="container">
         <div class="section-head">
@@ -88,10 +88,9 @@
         </div>
 
         <div class="grid cards-3">
-          <!-- Card 1 -->
           <article class="card">
             <div class="card-media">
-              <img src="./assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard" loading="lazy" />
+              <img src="assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Project Summary</h3>
@@ -99,10 +98,9 @@
             </div>
           </article>
 
-          <!-- Card 2 -->
           <article class="card">
             <div class="card-media">
-              <img src="./assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log dashboard" loading="lazy" />
+              <img src="assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log dashboard" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Daily Log</h3>
@@ -110,10 +108,9 @@
             </div>
           </article>
 
-          <!-- Card 3 -->
           <article class="card">
             <div class="card-media">
-              <img src="./assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart" loading="lazy" />
+              <img src="assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Digital Wall Chart</h3>
@@ -124,7 +121,6 @@
       </div>
     </section>
 
-    <!-- Applications -->
     <section class="section" id="applications">
       <div class="container">
         <div class="section-head center">
@@ -135,7 +131,7 @@
         <div class="grid cards-3">
           <article class="card">
             <div class="card-media">
-              <img src="./assets/img/apps/SKAppHand.PNG" alt="Mobile Field App" loading="lazy" />
+              <img src="assets/img/apps/SKAppHand.PNG" alt="Mobile Field App" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Mobile Field App</h3>
@@ -145,7 +141,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="./assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion" loading="lazy" />
+              <img src="assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Desktop Companion</h3>
@@ -155,7 +151,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="./assets/img/apps/CodeProMobile.JPG" alt="Quick Actions" loading="lazy" />
+              <img src="assets/img/apps/CodeProMobile.JPG" alt="Quick Actions" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Quick Actions</h3>
@@ -166,7 +162,6 @@
       </div>
     </section>
 
-    <!-- About (simple for now) -->
     <section class="section" id="about">
       <div class="container">
         <div class="section-head center">
@@ -179,7 +174,6 @@
       </div>
     </section>
 
-    <!-- Contact -->
     <section class="section" id="contact">
       <div class="container">
         <div class="section-head center">
@@ -201,9 +195,6 @@
 
           <div class="panel">
             <h3>Quick Message</h3>
-
-            <!-- NOTE: This does NOT "send" from the website.
-                 It opens the visitor’s email app (Outlook/Gmail/Yahoo/etc) with subject + body filled in. -->
             <form id="contactForm">
               <label>
                 Name
@@ -221,7 +212,7 @@
               </label>
 
               <button class="btn" type="submit">Open Email</button>
-              <p class="tiny muted">Opens your default email app with the message filled in (works everywhere).</p>
+              <p class="tiny muted">Opens your default email app with the message filled in.</p>
             </form>
           </div>
         </div>
@@ -230,13 +221,12 @@
 
     <footer class="site-footer">
       <div class="container">
-        <small>©2026 Shell Key. All rights reserved.</small>
+        <small>©2025 Shell Key. All rights reserved.</small>
       </div>
     </footer>
   </main>
 
   <script>
-    // ===== Mobile nav =====
     const btn = document.getElementById("hamburgerBtn");
     const mobileNav = document.getElementById("mobileNav");
     const backdrop = document.getElementById("navBackdrop");
@@ -247,7 +237,6 @@
       btn.setAttribute("aria-expanded", "true");
       btn.classList.add("is-open");
     }
-
     function closeNav() {
       mobileNav.classList.remove("open");
       backdrop.classList.remove("open");
@@ -256,18 +245,12 @@
     }
 
     btn.addEventListener("click", () => {
-      const isOpen = mobileNav.classList.contains("open");
-      isOpen ? closeNav() : openNav();
+      mobileNav.classList.contains("open") ? closeNav() : openNav();
     });
 
-    // Close when clicking backdrop
     backdrop.addEventListener("click", closeNav);
-
-    // Close after selecting a nav link (this fixes the “hamburger stays open” issue)
     mobileNav.querySelectorAll("a").forEach(a => a.addEventListener("click", closeNav));
 
-    // ===== Contact "Quick Message" =====
-    // This opens the visitor's email app with a pre-filled email.
     document.getElementById("contactForm").addEventListener("submit", function (e) {
       e.preventDefault();
 
@@ -291,8 +274,6 @@
       ].filter(Boolean);
 
       const body = encodeURIComponent(lines.join("\n"));
-
-      // mailto uses the device's default email app/account (Outlook/Gmail/Yahoo/etc)
       window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
     });
   </script>
