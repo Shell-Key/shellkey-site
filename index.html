@@ -1,50 +1,223 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shell Key | Digital Project Controls</title>
-
   <link rel="stylesheet" href="assets/styles.css" />
 </head>
 
 <body>
-
-  <!-- HEADER / NAV -->
+  <!-- Header / Nav -->
   <header class="site-header">
-    <div class="nav-container">
-      <img src="assets/img/logo/ShellKeyWhiteTrace.png" alt="Shell Key" class="logo" />
+    <div class="container header-inner">
+      <a class="brand" href="#home" aria-label="Shell Key Home">
+        <img
+          src="assets/img/logo/ShellKeyWhiteTrace.png"
+          alt="Shell Key"
+          class="brand-logo"
+        />
+      </a>
 
-      <nav class="nav-links">
-        <a href="#">Home</a>
-        <a href="#">Dashboards</a>
-        <a href="#">Applications</a>
-        <a href="#">About</a>
-        <a href="#">Contact</a>
+      <!-- Hamburger Button (shown on tablet/mobile) -->
+      <button class="nav-toggle" id="navToggle" aria-label="Open menu" aria-expanded="false" aria-controls="siteNav">
+        <span class="bar"></span>
+        <span class="bar"></span>
+        <span class="bar"></span>
+      </button>
+
+      <nav class="nav" id="siteNav" aria-label="Primary navigation">
+        <a href="#home">Home</a>
+        <a href="#dashboards">Dashboards</a>
+        <a href="#applications">Applications</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
       </nav>
+    </div>
+
+    <!-- Mobile dropdown panel -->
+    <div class="nav-panel" id="navPanel">
+      <div class="container nav-panel-inner">
+        <a href="#home">Home</a>
+        <a href="#dashboards">Dashboards</a>
+        <a href="#applications">Applications</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </div>
     </div>
   </header>
 
-  <!-- HERO IMAGE ONLY -->
-  <section class="hero"></section>
+  <main id="home">
+    <!-- HERO (image only, responsive, not dark) -->
+    <section class="hero">
+      <div class="container hero-card">
+        <div class="hero-media">
+          <img
+            src="assets/img/hero/Home.png"
+            alt="Shell Key banner"
+            loading="eager"
+          />
+        </div>
+      </div>
+    </section>
 
-  <!-- BANNER BELOW HERO -->
-  <section class="hero-banner">
-    <h1>Digital Project Controls</h1>
-    <p>
-      Real-time dashboards, mobile applications, and project intelligence built
-      for industrial execution, turnarounds, and leadership visibility.
-    </p>
-  </section>
+    <!-- Banner BELOW hero -->
+    <section class="banner">
+      <div class="container banner-inner">
+        <h1>Digital Project Controls</h1>
+        <p>
+          Real-time dashboards, mobile applications, and project intelligence built for industrial execution,
+          turnarounds, and leadership visibility.
+        </p>
+      </div>
+    </section>
 
-  <!-- MAIN CONTENT PLACEHOLDER -->
-  <section class="content">
-    <h2>Built for Industrial Projects</h2>
-    <p>
-      Designed for owners, planners, and leadership teams who need clarity,
-      accountability, and real-time insight — without spreadsheets.
-    </p>
-  </section>
+    <!-- Content -->
+    <section class="section" id="dashboards">
+      <div class="container">
+        <div class="section-head">
+          <h2>Dashboards</h2>
+          <p>Examples of project tracking dashboards and reporting outputs.</p>
+        </div>
 
+        <div class="grid cards-3">
+          <a class="card" href="#" aria-label="Project Summary">
+            <img src="assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard" />
+            <div class="card-body">
+              <h3>Project Summary</h3>
+              <p>Executive snapshot: KPIs, curves, and visibility.</p>
+            </div>
+          </a>
+
+          <a class="card" href="#" aria-label="Equipment">
+            <img src="assets/img/dashboards/002-Equipment.jpg" alt="Equipment dashboard" />
+            <div class="card-body">
+              <h3>Equipment</h3>
+              <p>Status, constraints, and readiness tracking.</p>
+            </div>
+          </a>
+
+          <a class="card" href="#" aria-label="Piping">
+            <img src="assets/img/dashboards/004-Piping.jpg" alt="Piping dashboard" />
+            <div class="card-body">
+              <h3>Piping</h3>
+              <p>Spools, progress, punch, and turnover signals.</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="applications">
+      <div class="container">
+        <div class="section-head">
+          <h2>Applications</h2>
+          <p>Mobile and desktop tools for field capture, work packs, and reporting.</p>
+        </div>
+
+        <div class="grid cards-3">
+          <a class="card" href="#" aria-label="Mobile App">
+            <img src="assets/img/apps/CodeProMobile.JPG" alt="Mobile app preview" />
+            <div class="card-body">
+              <h3>Mobile Field App</h3>
+              <p>Capture progress, photos, issues, and status in the field.</p>
+            </div>
+          </a>
+
+          <a class="card" href="#" aria-label="Desktop App">
+            <img src="assets/img/apps/CodeProDesk.JPG" alt="Desktop app preview" />
+            <div class="card-body">
+              <h3>Desktop / Admin</h3>
+              <p>Review, approve, and monitor real-time submission pipelines.</p>
+            </div>
+          </a>
+
+          <a class="card" href="#" aria-label="Shell Key App">
+            <img src="assets/img/apps/SKApp1.jpg" alt="Shell Key app mock" />
+            <div class="card-body">
+              <h3>Project-Specific Builds</h3>
+              <p>Configured per site: work packs, turnover, QA/QC, reporting.</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="about">
+      <div class="container">
+        <div class="section-head">
+          <h2>About</h2>
+          <p>Built for owners, planners, and leadership teams who need clarity—without spreadsheets.</p>
+        </div>
+
+        <div class="about">
+          <img class="avatar" src="assets/img/people/profilePic.jpg" alt="Profile" />
+          <div>
+            <h3>Shell Key</h3>
+            <p>
+              We build project controls systems that teams actually use: dashboards, field data capture,
+              daily reporting, staffing pipelines, and executive-ready progress tracking.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="contact">
+      <div class="container">
+        <div class="section-head">
+          <h2>Contact</h2>
+          <p>Let’s talk about your project and what you need visibility on.</p>
+        </div>
+
+        <div class="contact-box">
+          <div>
+            <h3>Email</h3>
+            <p><a href="mailto:support@shellkey.company">support@shellkey.company</a></p>
+          </div>
+          <div>
+            <h3>Phone</h3>
+            <p><a href="tel:+13372548321">+1 (337) 254-8321</a></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container footer-inner">
+        <span>© <span id="year"></span> Shell Key</span>
+        <span class="muted">Digital Project Controls</span>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    // footer year
+    document.getElementById("year").textContent = new Date().getFullYear();
+
+    // mobile menu toggle
+    const toggle = document.getElementById("navToggle");
+    const panel = document.getElementById("navPanel");
+
+    function closeMenu(){
+      panel.classList.remove("open");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+
+    toggle.addEventListener("click", () => {
+      const isOpen = panel.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    // close menu after clicking a link
+    panel.querySelectorAll("a").forEach(a => {
+      a.addEventListener("click", closeMenu);
+    });
+
+    // close menu if resizing up to desktop
+    window.addEventListener("resize", () => {
+      if (window.innerWidth > 980) closeMenu();
+    });
+  </script>
 </body>
 </html>
