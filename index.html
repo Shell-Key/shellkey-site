@@ -5,28 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shell Key | Digital Project Controls</title>
 
-  <!-- CRITICAL: GitHub Pages project site base path -->
-  <base href="/shellkey-site/">
-
-  <!-- CRITICAL: absolute path + cache bust -->
-  <link rel="stylesheet" href="/shellkey-site/styles.css?v=99" />
-
-  <!-- safety fallback so page never goes "giant image" even if CSS fails -->
-  <style>
-    body{margin:0;background:#071021;color:#eaf2ff;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;}
-    img{max-width:100%;height:auto;display:block;}
-  </style>
+  <!-- IMPORTANT: styles.css is inside /assets -->
+  <link rel="stylesheet" href="assets/styles.css?v=200" />
 </head>
 
 <body>
+  <!-- HEADER -->
   <header class="site-header" id="top">
     <div class="container header-inner">
       <a class="brand" href="#home" aria-label="Shell Key Home">
         <img
-          src="/shellkey-site/assets/img/logo/ShellKeyWhiteTrace.png"
+          src="assets/img/logo/ShellKeyWhiteTrace.png"
           alt="Shell Key"
           class="brand-logo"
-          style="height:28px;width:auto;"
           loading="eager"
         />
       </a>
@@ -45,6 +36,7 @@
         aria-label="Open menu"
         aria-expanded="false"
         aria-controls="mobileNav"
+        type="button"
       >
         <span></span><span></span><span></span>
       </button>
@@ -62,17 +54,19 @@
   </header>
 
   <main>
+    <!-- HERO IMAGE (fully visible, responsive) -->
     <section class="hero" id="home" aria-label="Hero">
       <div class="container hero-inner">
         <img
           class="hero-image"
-          src="/shellkey-site/assets/img/hero/Home.png"
+          src="assets/img/hero/Home.png"
           alt="Shell Key hero"
           loading="eager"
         />
       </div>
     </section>
 
+    <!-- BANNER -->
     <section class="banner">
       <div class="container banner-inner">
         <h1>Digital Project Controls</h1>
@@ -83,6 +77,7 @@
       </div>
     </section>
 
+    <!-- DASHBOARDS -->
     <section class="section" id="dashboards">
       <div class="container">
         <div class="section-head">
@@ -93,7 +88,7 @@
         <div class="grid cards-3">
           <article class="card">
             <div class="card-media">
-              <img src="/shellkey-site/assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard" loading="lazy" />
+              <img src="assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Project Summary</h3>
@@ -103,7 +98,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="/shellkey-site/assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log dashboard" loading="lazy" />
+              <img src="assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log dashboard" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Daily Log</h3>
@@ -113,7 +108,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="/shellkey-site/assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart" loading="lazy" />
+              <img src="assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Digital Wall Chart</h3>
@@ -124,17 +119,18 @@
       </div>
     </section>
 
+    <!-- APPLICATIONS -->
     <section class="section" id="applications">
       <div class="container">
-        <div class="section-head center">
+        <div class="section-head centered">
           <h2>Applications</h2>
-          <p class="muted">Mobile + Desktop tools that keep teams aligned.</p>
+          <p class="muted">Mobile + desktop tools that keep teams aligned.</p>
         </div>
 
         <div class="grid cards-3">
           <article class="card">
             <div class="card-media">
-              <img src="/shellkey-site/assets/img/apps/SKAppHand.PNG" alt="Mobile Field App" loading="lazy" />
+              <img src="assets/img/apps/SKAppHand.PNG" alt="Mobile Field App" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Mobile Field App</h3>
@@ -144,7 +140,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="/shellkey-site/assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion" loading="lazy" />
+              <img src="assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Desktop Companion</h3>
@@ -154,7 +150,7 @@
 
           <article class="card">
             <div class="card-media">
-              <img src="/shellkey-site/assets/img/apps/CodeProMobile.JPG" alt="Quick Actions" loading="lazy" />
+              <img src="assets/img/apps/SKApp1.jpg" alt="Quick Actions" loading="lazy" />
             </div>
             <div class="card-body">
               <h3>Quick Actions</h3>
@@ -165,21 +161,23 @@
       </div>
     </section>
 
+    <!-- ABOUT -->
     <section class="section" id="about">
       <div class="container">
-        <div class="section-head center">
+        <div class="section-head centered">
           <h2>Built for Industrial Projects</h2>
-          <p class="muted maxw">
-            Designed for owners, managers, planners, inspectors and leadership teams who need clarity, accountability,
-            and real-time insight — without spreadsheets.
+          <p class="muted">
+            Designed for owners, managers, planners, inspectors and leadership teams who need clarity,
+            accountability, and real-time insight — without spreadsheets.
           </p>
         </div>
       </div>
     </section>
 
+    <!-- CONTACT -->
     <section class="section" id="contact">
       <div class="container">
-        <div class="section-head center">
+        <div class="section-head centered">
           <h2>Contact</h2>
           <p class="muted">Request a demo or ask a question. We’ll respond fast.</p>
         </div>
@@ -187,35 +185,32 @@
         <div class="grid contact-grid">
           <div class="panel">
             <h3>Direct</h3>
-            <p>
-              <strong>Email:</strong>
-              <a href="mailto:support@shellkey.company">support@shellkey.company</a><br />
-              <strong>Phone:</strong>
-              <a href="tel:+13372548321">+1 (337) 254-8321</a><br /><br />
-              <span class="muted">Business hours: Mon–Fri 7am-5pm </span>
-            </p>
+            <p><strong>Email:</strong> <a href="mailto:support@shellkey.company">support@shellkey.company</a></p>
+            <p><strong>Phone:</strong> <a href="tel:+13372548321">+1 (337) 254-8321</a></p>
+            <p class="muted">Business hours: Mon–Fri</p>
           </div>
 
           <div class="panel">
             <h3>Quick Message</h3>
-            <form id="contactForm">
+
+            <form id="quickMessageForm">
               <label>
-                Name
-                <input id="cName" type="text" placeholder="Your name" />
+                <span>Name</span>
+                <input type="text" id="qmName" placeholder="Your name" />
               </label>
 
               <label>
-                Your email (optional)
-                <input id="cEmail" type="email" placeholder="you@company.com" />
+                <span>Email</span>
+                <input type="email" id="qmEmail" placeholder="you@example.com" />
               </label>
 
               <label>
-                Message
-                <textarea id="cMsg" rows="5" placeholder="How can we help?"></textarea>
+                <span>Message</span>
+                <textarea id="qmMessage" rows="5" placeholder="How can we help?"></textarea>
               </label>
 
-              <button class="btn" type="submit">Open Email</button>
-              <p class="tiny muted">Opens your default email app with the message filled in.</p>
+              <button type="submit" class="btn">Send Email</button>
+              <p class="muted small">Opens your default mail app (Outlook/Gmail/Yahoo—whatever is connected).</p>
             </form>
           </div>
         </div>
@@ -224,54 +219,62 @@
 
     <footer class="site-footer">
       <div class="container">
-        <small>©2025 Shell Key. All rights reserved.</small>
+        <p>© Shell Key. All rights reserved.</p>
       </div>
     </footer>
   </main>
 
   <script>
-    const btn = document.getElementById("hamburgerBtn");
-    const mobileNav = document.getElementById("mobileNav");
-    const backdrop = document.getElementById("navBackdrop");
+    // MOBILE NAV
+    const btn = document.getElementById('hamburgerBtn');
+    const mobileNav = document.getElementById('mobileNav');
+    const backdrop = document.getElementById('navBackdrop');
 
-    function openNav() {
-      mobileNav.classList.add("open");
-      backdrop.classList.add("open");
-      btn.setAttribute("aria-expanded", "true");
-      btn.classList.add("is-open");
+    function closeMenu() {
+      btn.setAttribute('aria-expanded', 'false');
+      mobileNav.classList.remove('open');
+      backdrop.classList.remove('open');
+      document.body.classList.remove('no-scroll');
     }
-    function closeNav() {
-      mobileNav.classList.remove("open");
-      backdrop.classList.remove("open");
-      btn.setAttribute("aria-expanded", "false");
-      btn.classList.remove("is-open");
-    }
-    btn.addEventListener("click", () => mobileNav.classList.contains("open") ? closeNav() : openNav());
-    backdrop.addEventListener("click", closeNav);
-    mobileNav.querySelectorAll("a").forEach(a => a.addEventListener("click", closeNav));
 
-    document.getElementById("contactForm").addEventListener("submit", function (e) {
+    function openMenu() {
+      btn.setAttribute('aria-expanded', 'true');
+      mobileNav.classList.add('open');
+      backdrop.classList.add('open');
+      document.body.classList.add('no-scroll');
+    }
+
+    btn.addEventListener('click', () => {
+      const expanded = btn.getAttribute('aria-expanded') === 'true';
+      expanded ? closeMenu() : openMenu();
+    });
+
+    backdrop.addEventListener('click', closeMenu);
+
+    // Close menu when clicking a nav link (your request)
+    mobileNav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        closeMenu();
+      });
+    });
+
+    // QUICK MESSAGE -> opens mail client with subject/body (works with default mail handler)
+    document.getElementById('quickMessageForm').addEventListener('submit', (e) => {
       e.preventDefault();
-      const name = document.getElementById("cName").value.trim();
-      const email = document.getElementById("cEmail").value.trim();
-      const msg = document.getElementById("cMsg").value.trim();
-      const to = "support@shellkey.company";
-      const subject = "Shell Key Website Inquiry";
 
-      const lines = [
-        "Hi Shell Key,",
-        "",
-        "I'd like to request a demo / ask a question:",
-        "",
-        msg || "(No message entered)",
-        "",
-        "—",
-        (name ? name : "Name: (not provided)"),
-        (email ? "Reply email: " + email : "")
-      ].filter(Boolean);
+      const name = document.getElementById('qmName').value.trim();
+      const email = document.getElementById('qmEmail').value.trim();
+      const msg = document.getElementById('qmMessage').value.trim();
 
-      const body = encodeURIComponent(lines.join("\n"));
-      window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
+      const subject = encodeURIComponent('Shell Key Website Inquiry');
+      const body = encodeURIComponent(
+        `Hi Shell Key,\n\nI'd like to request a demo / ask a question:\n\n` +
+        `Name: ${name || '(not provided)'}\n` +
+        `Email: ${email || '(not provided)'}\n\n` +
+        `Message:\n${msg || '(no message)'}\n`
+      );
+
+      window.location.href = `mailto:support@shellkey.company?subject=${subject}&body=${body}`;
     });
   </script>
 </body>
