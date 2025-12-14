@@ -1,22 +1,49 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shell Key | Digital Project Controls</title>
-  <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="./styles.css" />
 </head>
 
 <body>
+  <!-- Header -->
+  <header class="site-header" id="top">
+    <div class="container header-inner">
+      <a class="brand" href="#home" aria-label="Shell Key Home">
+        <img
+          src="./assets/img/logo/ShellKeyWhiteTrace.png"
+          alt="Shell Key"
+          class="brand-logo"
+          loading="eager"
+        />
+      </a>
 
-<!-- ================= HEADER ================= -->
-<header class="site-header">
-  <div class="nav-container">
-    <a class="logo" href="#home" aria-label="Go to Home">
-      <img src="assets/img/logo/ShellKeyWhiteTrace.png" alt="Shell Key" />
-    </a>
+      <!-- Desktop nav -->
+      <nav class="nav-desktop" aria-label="Primary navigation">
+        <a href="#home">Home</a>
+        <a href="#dashboards">Dashboards</a>
+        <a href="#applications">Applications</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+      </nav>
 
-    <nav class="nav-links" id="navLinks" aria-label="Primary navigation">
+      <!-- Mobile hamburger -->
+      <button
+        class="hamburger"
+        id="hamburgerBtn"
+        aria-label="Open menu"
+        aria-expanded="false"
+        aria-controls="mobileNav"
+      >
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <!-- Mobile drawer -->
+    <nav class="nav-mobile" id="mobileNav" aria-label="Mobile navigation">
       <a href="#home">Home</a>
       <a href="#dashboards">Dashboards</a>
       <a href="#applications">Applications</a>
@@ -24,188 +51,250 @@
       <a href="#contact">Contact</a>
     </nav>
 
-    <button class="hamburger" id="hamburgerBtn" aria-label="Open menu" aria-expanded="false">
-      ☰
-    </button>
-  </div>
-</header>
+    <div class="nav-backdrop" id="navBackdrop" aria-hidden="true"></div>
+  </header>
 
-<!-- ================= HERO ================= -->
-<section id="home" class="hero">
-  <img
-    src="assets/img/hero/Home.png"
-    alt="Shell Key Hero"
-    class="hero-img"
-  />
-</section>
-
-<!-- ================= BANNER ================= -->
-<section class="banner">
-  <h1>Digital Project Controls</h1>
-  <p>
-    Real-time dashboards, mobile applications, and project intelligence built
-    for industrial execution, turnarounds, and leadership visibility.
-  </p>
-</section>
-
-<!-- ================= DASHBOARDS ================= -->
-<section id="dashboards" class="section">
-  <h2>Dashboards</h2>
-
-  <div class="card-grid">
-    <div class="card">
-      <div class="media">
-        <img src="assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard">
+  <!-- HERO -->
+  <main>
+    <section class="hero" id="home" aria-label="Hero">
+      <div class="container hero-inner">
+        <!-- This shows the FULL image (no crop). It will shrink to fit every screen. -->
+        <img
+          class="hero-image"
+          src="./assets/img/hero/Home.png"
+          alt="Shell Key hero"
+          loading="eager"
+        />
       </div>
-      <h3>Project Summary</h3>
-      <p>Executive-ready view of progress, cost, and schedule.</p>
-    </div>
+    </section>
 
-    <div class="card">
-      <div class="media">
-        <img src="assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log dashboard">
-      </div>
-      <h3>Daily Log</h3>
-      <p>Field updates and reporting visibility.</p>
-    </div>
-
-    <div class="card">
-      <div class="media">
-        <img src="assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart dashboard">
-      </div>
-      <h3>Digital Wall Chart</h3>
-      <p>Big-picture planning and readiness tracking.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ================= APPLICATIONS ================= -->
-<section id="applications" class="section section-dark">
-  <h2>Applications</h2>
-  <p class="section-sub">Mobile + desktop tools that keep teams aligned.</p>
-
-  <div class="card-grid">
-    <div class="card">
-      <div class="media">
-        <img src="assets/img/apps/SKAppHand.PNG" alt="Mobile Field App">
-      </div>
-      <h3>Mobile Field App</h3>
-      <p>Capture updates, photos, and status in the field.</p>
-    </div>
-
-    <div class="card">
-      <div class="media">
-        <img src="assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion">
-      </div>
-      <h3>Desktop Companion</h3>
-      <p>Work packages, reporting, and dashboards in one view.</p>
-    </div>
-
-    <div class="card">
-      <div class="media">
-        <img src="assets/img/apps/CodeProMobile.JPG" alt="Quick Actions">
-      </div>
-      <h3>Quick Actions</h3>
-      <p>Fast navigation for key workflows.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ================= ABOUT ================= -->
-<section id="about" class="section">
-  <h2>Built for Industrial Projects</h2>
-  <p class="center-text">
-    Designed for owners, managers, planners, inspectors and leadership teams who need clarity,
-    accountability, and real-time insight — without spreadsheets.
-  </p>
-</section>
-
-<!-- ================= CONTACT ================= -->
-<section id="contact" class="section section-dark">
-  <h2>Contact</h2>
-  <p class="section-sub">Request a demo or ask a question. We’ll respond fast.</p>
-
-  <div class="contact-grid">
-    <div class="contact-card">
-      <h3>Direct</h3>
-      <p><strong>Email:</strong> <a href="mailto:support@shellkey.company">support@shellkey.company</a></p>
-      <p><strong>Phone:</strong> <a href="tel:+13372548321">+1 (337) 254-8321</a></p>
-      <p class="muted">Business hours: Mon–Fri</p>
-    </div>
-
-    <div class="contact-card">
-      <h3>Quick Message</h3>
-      <!-- Note: this is a simple form shell. To actually send emails from GitHub Pages,
-           you’ll either use Formspree/Netlify Forms or a mailto link. -->
-      <form class="contact-form" onsubmit="return false;">
-        <label>
-          Name
-          <input type="text" placeholder="Your name" />
-        </label>
-        <label>
-          Email
-          <input type="email" placeholder="you@company.com" />
-        </label>
-        <label>
-          Message
-          <textarea rows="4" placeholder="What do you need built?"></textarea>
-        </label>
-
-        <button class="btn" type="button" onclick="openEmailDraft()">
-          Send Email
-        </button>
-        <p class="muted small">
-          This button opens your email app with the message (works everywhere).
+    <!-- Banner below hero (your text goes here, NOT on top of the image) -->
+    <section class="banner">
+      <div class="container banner-inner">
+        <h1>Digital Project Controls</h1>
+        <p>
+          Real-time dashboards, mobile applications, and project intelligence built for industrial execution,
+          turnarounds, and leadership visibility.
         </p>
-      </form>
-    </div>
-  </div>
-</section>
+      </div>
+    </section>
 
-<!-- ================= FOOTER ================= -->
-<footer class="footer">
-  <p>© Shell Key. All rights reserved.</p>
-</footer>
+    <!-- Dashboards -->
+    <section class="section" id="dashboards">
+      <div class="container">
+        <div class="section-head">
+          <h2>Dashboards</h2>
+          <p class="muted">Examples you can swap anytime (images already in your repo).</p>
+        </div>
 
-<script>
-  const navLinks = document.getElementById("navLinks");
-  const hamburgerBtn = document.getElementById("hamburgerBtn");
+        <div class="grid cards-3">
+          <!-- Card 1 -->
+          <article class="card">
+            <div class="card-media">
+              <img src="./assets/img/dashboards/001-ProjectSummary.jpg" alt="Project Summary dashboard" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <h3>Project Summary</h3>
+              <p>Executive-ready view of progress, cost, and schedule.</p>
+            </div>
+          </article>
 
-  function closeMenu() {
-    navLinks.classList.remove("open");
-    hamburgerBtn.setAttribute("aria-expanded", "false");
-  }
+          <!-- Card 2 -->
+          <article class="card">
+            <div class="card-media">
+              <img src="./assets/img/dashboards/008-DailyLog.jpg" alt="Daily Log dashboard" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <h3>Daily Log</h3>
+              <p>Field updates and reporting visibility.</p>
+            </div>
+          </article>
 
-  function toggleMenu() {
-    const isOpen = navLinks.classList.toggle("open");
-    hamburgerBtn.setAttribute("aria-expanded", isOpen ? "true" : "false");
-  }
+          <!-- Card 3 -->
+          <article class="card">
+            <div class="card-media">
+              <img src="./assets/img/dashboards/WallChart1.PNG" alt="Digital Wall Chart" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <h3>Digital Wall Chart</h3>
+              <p>Big-picture plan and readiness tracking.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
 
-  hamburgerBtn.addEventListener("click", toggleMenu);
+    <!-- Applications -->
+    <section class="section" id="applications">
+      <div class="container">
+        <div class="section-head center">
+          <h2>Applications</h2>
+          <p class="muted">Mobile + Desktop tools that keep teams aligned.</p>
+        </div>
 
-  // Close menu when clicking a nav link
-  navLinks.querySelectorAll("a").forEach(a => {
-    a.addEventListener("click", () => closeMenu());
-  });
+        <div class="grid cards-3">
+          <article class="card">
+            <div class="card-media">
+              <img src="./assets/img/apps/SKAppHand.PNG" alt="Mobile Field App" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <h3>Mobile Field App</h3>
+              <p>Capture updates, photos, and status in the field.</p>
+            </div>
+          </article>
 
-  // Close menu if clicking outside
-  document.addEventListener("click", (e) => {
-    const clickedInsideNav = navLinks.contains(e.target) || hamburgerBtn.contains(e.target);
-    if (!clickedInsideNav) closeMenu();
-  });
+          <article class="card">
+            <div class="card-media">
+              <img src="./assets/img/apps/CodeProDesk.JPG" alt="Desktop Companion" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <h3>Desktop Companion</h3>
+              <p>Work packages, reporting, and dashboards in one view.</p>
+            </div>
+          </article>
 
-  // Close menu on resize back to desktop
-  window.addEventListener("resize", () => {
-    if (window.innerWidth > 900) closeMenu();
-  });
+          <article class="card">
+            <div class="card-media">
+              <img src="./assets/img/apps/CodeProMobile.JPG" alt="Quick Actions" loading="lazy" />
+            </div>
+            <div class="card-body">
+              <h3>Quick Actions</h3>
+              <p>Fast navigation for key workflows.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
 
-  function openEmailDraft() {
-    const subject = encodeURIComponent("Shell Key Website Inquiry");
-    const body = encodeURIComponent("Hi Shell Key,\n\nI’d like to request a demo / ask a question:\n\n");
-    window.location.href = `mailto:support@shellkey.company?subject=${subject}&body=${body}`;
-  }
-</script>
+    <!-- About (simple for now) -->
+    <section class="section" id="about">
+      <div class="container">
+        <div class="section-head center">
+          <h2>Built for Industrial Projects</h2>
+          <p class="muted maxw">
+            Designed for owners, managers, planners, inspectors and leadership teams who need clarity, accountability,
+            and real-time insight — without spreadsheets.
+          </p>
+        </div>
+      </div>
+    </section>
 
+    <!-- Contact -->
+    <section class="section" id="contact">
+      <div class="container">
+        <div class="section-head center">
+          <h2>Contact</h2>
+          <p class="muted">Request a demo or ask a question. We’ll respond fast.</p>
+        </div>
+
+        <div class="grid contact-grid">
+          <div class="panel">
+            <h3>Direct</h3>
+            <p>
+              <strong>Email:</strong>
+              <a href="mailto:support@shellkey.company">support@shellkey.company</a><br />
+              <strong>Phone:</strong>
+              <a href="tel:+13372548321">+1 (337) 254-8321</a><br /><br />
+              <span class="muted">Business hours: Mon–Fri</span>
+            </p>
+          </div>
+
+          <div class="panel">
+            <h3>Quick Message</h3>
+
+            <!-- NOTE: This does NOT "send" from the website.
+                 It opens the visitor’s email app (Outlook/Gmail/Yahoo/etc) with subject + body filled in. -->
+            <form id="contactForm">
+              <label>
+                Name
+                <input id="cName" type="text" placeholder="Your name" />
+              </label>
+
+              <label>
+                Your email (optional)
+                <input id="cEmail" type="email" placeholder="you@company.com" />
+              </label>
+
+              <label>
+                Message
+                <textarea id="cMsg" rows="5" placeholder="How can we help?"></textarea>
+              </label>
+
+              <button class="btn" type="submit">Open Email</button>
+              <p class="tiny muted">Opens your default email app with the message filled in (works everywhere).</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div class="container">
+        <small>©2026 Shell Key. All rights reserved.</small>
+      </div>
+    </footer>
+  </main>
+
+  <script>
+    // ===== Mobile nav =====
+    const btn = document.getElementById("hamburgerBtn");
+    const mobileNav = document.getElementById("mobileNav");
+    const backdrop = document.getElementById("navBackdrop");
+
+    function openNav() {
+      mobileNav.classList.add("open");
+      backdrop.classList.add("open");
+      btn.setAttribute("aria-expanded", "true");
+      btn.classList.add("is-open");
+    }
+
+    function closeNav() {
+      mobileNav.classList.remove("open");
+      backdrop.classList.remove("open");
+      btn.setAttribute("aria-expanded", "false");
+      btn.classList.remove("is-open");
+    }
+
+    btn.addEventListener("click", () => {
+      const isOpen = mobileNav.classList.contains("open");
+      isOpen ? closeNav() : openNav();
+    });
+
+    // Close when clicking backdrop
+    backdrop.addEventListener("click", closeNav);
+
+    // Close after selecting a nav link (this fixes the “hamburger stays open” issue)
+    mobileNav.querySelectorAll("a").forEach(a => a.addEventListener("click", closeNav));
+
+    // ===== Contact "Quick Message" =====
+    // This opens the visitor's email app with a pre-filled email.
+    document.getElementById("contactForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById("cName").value.trim();
+      const email = document.getElementById("cEmail").value.trim();
+      const msg = document.getElementById("cMsg").value.trim();
+
+      const to = "support@shellkey.company";
+      const subject = "Shell Key Website Inquiry";
+
+      const lines = [
+        "Hi Shell Key,",
+        "",
+        "I'd like to request a demo / ask a question:",
+        "",
+        msg || "(No message entered)",
+        "",
+        "—",
+        (name ? name : "Name: (not provided)"),
+        (email ? "Reply email: " + email : "")
+      ].filter(Boolean);
+
+      const body = encodeURIComponent(lines.join("\n"));
+
+      // mailto uses the device's default email app/account (Outlook/Gmail/Yahoo/etc)
+      window.location.href = `mailto:${to}?subject=${encodeURIComponent(subject)}&body=${body}`;
+    });
+  </script>
 </body>
 </html>
-
