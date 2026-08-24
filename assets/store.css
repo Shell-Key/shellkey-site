@@ -1,0 +1,424 @@
+/* ==========================================================================
+   store.css — Shell Key store, product pages and request form.
+   Layers on top of styles.css. Uses the same tokens, nothing overridden.
+   ========================================================================== */
+
+/* ---------- shared bits ---------- */
+/* styles.css never sets a body link colour, so text links fall back to the
+   browser default blue — effectively unreadable on the navy background.
+   This also fixes the email/phone links in the existing contact section. */
+a{color:var(--accent)}
+a:hover{color:#a6ff4d}
+.card-body a:not(.btn):not(.plain){
+  color:var(--accent);
+  text-decoration:underline;
+  text-underline-offset:2px;
+  text-decoration-color:rgba(124,255,0,0.4);
+}
+.card-body a:not(.btn):not(.plain):hover{text-decoration-color:var(--accent)}
+.btn, .nav-link, .brand, .plain, .card-media{color:inherit}
+.btn-primary{color:#061028}
+
+.eyebrow{
+  font-size:12px;
+  letter-spacing:.22em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin:0 0 10px;
+  font-weight:700;
+}
+.plain{color:inherit; text-decoration:none}
+.plain:hover{color:var(--accent)}
+.btn-block{width:100%}
+.rule{
+  border:none;
+  border-top:1px solid rgba(255,255,255,0.08);
+  margin:16px 0;
+}
+.nav-link.active{
+  background:rgba(124,255,0,0.10);
+  color:var(--accent);
+}
+
+/* ---------- store hero ---------- */
+.store-hero{padding:24px 0 0}
+.store-hero .hero-banner{padding:34px 20px 30px}
+.store-hero h1{margin-bottom:12px}
+.credline{justify-content:center; margin:18px auto 20px; max-width:900px}
+
+.notice{
+  margin:22px 0 0;
+  padding:16px 18px;
+  border-radius:14px;
+  border:1px solid rgba(124,255,0,0.22);
+  background:rgba(124,255,0,0.06);
+  color:rgba(234,242,255,0.88);
+  line-height:1.55;
+  font-size:15px;
+}
+.notice strong{color:var(--accent)}
+
+/* ---------- status tags ---------- */
+.card-tags{margin:0 0 10px}
+.tag{
+  display:inline-block;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.09em;
+  text-transform:uppercase;
+  padding:5px 10px;
+  border-radius:999px;
+  border:1px solid transparent;
+}
+.tag-live{
+  background:rgba(124,255,0,0.14);
+  border-color:rgba(124,255,0,0.40);
+  color:#bfff7a;
+}
+.tag-soon{
+  background:rgba(90,170,255,0.13);
+  border-color:rgba(90,170,255,0.34);
+  color:#a8d0ff;
+}
+.tag-quote{
+  background:rgba(255,190,80,0.12);
+  border-color:rgba(255,190,80,0.32);
+  color:#ffd79a;
+}
+
+/* ---------- product cards ---------- */
+.product-card{
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  transition:transform .16s ease, border-color .16s ease;
+}
+.product-card:hover{
+  transform:translateY(-3px);
+  border-color:rgba(124,255,0,0.28);
+}
+/* Fixed height, not min-height: images have different aspect ratios, and a
+   variable media box pushes every card body to a different baseline. */
+.product-card .card-media{
+  height:216px;
+  min-height:0;
+  text-decoration:none;
+  cursor:pointer;
+  overflow:hidden;
+}
+.product-card .card-media img{
+  max-height:100%;
+  width:auto;
+  max-width:100%;
+}
+.product-card .card-body{
+  display:flex;
+  flex-direction:column;
+  flex:1 1 auto;
+}
+.product-card .card-body h3{
+  font-size:19px;
+  line-height:1.3;
+  margin-bottom:8px;
+}
+.product-card .bullets{
+  flex:1 1 auto;
+  font-size:14px;
+  margin-bottom:14px;
+}
+.card-feature{
+  border-color:rgba(124,255,0,0.42);
+  box-shadow:0 18px 45px rgba(0,0,0,0.32), 0 0 0 1px rgba(124,255,0,0.10);
+}
+.ribbon{
+  position:absolute;
+  top:12px;
+  right:12px;
+  z-index:3;
+  font-size:10.5px;
+  font-weight:800;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  padding:6px 11px;
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(124,255,0,0.95), rgba(70,220,0,0.88));
+  color:#061028;
+  box-shadow:0 8px 20px rgba(124,255,0,0.28);
+}
+
+/* ---------- price ---------- */
+.price-row{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+  flex-wrap:wrap;
+  padding-top:14px;
+  margin-bottom:14px;
+  border-top:1px solid rgba(255,255,255,0.08);
+}
+.price{
+  font-size:27px;
+  font-weight:800;
+  letter-spacing:-.02em;
+  color:var(--text);
+  line-height:1;
+}
+.price-was{
+  font-size:15px;
+  color:rgba(234,242,255,0.45);
+  text-decoration:line-through;
+}
+.price-note{
+  font-size:12px;
+  color:rgba(234,242,255,0.55);
+}
+.card-actions{display:grid; gap:9px}
+
+/* ---------- breadcrumbs ---------- */
+.crumbs{
+  padding:18px 0 4px;
+  font-size:13px;
+  color:rgba(234,242,255,0.60);
+}
+.crumbs a{color:rgba(234,242,255,0.86); text-decoration:none}
+.crumbs a:hover{color:var(--accent)}
+.crumbs span{margin:0 7px; opacity:.5}
+
+/* ---------- product detail ---------- */
+.product-detail{
+  display:grid;
+  grid-template-columns:1.25fr 1fr;
+  gap:18px;
+  align-items:start;
+  padding:14px 0 0;
+}
+.pd-media{
+  padding:18px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(0,0,0,0.18));
+  text-align:center;
+}
+.pd-media img{
+  display:block;
+  width:100%;
+  height:auto;
+  max-height:560px;
+  object-fit:contain;
+  border-radius:14px;
+  box-shadow:0 14px 40px rgba(0,0,0,0.30);
+}
+.zoomhint{margin:12px 0 0}
+.pd-info h1{
+  font-size:clamp(24px,3vw,34px);
+  margin:0 0 8px;
+  line-height:1.15;
+}
+.tagline{
+  color:var(--accent);
+  font-weight:700;
+  font-size:16px;
+  margin:0 0 14px;
+}
+.pd-info .bullets{margin-bottom:6px}
+.cta-note{margin:12px 0 0; line-height:1.5}
+
+.pd-detail{padding:34px 0 0}
+.detail-grid{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0,1fr));
+  gap:18px;
+}
+.detail-block{
+  border-radius:var(--radius);
+  border:1px solid var(--stroke);
+  background:linear-gradient(180deg, var(--cardTop) 0%, var(--cardMid) 40%, var(--cardBot) 100%);
+  padding:20px 22px;
+}
+.detail-block h3{
+  margin:0 0 8px;
+  font-size:17px;
+  color:var(--accent);
+}
+.detail-block p{
+  margin:0;
+  color:rgba(234,242,255,0.80);
+  line-height:1.6;
+}
+.pd-foot h3{margin-top:0}
+
+/* ---------- request page ---------- */
+.request-grid{
+  display:grid;
+  grid-template-columns:0.85fr 1.15fr;
+  gap:18px;
+  align-items:start;
+}
+.field-2{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+/* textarea/input don't inherit font-family by default — without this the
+   message box renders in monospace while every other field is sans. */
+input, textarea{
+  font-family:inherit;
+  font-size:15px;
+}
+textarea{resize:vertical; min-height:110px}
+
+select{
+  width:100%;
+  border-radius:12px;
+  border:1px solid rgba(255,255,255,0.12);
+  background:rgba(255,255,255,0.04);
+  color:rgba(234,242,255,0.92);
+  padding:11px 12px;
+  outline:none;
+  font-size:15px;
+  font-family:inherit;
+  appearance:none;
+  background-image:linear-gradient(45deg, transparent 50%, rgba(234,242,255,0.6) 50%),
+                   linear-gradient(135deg, rgba(234,242,255,0.6) 50%, transparent 50%);
+  background-position:calc(100% - 18px) calc(1em + 2px), calc(100% - 13px) calc(1em + 2px);
+  background-size:5px 5px, 5px 5px;
+  background-repeat:no-repeat;
+}
+select:focus{
+  border-color:rgba(124,255,0,0.35);
+  box-shadow:0 0 0 4px rgba(124,255,0,0.10);
+}
+select option, select optgroup{
+  background:#07142a;
+  color:#eaf2ff;
+}
+label.check{
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+  padding:13px 14px;
+  border-radius:12px;
+  border:1px solid rgba(124,255,0,0.22);
+  background:rgba(124,255,0,0.05);
+  cursor:pointer;
+}
+label.check input{
+  width:19px;
+  height:19px;
+  flex:0 0 auto;
+  margin-top:1px;
+  accent-color:#7CFF00;
+  cursor:pointer;
+}
+.checktext{
+  font-size:14px;
+  color:rgba(234,242,255,0.86);
+  line-height:1.5;
+  margin:0;
+}
+.form-ok{
+  margin:14px 0 0;
+  padding:14px 16px;
+  border-radius:12px;
+  border:1px solid rgba(124,255,0,0.32);
+  background:rgba(124,255,0,0.08);
+  color:#cfff9b;
+  font-size:14.5px;
+  line-height:1.55;
+  display:none;
+}
+.form-ok.show{display:block}
+input:invalid:not(:placeholder-shown),
+textarea:invalid:not(:placeholder-shown){
+  border-color:rgba(255,120,100,0.45);
+}
+
+/* ---------- responsive ---------- */
+@media (max-width:1020px){
+  .product-detail{grid-template-columns:1fr}
+  .request-grid{grid-template-columns:1fr}
+  .detail-grid{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .field-2{grid-template-columns:1fr}
+  .price{font-size:24px}
+  .product-card .card-media{height:190px}
+}
+
+/* ---------- product gallery (multi-view products) ---------- */
+.gallery-sec{padding:34px 0 0}
+.shot-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
+  gap:16px;
+}
+.shot{
+  margin:0;
+  border-radius:var(--radius);
+  border:1px solid var(--stroke);
+  background:linear-gradient(180deg,var(--cardTop) 0%,var(--cardMid) 40%,var(--cardBot) 100%);
+  overflow:hidden;
+}
+.shot img{
+  display:block;
+  width:100%;
+  height:196px;
+  object-fit:cover;
+  object-position:top center;
+  cursor:zoom-in;
+  border-bottom:1px solid rgba(255,255,255,0.07);
+  background:rgba(255,255,255,0.04);
+}
+.shot figcaption{
+  padding:12px 15px 14px;
+  font-size:13.5px;
+  line-height:1.45;
+  color:rgba(234,242,255,0.78);
+  background:rgba(0,0,0,0.14);
+}
+@media (max-width:600px){ .shot img{height:168px} }
+
+/* ---------- portrait book covers ----------
+   Guide covers are 0.60–0.77 aspect. Dropping them in the landscape media box
+   squashes them to a sliver, so they get a taller box, contain fit, and a soft
+   ground so the cover reads as an object rather than a floating rectangle. */
+.product-card .cover-media{
+  height:326px;
+  padding:20px 16px;
+  background:
+    radial-gradient(120% 78% at 50% 4%, rgba(124,255,0,0.055), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,0.06), rgba(0,0,0,0.24));
+}
+.product-card .cover-media img{
+  height:100%;
+  width:auto;
+  max-width:100%;
+  object-fit:contain;
+  border-radius:5px;
+  box-shadow:0 16px 34px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.4);
+}
+.pd-cover img{
+  max-height:640px;
+  width:auto;
+  max-width:100%;
+  margin:0 auto;
+  border-radius:6px;
+  box-shadow:0 22px 50px rgba(0,0,0,0.55);
+}
+@media (max-width:600px){
+  .product-card .cover-media{height:280px}
+}
+
+/* ---------- lightbox sharpness ----------
+   The transform is what the browser rasterises during zoom; without these it
+   resamples through a low-quality path on some GPUs and screenshots go soft. */
+#viewerImg{
+  image-rendering:auto;
+  transform-origin:center center;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+}
+/* Thumbnails are heavy downscales of large screenshots — tell the browser to
+   use its high-quality resampler rather than the fast one. */
+.card-media img, .shot img, .pd-media img{
+  image-rendering:-webkit-optimize-contrast;
+  image-rendering:high-quality;
+}

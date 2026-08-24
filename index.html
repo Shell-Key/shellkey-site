@@ -4,7 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Shell Key | Digital Project Controls</title>
+  <meta name="description" content="Digital project controls for industrial execution. Power BI wall charts, mobile and desktop field apps, business portals, training and SOPs for turnarounds, refineries, LNG and petrochemical projects. Built by Kirby Billiot — 32 years, projects to $3.8B." />
+  <link rel="canonical" href="https://shellkey.company/" />
+  <link rel="icon" href="favicon.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/img/logo/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/img/logo/favicon-192.png" />
+  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png" />
+  <meta name="theme-color" content="#07142a" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Shell Key" />
+  <meta property="og:title" content="Shell Key | Digital Project Controls" />
+  <meta property="og:description" content="Digital project controls for industrial execution. Power BI wall charts, mobile and desktop field apps, business portals, training and SOPs for turnarounds, refineries, LNG and petrochemical projects. Built by Kirby Billiot — 32 years, projects to $3.8B." />
+  <meta property="og:url" content="https://shellkey.company/" />
+  <meta property="og:image" content="https://shellkey.company/assets/img/social/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Shell Key | Digital Project Controls" />
+  <meta name="twitter:description" content="Digital project controls for industrial execution. Power BI wall charts, mobile and desktop field apps, business portals, training and SOPs for turnarounds, refineries, LNG and petrochemical projects. Built by Kirby Billiot — 32 years, projects to $3.8B." />
+  <meta name="twitter:image" content="https://shellkey.company/assets/img/social/og-image.jpg" />
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "@id": "https://shellkey.company/#organization",
+  "name": "Shell Key",
+  "alternateName": [
+    "Shell Key LLC",
+    "ShellKey"
+  ],
+  "url": "https://shellkey.company",
+  "logo": {
+    "@type": "ImageObject",
+    "url": "https://shellkey.company/assets/img/logo/shellkey-mark-square.png",
+    "width": 512,
+    "height": 512
+  },
+  "image": "https://shellkey.company/assets/img/social/og-image.jpg",
+  "description": "Digital project controls for industrial execution. Power BI wall charts, mobile and desktop field apps, business portals, training and SOPs for turnarounds, refineries, LNG and petrochemical projects. Built by Kirby Billiot \u2014 32 years, projects to $3.8B.",
+  "email": "support@shellkey.company",
+  "telephone": "+1-337-254-8321",
+  "founder": {
+    "@type": "Person",
+    "name": "Kirby C. Billiot",
+    "jobTitle": "Project Controls & Planning Specialist",
+    "sameAs": "https://www.linkedin.com/in/kirbycbilliot/"
+  },
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Lafayette",
+    "addressRegion": "LA",
+    "addressCountry": "US"
+  },
+  "areaServed": "US",
+  "knowsAbout": [
+    "Project Controls",
+    "Primavera P6",
+    "Power BI",
+    "Turnaround Planning",
+    "Refinery Turnarounds",
+    "LNG Construction",
+    "Workpack Management",
+    "API 510 Inspection",
+    "Schedule Analysis",
+    "Industrial Dashboards"
+  ],
+  "sameAs": [
+    "https://www.linkedin.com/company/shell-key/",
+    "https://www.facebook.com/ShellKeyCompany",
+    "https://www.linkedin.com/in/kirbycbilliot/"
+  ]
+}
+  </script>
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Shell Key",
+  "url": "https://shellkey.company",
+  "publisher": {
+    "@id": "https://shellkey.company/#organization"
+  }
+}
+  </script>
   <link rel="stylesheet" href="assets/styles.css" />
+  <link rel="stylesheet" href="assets/store.css" />
 </head>
 
 <body>
@@ -29,6 +114,7 @@
           <li><a class="nav-link" href="#home">Home</a></li>
           <li><a class="nav-link" href="#dashboards">Dashboards</a></li>
           <li><a class="nav-link" href="#applications">Applications</a></li>
+          <li><a class="nav-link" href="store.html">Store</a></li>
           <li><a class="nav-link" href="#about">About</a></li>
           <li><a class="nav-link" href="#contact">Contact</a></li>
         </ul>
@@ -64,6 +150,7 @@
             <div class="hero-cta">
               <a class="btn btn-primary" href="#contact">Request a Demo</a>
               <a class="btn btn-ghost" href="#dashboards">View Examples</a>
+              <a class="btn btn-ghost" href="store.html">Visit the Store</a>
             </div>
           </div>
         </div>
@@ -410,197 +497,6 @@
     </div>
   </div>
 
-  <script>
-    // -------------------------
-    // Mobile Nav (hamburger)
-    // -------------------------
-    const navToggle = document.getElementById("navToggle");
-    const navLinks = document.getElementById("navLinks");
-
-    function closeMenu() {
-      navLinks.classList.remove("open");
-      navToggle.classList.remove("open");
-      navToggle.setAttribute("aria-expanded", "false");
-    }
-
-    navToggle.addEventListener("click", () => {
-      const isOpen = navLinks.classList.toggle("open");
-      navToggle.classList.toggle("open", isOpen);
-      navToggle.setAttribute("aria-expanded", String(isOpen));
-    });
-
-    // Close menu when clicking a link (fixes "hamburger stays open")
-    document.querySelectorAll(".nav-link").forEach(a => {
-      a.addEventListener("click", () => closeMenu());
-    });
-
-    // Close menu on outside click (mobile)
-    document.addEventListener("click", (e) => {
-      const withinNav = e.target.closest(".nav");
-      if (!withinNav) closeMenu();
-    });
-
-    // -------------------------
-    // Contact "Quick Message"
-    // -------------------------
-    document.getElementById("contactForm").addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const name = document.getElementById("qName").value.trim();
-      const email = document.getElementById("qEmail").value.trim();
-      const msg = document.getElementById("qMsg").value.trim();
-
-      const subject = "Shell Key Website Inquiry";
-      const bodyLines = [
-        "Hi Shell Key,",
-        "",
-        "I'd like to request a demo / ask a question:",
-        "",
-        `Name: ${name || "(not provided)"}`,
-        `Email: ${email || "(not provided)"}`,
-        "",
-        "Message:",
-        msg || "(no message entered)",
-        "",
-        "— Sent from shellkey.company"
-      ];
-
-      const body = encodeURIComponent(bodyLines.join("\n"));
-      const url = `mailto:support@shellkey.company?subject=${encodeURIComponent(subject)}&body=${body}`;
-      window.location.href = url;
-    });
-
-    // -------------------------
-    // Fullscreen Image Viewer
-    // Pinch-to-zoom + drag (mobile)
-    // -------------------------
-    const viewer = document.getElementById("viewer");
-    const viewerImg = document.getElementById("viewerImg");
-    const viewerBackdrop = document.getElementById("viewerBackdrop");
-    const viewerClose = document.getElementById("viewerClose");
-    const viewerOpenNew = document.getElementById("viewerOpenNew");
-    const viewerReset = document.getElementById("viewerReset");
-    const stage = document.getElementById("viewerStage");
-
-    let scale = 1;
-    let translateX = 0;
-    let translateY = 0;
-
-    function applyTransform() {
-      viewerImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    }
-
-    function resetTransform() {
-      scale = 1;
-      translateX = 0;
-      translateY = 0;
-      applyTransform();
-    }
-
-    function openViewer(src) {
-      viewerImg.src = src;
-      viewerOpenNew.href = src;
-      resetTransform();
-      viewer.classList.add("open");
-      viewer.setAttribute("aria-hidden", "false");
-      document.body.classList.add("no-scroll");
-    }
-
-    function closeViewer() {
-      viewer.classList.remove("open");
-      viewer.setAttribute("aria-hidden", "true");
-      document.body.classList.remove("no-scroll");
-      viewerImg.src = "";
-    }
-
-    document.querySelectorAll(".zoomable").forEach(img => {
-      img.addEventListener("click", () => {
-        const full = img.getAttribute("data-full") || img.src;
-        openViewer(full);
-      });
-    });
-
-    viewerBackdrop.addEventListener("click", closeViewer);
-    viewerClose.addEventListener("click", closeViewer);
-    viewerReset.addEventListener("click", resetTransform);
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && viewer.classList.contains("open")) closeViewer();
-    });
-
-    // Pinch zoom + drag (touch + mouse)
-    let isDragging = false;
-    let startX = 0, startY = 0;
-
-    // Touch pinch
-    let pinchStartDist = 0;
-    let pinchStartScale = 1;
-
-    function dist(t1, t2) {
-      const dx = t1.clientX - t2.clientX;
-      const dy = t1.clientY - t2.clientY;
-      return Math.hypot(dx, dy);
-    }
-
-    stage.addEventListener("touchstart", (e) => {
-      if (!viewer.classList.contains("open")) return;
-
-      if (e.touches.length === 2) {
-        pinchStartDist = dist(e.touches[0], e.touches[1]);
-        pinchStartScale = scale;
-      } else if (e.touches.length === 1) {
-        isDragging = true;
-        startX = e.touches[0].clientX - translateX;
-        startY = e.touches[0].clientY - translateY;
-      }
-    }, { passive: true });
-
-    stage.addEventListener("touchmove", (e) => {
-      if (!viewer.classList.contains("open")) return;
-
-      if (e.touches.length === 2) {
-        // Pinch zoom
-        const d = dist(e.touches[0], e.touches[1]);
-        const factor = d / pinchStartDist;
-        scale = Math.min(6, Math.max(1, pinchStartScale * factor));
-        applyTransform();
-      } else if (e.touches.length === 1 && isDragging) {
-        translateX = e.touches[0].clientX - startX;
-        translateY = e.touches[0].clientY - startY;
-        applyTransform();
-      }
-    }, { passive: true });
-
-    stage.addEventListener("touchend", () => {
-      isDragging = false;
-      pinchStartDist = 0;
-    });
-
-    // Mouse drag + wheel zoom (desktop)
-    stage.addEventListener("mousedown", (e) => {
-      if (!viewer.classList.contains("open")) return;
-      isDragging = true;
-      startX = e.clientX - translateX;
-      startY = e.clientY - translateY;
-    });
-
-    window.addEventListener("mousemove", (e) => {
-      if (!isDragging) return;
-      translateX = e.clientX - startX;
-      translateY = e.clientY - startY;
-      applyTransform();
-    });
-
-    window.addEventListener("mouseup", () => { isDragging = false; });
-
-    stage.addEventListener("wheel", (e) => {
-      if (!viewer.classList.contains("open")) return;
-      e.preventDefault();
-      const delta = Math.sign(e.deltaY);
-      const next = scale + (delta < 0 ? 0.15 : -0.15);
-      scale = Math.min(6, Math.max(1, next));
-      applyTransform();
-    }, { passive: false });
-  </script>
+  <script src="assets/site.js" defer></script>
 </body>
 </html>
