@@ -24,6 +24,9 @@ IMG = "assets/img"
 # --------------------------------------------------------------------------
 
 CATEGORIES = [
+    ("software", "Software Subscriptions",
+     "Shell Key's own systems, hosted and supported. Subscribe online, get access the same "
+     "business day, cancel with one email."),
     ("wallcharts", "Digital Wall Charts",
      "Power BI wall charts built on live turnarounds — the same boards used to run "
      "equipment, piping, valve and workpack scope on projects from $75M to $3.8B."),
@@ -41,7 +44,134 @@ CATEGORIES = [
      "Useful on their own. No purchase, no catch."),
 ]
 
+# PayPal links. Subscription plans use the hosted subscribe URL; one-time items use
+# the "Buy Now" hosted button URL (https://www.paypal.com/ncp/payment/XXXX).
+# Any link still starting with PAYPAL_LINK_ is a placeholder: the button becomes
+# "Request This" until you paste the real one.
+PAYPAL_BIDBOARD = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-1MD1072905987273YNKSDYIY"
+PAYPAL_INSPECTION = "PAYPAL_LINK_INSPECTION_ANNUAL"      # create plan: Shell Key Inspection System, $2,000 / year
+PAYPAL_WEBSITE_START = "PAYPAL_LINK_WEBSITE_START"       # Buy Now button: AI Website Studio start, $50
+PAYPAL_TRAINING_COURSE = "PAYPAL_LINK_TRAINING_COURSE"   # Buy Now button: one course, $39
+PAYPAL_TRAINING_ALL = "PAYPAL_LINK_TRAINING_ALL"         # Buy Now button: all-access year, $99
+
 PRODUCTS = [
+    # ---------------- SOFTWARE SUBSCRIPTIONS ----------------
+    dict(slug="bid-board", cat="software", cover=True,
+         name="Bid Board",
+         tagline="Every Louisiana public bid, scored for your company, on one board.",
+         img=f"{IMG}/covers/bid-board.jpg",
+         price="$75", price_note="first month, then $750 / month", status="available", subscribe=True,
+         paypal=PAYPAL_BIDBOARD, feature=True,
+         demo="https://shellkey-bidboard.pages.dev",
+         short="Bid intelligence for Louisiana contractors. LaPAC, DOTD, parish and SAM.gov bids in one place, go / no-go scoring against your license and certifications, a company vault for your documents, and a bid-kit generator that assembles the government package.",
+         bullets=["All open Louisiana public bids on one board",
+                  "Go / no-go score matched to your license class",
+                  "Company vault: licenses, certs, insurance, forms",
+                  "Bid kit generator builds the submission package"],
+         detail=[
+           ("What it is",
+            "A subscription portal that watches every Louisiana public procurement source, "
+            "scores each bid against your license classifications and certifications, keeps "
+            "your company documents ready in a vault, and builds the bid package so you can "
+            "go from 'Go' to a submitted bid without hunting for forms."),
+           ("Who it is for",
+            "Louisiana general contractors, subcontractors and specialty contractors who bid "
+            "state, parish, municipal or federal work and are tired of missing lettings or "
+            "wasting a week on a bid they should have passed on."),
+           ("What you get",
+            "A company account on the Bid Board portal, the readiness check for each bid, the "
+            "vault, the bid-kit generator, and email support from the person who built it."),
+           ("How billing works",
+            "$75 for the first month so you can see it work on real bids, then $750 a month "
+            "until you cancel. Cancel any time by emailing support@shellkey.company; access "
+            "ends at the close of the billing period and no further charges are made. The $75 "
+            "introductory month is available once per company."),
+         ]),
+
+    dict(slug="inspection-system", cat="software", cover=True,
+         name="Shell Key Inspection System",
+         tagline="Welds, NDE, indications, repairs and reports — branded for your company.",
+         img=f"{IMG}/covers/inspection-system.jpg",
+         price="$2,000", price_note="per year, per company", status="available", subscribe=True,
+         paypal=PAYPAL_INSPECTION,
+         short="The inspection management system already running at a Louisiana NDE company. Projects, welds, materials and full traceability, VT/NDE scope, indications, repairs and re-inspection, technician photos from the phone, certification tracking, audit log, PDF reports and CSV export.",
+         bullets=["Weld and material traceability end to end",
+                  "Phone-first field board with QR field cards",
+                  "Certifications, audit log, PDF reports, CSV export",
+                  "Your company name on every screen"],
+         detail=[
+           ("What it is",
+            "A browser-based inspection management system for NDE, API and weld inspection "
+            "companies. It replaces the spreadsheet stack: one place for projects, welds, "
+            "materials, inspection scope, indications, repairs, re-inspects, photos, technician "
+            "certifications, and the reports the client asks for."),
+           ("Who it is for",
+            "NDE and inspection companies, QA/QC managers, and owner-side inspection groups on "
+            "pipeline, refinery, and fabrication work."),
+           ("What you get",
+            "The system set up under your company name (Standard or AI edition), the field "
+            "board for technicians, setup and a walkthrough with Kirby, and support by phone "
+            "and email for the year."),
+           ("How billing works",
+            "$2,000 per year for the company — no per-user fees. Renews annually; cancel by "
+            "email before the renewal date."),
+         ]),
+
+    dict(slug="ai-website-studio", cat="software", cover=True,
+         name="AI Website Studio",
+         tagline="A professional website for your business in days, not months.",
+         img=f"{IMG}/covers/ai-website-studio.jpg",
+         price="$50", price_note="to start &middot; $500 when you approve the site", status="available",
+         paypal=PAYPAL_WEBSITE_START,
+         short="Built for contractors, trades and local businesses in Acadiana and beyond. Pick from about twenty industry-specific designs, ask for changes in plain English, and launch a fast, mobile-ready site with your phone number and quote form front and center.",
+         bullets=["About 20 industry-specific design directions",
+                  "Ask for changes in plain English, see them instantly",
+                  "Mobile-ready, fast, built to make the phone ring",
+                  "Custom domain, real photography, quote and contact forms"],
+         detail=[
+           ("What it is",
+            "A website build service powered by Shell Key's AI studio. You pay $50 to start, "
+            "get a preview site in minutes, choose a direction, and request changes in plain "
+            "English. When you approve it, the $500 balance is due and the site goes live on "
+            "your domain."),
+           ("Who it is for",
+            "Plumbers, electricians, roofers, HVAC, fence, concrete, welding and dirt-work "
+            "contractors, and any small business whose current website is a Facebook page or "
+            "a template from 2012."),
+           ("What you get",
+            "A finished, mobile-responsive site on your own domain with contact and quote forms "
+            "that deliver to your email, plus 'continue building' access for later edits. Further "
+            "AI-assisted edits are $25 an hour; personal assistance is $150 an hour, four-hour minimum."),
+           ("How billing works",
+            "$50 non-refundable start fee, credited toward the $500 purchase price when you approve "
+            "the site. Nothing else is owed if you do not approve it."),
+         ]),
+
+    dict(slug="inspector-training", cat="software", cover=True,
+         name="AWS CWI &amp; API Inspector Training",
+         tagline="The full body of knowledge, timed practice exams, saved progress.",
+         img=f"{IMG}/covers/inspector-training.jpg",
+         price="$39", price_note="per course for 90 days &middot; $99 all courses for a year", status="soon",
+         paypal=PAYPAL_TRAINING_COURSE, paypal_alt=("All-access year — $99", PAYPAL_TRAINING_ALL),
+         short="Online preparation for the AWS Certified Welding Inspector exam and API 510 / 570 / 653 / 1169 inspector certifications. Twenty-plus hours of instruction with section imagery, timed tests that mirror the real exam, and progress that saves across devices.",
+         bullets=["Complete current AWS CWI body of knowledge",
+                  "Timed practice exams that mirror the real test",
+                  "Saved progress — pick up on any device",
+                  "API 510, 570, 653 and 1169 tracks"],
+         detail=[
+           ("What it is",
+            "Self-paced online courses for inspector certification exams, written by an API 510 / "
+            "570 certified inspector and NDE Level II who has sat the tests."),
+           ("Who it is for",
+            "Welders and QA/QC technicians moving up to CWI; inspectors adding API certifications; "
+            "companies putting a crew through certification together."),
+           ("What you get",
+            "Login to the training platform with the courses you purchased, timed exam simulator, "
+            "and progress tracking. Company packages for five or more seats are available by quote."),
+           ("How billing works",
+            "$39 gives one course for 90 days. $99 gives every course for 365 days. One-time payments."),
+         ]),
+
     # ---------------- DIGITAL WALL CHARTS ----------------
     dict(slug="digital-wall-charts", cat="wallcharts",
          name="Digital Wall Charts",
@@ -631,10 +761,33 @@ NAV = """  <header class="site-header">
 
 FOOTER = """  <footer class="site-footer">
     <div class="container footer-inner">
-      <div class="muted">&copy; 2025 Shell Key. All rights reserved.</div>
+      <div class="muted">&copy; 2026 Shell Key. All rights reserved. Lafayette, Louisiana.</div>
+      <div class="muted footer-links">
+        <a href="{root}privacy.html">Privacy</a> &middot;
+        <a href="{root}terms.html">Terms</a> &middot;
+        <a href="mailto:support@shellkey.company">support@shellkey.company</a> &middot;
+        <a href="tel:+13372548321">+1 (337) 254-8321</a>
+      </div>
     </div>
   </footer>
 """
+
+# Analytics. Cloudflare Web Analytics is free and needs no cookie banner: Cloudflare
+# dashboard -> Analytics & Logs -> Web Analytics -> Add a site -> copy the token.
+# GA4 is optional; leave the ID as-is and the tag is skipped.
+CF_BEACON_TOKEN = "YOUR_CLOUDFLARE_WEB_ANALYTICS_TOKEN"
+GA4_ID = "G-XXXXXXXXXX"
+
+def analytics():
+    out = ""
+    if not CF_BEACON_TOKEN.startswith("YOUR_"):
+        out += (f'  <script defer src="https://static.cloudflareinsights.com/beacon.min.js" '
+                f'data-cf-beacon=\'{{"token": "{CF_BEACON_TOKEN}"}}\'></script>\n')
+    if not GA4_ID.startswith("G-X"):
+        out += (f'  <script async src="https://www.googletagmanager.com/gtag/js?id={GA4_ID}"></script>\n'
+                f'  <script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments);}}'
+                f'gtag("js",new Date());gtag("config","{GA4_ID}");</script>\n')
+    return out
 
 VIEWER = """  <div class="viewer" id="viewer" aria-hidden="true">
     <div class="viewer-backdrop" id="viewerBackdrop"></div>
@@ -731,7 +884,7 @@ def head(title, desc, root="", path="", schema=""):
   <meta name="description" content="{desc}" />
   <link rel="stylesheet" href="{root}assets/styles.css" />
   <link rel="stylesheet" href="{root}assets/store.css" />
-{seo(title, desc, root, path)}{schema}</head>
+{seo(title, desc, root, path)}{schema}{analytics()}</head>
 <body>
 """
 
@@ -751,20 +904,46 @@ def price_block(p):
         return '<div class="price-row"><span class="price-note">See price at checkout</span></div>'
     was_html = f'<span class="price-was">{was}</span>' if was else ""
     note = ""
-    if p["status"] == "soon" and price not in ("Free",):
+    if p.get("price_note"):
+        note = f'<span class="price-note">{p["price_note"]}</span>'
+    elif p["status"] == "soon" and price not in ("Free",):
         note = '<span class="price-note">planned price</span>'
     elif p["status"] == "quote":
         note = '<span class="price-note">scope dependent</span>'
     return f'<div class="price-row"><span class="price">{price}</span>{was_html}{note}</div>'
 
 
+def live_link(link):
+    """A PayPal link is usable only once the placeholder has been replaced."""
+    return bool(link) and not link.startswith("PAYPAL_LINK_") and link != "#"
+
+
 def action_button(p, root=""):
-    if p["status"] == "available":
-        link = p.get("paypal", "#")
-        return f'<a class="btn btn-primary btn-block" href="{link}">Buy Now (PayPal)</a>'
-    label = "Request a Quote" if p["status"] == "quote" else "Request This"
+    slug = p["slug"]
+    if p["status"] == "available" and live_link(p.get("paypal")):
+        label = "Subscribe (PayPal)" if p.get("subscribe") else "Buy Now (PayPal)"
+        btn = (f'<a class="btn btn-primary btn-block" href="{p["paypal"]}" '
+               f'data-track="checkout" data-item="{slug}">{label}</a>')
+        alt = p.get("paypal_alt")
+        if alt and live_link(alt[1]):
+            btn += (f'<a class="btn btn-ghost btn-block" href="{alt[1]}" '
+                    f'data-track="checkout" data-item="{slug}-alt">{alt[0]}</a>')
+        return btn
+    if p["status"] == "quote":
+        label = "Request a Quote"
+    elif p["status"] == "available":
+        label = "Order by Request"      # real product, PayPal link not pasted yet
+    else:
+        label = "Request This"
     return (f'<a class="btn btn-primary btn-block" '
-            f'href="{root}request.html?item={p["slug"]}">{label}</a>')
+            f'href="{root}request.html?item={slug}">{label}</a>')
+
+
+def demo_link(p, root=""):
+    if not p.get("demo"):
+        return ""
+    return (f'<p class="muted tiny demo-link"><a href="{p["demo"]}" target="_blank" '
+            f'rel="noopener">See the live portal &rarr;</a></p>')
 
 
 def card(p):
@@ -787,6 +966,7 @@ def card(p):
                 <a class="btn btn-ghost btn-block" href="products/{p['slug']}.html">Details</a>
                 {action_button(p)}
               </div>
+              {demo_link(p)}
             </div>
           </article>
 """
@@ -819,8 +999,9 @@ def build_store():
               <div class="pill">P6 &middot; Power BI &middot; SAP</div>
             </div>
             <div class="hero-cta">
-              <a class="btn btn-primary" href="#wallcharts">Browse Wall Charts</a>
-              <a class="btn btn-ghost" href="#guides">Available Now</a>
+              <a class="btn btn-primary" href="#software">Software Subscriptions</a>
+              <a class="btn btn-ghost" href="#wallcharts">Wall Charts</a>
+              <a class="btn btn-ghost" href="#guides">Guides — Available Now</a>
             </div>
           </div>
         </div>
@@ -853,7 +1034,7 @@ def build_store():
 
     parts.append("""  </main>
 """)
-    parts.append(FOOTER)
+    parts.append(FOOTER.format(root=""))
     parts.append(SCRIPT.format(root=""))
     parts.append("</body>\n</html>\n")
     return "".join(parts)
@@ -883,7 +1064,13 @@ def build_product(p):
             f'<div class="shot-grid">{shots}</div></section>')
     bullets = "".join(f"<li>{b}</li>" for b in p["bullets"])
 
-    if p["status"] == "available":
+    if p["status"] == "available" and p.get("subscribe"):
+        cta_note = ("Secure checkout by PayPal — cards accepted without a PayPal account. "
+                    "Your access details are emailed the same business day.")
+    elif p["status"] == "available" and not live_link(p.get("paypal")):
+        cta_note = ("Online checkout for this item is being connected. Send a request and "
+                    "you will get a PayPal invoice the same business day.")
+    elif p["status"] == "available":
         cta_note = ("Delivered by email immediately after payment. No account needed.")
     elif p["status"] == "quote":
         cta_note = ("Tell us about your project and you will get a scoped, fixed price back — "
@@ -912,6 +1099,7 @@ def build_product(p):
             <ul class="bullets">{bullets}</ul>
             {price_block(p)}
             {action_button(p, root)}
+            {demo_link(p, root)}
             <p class="muted tiny cta-note">{cta_note}</p>
           </div>
         </div>
@@ -940,7 +1128,7 @@ def build_product(p):
     </div>
   </main>
 """)
-    parts.append(FOOTER)
+    parts.append(FOOTER.format(root=root))
     parts.append(VIEWER)
     parts.append(SCRIPT.format(root=root))
     parts.append("</body>\n</html>\n")
@@ -1052,14 +1240,17 @@ def build_request():
 
                 <button class="btn btn-primary btn-block" type="submit">Send Request</button>
                 <div class="form-ok" id="formOk">
-                  <strong>Your email app should have opened</strong> with the request filled in.
-                  Press send there and it reaches us. If nothing opened, email
+                  <strong>Got it &mdash; your request is in.</strong> You will hear back the same
+                  business day. Need it faster? Call <a href="tel:+13372548321">+1 (337) 254-8321</a>.
+                </div>
+                <div class="form-err" id="formErr">
+                  <strong>That did not go through.</strong> Please email
                   <a href="mailto:support@shellkey.company">support@shellkey.company</a>
                   or call <a href="tel:+13372548321">+1 (337) 254-8321</a>.
                 </div>
                 <p class="muted tiny">
-                  Opens your email app with everything filled in &mdash; check it and hit send.
-                  Nothing is stored on this website.
+                  Sent straight to Shell Key. See the <a href="privacy.html">privacy policy</a>
+                  for how your details are handled.
                 </p>
               </form>
             </div>
@@ -1069,14 +1260,77 @@ def build_request():
     </section>
   </main>
 """)
-    parts.append(FOOTER)
+    parts.append(FOOTER.format(root=""))
     parts.append(SCRIPT.format(root=""))
     parts.append("</body>\n</html>\n")
     return "".join(parts)
 
 
+def build_legal(title, path, body):
+    parts = [head(f"{title} | Shell Key",
+                  f"Shell Key {title.lower()} for shellkey.company and Shell Key software subscriptions.",
+                  path=path)]
+    parts.append(NAV.format(root="", store_on=""))
+    parts.append(f"""  <main>
+    <section class="section">
+      <div class="container legal">
+        <div class="section-head"><h1>{title}</h1><p class="muted">Last updated September 2026</p></div>
+        <div class="card"><div class="card-body legal-body">
+{body}
+        </div></div>
+      </div>
+    </section>
+  </main>
+""")
+    parts.append(FOOTER.format(root=""))
+    parts.append(SCRIPT.format(root=""))
+    parts.append("</body>\n</html>\n")
+    return "".join(parts)
+
+
+PRIVACY = """
+<h3>Who we are</h3>
+<p>Shell Key ("we", "us") is a project-controls software and services business based in Lafayette, Louisiana. Contact: support@shellkey.company, +1 (337) 254-8321.</p>
+<h3>What we collect</h3>
+<p><strong>Information you give us.</strong> When you submit a form (request, quote, contact, or download), we store what you enter: name, company, email, phone, address, and your message.</p>
+<p><strong>Site usage.</strong> We record page views on this site — the page, the referring site, the time, an anonymous browser identifier, and the country and device type reported by your browser. We use Cloudflare Web Analytics, which does not use cookies or track you across other sites. If you later submit a form, we may associate your earlier visits on this site with your request so we can respond with the right product.</p>
+<p><strong>Purchases.</strong> Payments are processed by PayPal. We never see or store your card number. PayPal sends us your name, email, the item purchased, and the transaction or subscription reference so we can deliver what you bought and handle support and cancellations.</p>
+<h3>How we use it</h3>
+<p>To answer your request, deliver and support the products you buy, bill subscriptions, improve this site, and — if you have asked for it or are a customer — send occasional product updates. Every marketing email includes an unsubscribe link, and a reply saying "no thanks" is honored within ten days.</p>
+<h3>Who we share it with</h3>
+<p>Service providers only, and only to run the business: Cloudflare (hosting, analytics, database), PayPal (payments), Google (email). We do not sell your information.</p>
+<h3>How long we keep it</h3>
+<p>Form submissions and customer records are kept while you are a customer or prospect and for up to three years after last contact. Page-view records are kept for twelve months.</p>
+<h3>Your choices</h3>
+<p>Email support@shellkey.company to see, correct, or delete what we hold about you, or to opt out of marketing. We respond within ten business days.</p>
+<h3>Changes</h3>
+<p>If this policy changes materially, the date above changes and customers are notified by email.</p>
+"""
+
+TERMS = """
+<h3>Purchases and delivery</h3>
+<p>Prices are shown in U.S. dollars. Payments are processed by PayPal. Digital guides and files are delivered by email after payment. Software subscriptions (Bid Board, Shell Key Inspection System, training) are activated the same business day; access details are sent to the email used at checkout.</p>
+<h3>Subscriptions and cancellation</h3>
+<p>Bid Board bills $75 for the first month and $750 per month thereafter until cancelled. The introductory month is available once per company. The Inspection System bills $2,000 per year. To cancel, email support@shellkey.company from the account email; you will receive a confirmation, access ends at the close of the current billing period, and no further charges are made. Fees already billed are not refunded.</p>
+<h3>Website builds</h3>
+<p>The AI Website Studio start fee of $50 is non-refundable and is credited toward the $500 purchase price when you approve the site. If you do not approve a site, nothing further is owed.</p>
+<h3>Custom work and quotes</h3>
+<p>Custom dashboards, applications and portals are delivered under a written scope with a fixed price and date, agreed by email before work starts. Changes outside the scope are quoted separately.</p>
+<h3>Licenses</h3>
+<p>Guides, Power BI files and training content are licensed to the purchaser for internal business use. They may not be resold or redistributed. Software subscriptions are licensed to the subscribing company for its employees and contractors.</p>
+<h3>Refunds</h3>
+<p>Digital downloads are not refundable once delivered. If a file is defective, email support within seven days and it will be corrected or replaced. Subscriptions may be cancelled at any time as described above.</p>
+<h3>Support</h3>
+<p>Email support@shellkey.company or call +1 (337) 254-8321, Monday to Friday, 8 a.m. to 5 p.m. Central.</p>
+<h3>Liability</h3>
+<p>Shell Key products support your project decisions; they do not make them. Shell Key is not liable for indirect or consequential losses arising from use of its products, and its total liability for any product is limited to the amount paid for it.</p>
+<h3>Governing law</h3>
+<p>These terms are governed by the laws of the State of Louisiana. Questions: support@shellkey.company.</p>
+"""
+
+
 def build_sitemap():
-    urls = ["", "store.html", "request.html"] + \
+    urls = ["", "store.html", "request.html", "privacy.html", "terms.html"] + \
            [f"products/{p['slug']}.html" for p in PRODUCTS]
     rows = "".join(
         f"  <url><loc>{SITE}/{u}</loc>"
@@ -1090,7 +1344,9 @@ def build_sitemap():
 
 def build_robots():
     return ("User-agent: *\n"
-            "Allow: /\n\n"
+            "Allow: /\n"
+            "Disallow: /crm.html\n"
+            "Disallow: /api/\n\n"
             f"Sitemap: {SITE}/sitemap.xml\n")
 
 
@@ -1106,6 +1362,12 @@ def main():
     with open("store.html", "w", encoding="utf-8") as f:
         f.write(build_store())
     print("wrote store.html")
+
+    with open("privacy.html", "w", encoding="utf-8") as f:
+        f.write(build_legal("Privacy Policy", "privacy.html", PRIVACY))
+    with open("terms.html", "w", encoding="utf-8") as f:
+        f.write(build_legal("Terms of Service", "terms.html", TERMS))
+    print("wrote privacy.html + terms.html")
 
     with open("request.html", "w", encoding="utf-8") as f:
         f.write(build_request())

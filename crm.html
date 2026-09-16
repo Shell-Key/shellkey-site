@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shell Key CRM</title>
+<meta name="robots" content="noindex, nofollow" />
+<link rel="icon" href="favicon.ico" />
+<style>
+:root{--bg0:#050a16;--bg1:#07142a;--bg2:#0a1d3a;--panel:#0d2244;--stroke:rgba(255,255,255,0.12);
+  --text:#ffffff;--text2:#e6eefc;--accent:#7CFF00;--blue:#4da3ff;--amber:#ffc857;--red:#ff6b6b;--green:#4ade80;--radius:14px}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--text);
+  background:linear-gradient(180deg,var(--bg1),var(--bg0)) fixed;min-height:100vh}
+a{color:var(--accent)}
+.wrap{width:min(100% - 32px,1400px);margin:0 auto;padding-block:18px 60px}
+header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 0 18px;border-bottom:1px solid var(--stroke)}
+header img{height:30px}
+header h1{font-size:18px;margin:0;font-weight:700}
+.tabs{display:flex;gap:6px;margin-left:auto}
+.tab{background:transparent;border:1px solid var(--stroke);color:var(--text2);padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+.tab.on{background:var(--accent);color:#06210b;border-color:var(--accent)}
+.btn{background:var(--accent);color:#06210b;border:0;padding:9px 14px;border-radius:10px;font-weight:700;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--stroke)}
+.btn.danger{background:var(--red);color:#fff}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.tile{background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius);padding:14px 16px}
+.tile b{display:block;font-size:28px;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile span{color:var(--text2);font-size:13px}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+input,select,textarea{background:#08182f;color:var(--text);border:1px solid var(--stroke);border-radius:9px;padding:8px 10px;font:inherit}
+input::placeholder{color:#9fb3d1}
+.search{min-width:260px;flex:1}
+.tablewrap{overflow-x:auto;border:1px solid var(--stroke);border-radius:var(--radius);background:rgba(255,255,255,0.03)}
+table{border-collapse:collapse;width:100%;min-width:900px}
+th,td{padding:9px 10px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--stroke);vertical-align:middle}
+th{position:sticky;top:0;background:var(--panel);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);cursor:pointer;user-select:none}
+th .arrow{color:var(--accent);margin-left:4px}
+tr.filters th{cursor:default;padding:4px 6px}
+tr.filters input,tr.filters select{width:100%;padding:5px 7px;font-size:13px}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:rgba(124,255,0,0.07)}
+td.clip{max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:700}
+.s-new{background:var(--blue);color:#021} .s-contacted{background:#7aa7ff;color:#021} .s-demo{background:var(--amber);color:#211}
+.s-quoted{background:#ffa14d;color:#211} .s-won{background:var(--green);color:#021} .s-lost{background:#6b7a90;color:#fff} .s-stop{background:var(--red);color:#fff}
+.prio{color:var(--amber);font-weight:800}
+.empty{padding:26px;text-align:center;color:var(--text2)}
+/* drawer */
+.drawer{position:fixed;inset:0 0 0 auto;width:min(680px,100%);background:var(--bg1);border-left:1px solid var(--stroke);transform:translateX(100%);transition:.2s;overflow-y:auto;z-index:20;padding:20px}
+.drawer.open{transform:none}
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:15}
+.backdrop.show{display:block}
+.drawer h2{margin:0 0 4px;font-size:22px}
+.kv{display:grid;grid-template-columns:130px 1fr;gap:6px 12px;margin:14px 0;font-size:14px}
+.kv div:nth-child(odd){color:var(--text2)}
+.kv div{overflow-wrap:anywhere}
+.msg{white-space:pre-wrap;background:#08182f;border:1px solid var(--stroke);border-radius:10px;padding:12px;font-size:14px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.tl{list-style:none;padding:0;margin:8px 0}
+.tl li{padding:6px 0 6px 14px;border-left:2px solid var(--stroke);font-size:13px;margin-left:6px}
+.tl li time{color:var(--text2);margin-right:8px;font-variant-numeric:tabular-nums}
+h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
+/* login */
+.login{max-width:420px;margin:80px auto;background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius);padding:28px;text-align:center}
+.login input{width:100%;margin:14px 0}
+.bars{display:flex;align-items:flex-end;gap:3px;height:120px;padding:10px;background:rgba(255,255,255,0.03);border:1px solid var(--stroke);border-radius:var(--radius);overflow-x:auto}
+.bar{flex:1 0 12px;background:var(--blue);border-radius:3px 3px 0 0;position:relative;min-height:2px}
+.bar.v{background:var(--accent)}
+.bar:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:4px 8px;border-radius:6px;white-space:nowrap;font-size:12px;z-index:5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#06210b;padding:10px 18px;border-radius:10px;font-weight:700;display:none;z-index:30}
+.hidden{display:none!important}
+.legend{font-size:12px;color:var(--text2);margin:6px 2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="assets/img/logo/ShellKeyWhiteTrace.png" alt="Shell Key" />
+    <h1>CRM</h1>
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-tab="pipeline">Pipeline</button>
+      <button class="tab" data-tab="visitors">Visitors</button>
+      <button class="tab" data-tab="sales">Sales</button>
+      <button class="tab ghost" id="logout" title="Forget the key on this browser">Sign out</button>
+    </div>
+  </header>
+
+  <div id="login" class="login hidden">
+    <h2>Shell Key CRM</h2>
+    <p style="color:var(--text2)">Enter the CRM key you set in Cloudflare (Pages → Settings → Variables → <code>CRM_KEY</code>).</p>
+    <input id="keyInput" type="password" placeholder="CRM key" autocomplete="current-password" />
+    <button class="btn" id="keyBtn">Open CRM</button>
+    <p id="loginErr" style="color:var(--red);display:none">That key was refused.</p>
+  </div>
+
+  <div id="app" class="hidden">
+    <div class="tiles" id="tiles"></div>
+
+    <!-- PIPELINE -->
+    <section id="tab-pipeline">
+      <div class="toolbar">
+        <input class="search" id="q" placeholder="Search name, company, email, product, message…" />
+        <select id="statusFilter">
+          <option value="">All statuses</option>
+          <option value="new">New</option><option value="contacted">Contacted</option><option value="demo">Demo booked</option>
+          <option value="quoted">Quoted</option><option value="won">Won</option><option value="lost">Lost</option><option value="stop">Do not contact</option>
+        </select>
+        <button class="btn ghost" id="refresh">Refresh</button>
+        <button class="btn ghost" id="exportCsv">Export CSV</button>
+        <span class="legend" id="count"></span>
+      </div>
+      <div class="tablewrap"><table id="leadsTable"></table></div>
+    </section>
+
+    <!-- VISITORS -->
+    <section id="tab-visitors" class="hidden">
+      <div class="toolbar">
+        <select id="days"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
+        <span class="legend">Green bars = unique visitors, blue = page views. Hover a bar for the date.</span>
+      </div>
+      <div class="bars" id="bars"></div>
+      <div class="grid2" style="margin-top:14px">
+        <div><h3>Top pages</h3><div class="tablewrap"><table id="pagesTable"></table></div></div>
+        <div><h3>Where they came from</h3><div class="tablewrap"><table id="refsTable"></table></div>
+             <h3>Countries</h3><div class="tablewrap"><table id="countriesTable"></table></div></div>
+      </div>
+      <h3>Sessions (click one with a lead to open it)</h3>
+      <div class="tablewrap"><table id="sessionsTable"></table></div>
+    </section>
+
+    <!-- SALES -->
+    <section id="tab-sales" class="hidden">
+      <p class="legend">Every PayPal event received by the webhook. A sale also marks the matching lead as Won.</p>
+      <div class="tablewrap"><table id="salesTable"></table></div>
+    </section>
+  </div>
+</div>
+
+<div class="backdrop" id="backdrop"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+var API="/api/crm/";
+var KEY=null; try{KEY=localStorage.getItem("sk_crm_key");}catch(e){}
+var $=function(id){return document.getElementById(id);};
+var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+var fmtDate=function(s){if(!s)return"";var d=new Date(s.replace(" ","T")+"Z");return isNaN(d)?s:d.toLocaleString("en-US",{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
+var money=function(n){return"$"+(Number(n)||0).toLocaleString("en-US",{maximumFractionDigits:0});};
+var toast=function(t){var el=$("toast");el.textContent=t;el.style.display="block";setTimeout(function(){el.style.display="none";},1800);};
+
+function api(path,opts){
+  opts=opts||{};opts.headers=Object.assign({authorization:"Bearer "+KEY},opts.headers||{});
+  if(opts.body&&typeof opts.body!=="string"){opts.body=JSON.stringify(opts.body);opts.headers["content-type"]="application/json";}
+  return fetch(API+path,opts).then(function(r){if(r.status===401){logout();throw new Error("unauthorized");}return r.json();});
+}
+function logout(){KEY=null;try{localStorage.removeItem("sk_crm_key");}catch(e){}$("app").classList.add("hidden");$("login").classList.remove("hidden");}
+$("logout").onclick=logout;
+$("keyBtn").onclick=function(){KEY=$("keyInput").value.trim();api("stats").then(function(){try{localStorage.setItem("sk_crm_key",KEY);}catch(e){}start();}).catch(function(){$("loginErr").style.display="block";});};
+$("keyInput").addEventListener("keydown",function(e){if(e.key==="Enter")$("keyBtn").click();});
+
+/* ---------- generic sortable / filterable table ---------- */
+function renderTable(el,cols,rows,onRow){
+  var state=el._state||(el._state={sort:null,dir:1,filters:{}});
+  var filtered=rows.filter(function(r){return cols.every(function(c){var f=(state.filters[c.key]||"").toLowerCase();if(!f)return true;return String(c.val?c.val(r):r[c.key]==null?"":r[c.key]).toLowerCase().indexOf(f)>=0;});});
+  if(state.sort){var c=cols.find(function(x){return x.key===state.sort;});filtered.sort(function(a,b){var va=c.val?c.val(a):a[c.key],vb=c.val?c.val(b):b[c.key];va=va==null?"":va;vb=vb==null?"":vb;if(typeof va==="number"&&typeof vb==="number")return(va-vb)*state.dir;return String(va).localeCompare(String(vb),undefined,{numeric:true})*state.dir;});}
+  var h='<thead><tr>'+cols.map(function(c){return'<th data-k="'+c.key+'" title="Click to sort">'+esc(c.label)+(state.sort===c.key?'<span class="arrow">'+(state.dir>0?"▲":"▼")+'</span>':"")+'</th>';}).join("")+'</tr>';
+  h+='<tr class="filters">'+cols.map(function(c){return'<th><input data-f="'+c.key+'" value="'+esc(state.filters[c.key]||"")+'" placeholder="filter" title="Type to filter this column" /></th>';}).join("")+'</tr></thead><tbody>';
+  if(!filtered.length)h+='<tr><td colspan="'+cols.length+'" class="empty">Nothing here yet.</td></tr>';
+  filtered.forEach(function(r,i){h+='<tr data-i="'+i+'">'+cols.map(function(c){var v=c.render?c.render(r):esc(c.val?c.val(r):r[c.key]);return'<td class="'+(c.clip?"clip":"")+'" title="'+esc(c.val?c.val(r):r[c.key])+'">'+v+'</td>';}).join("")+'</tr>';});
+  el.innerHTML=h+'</tbody>';
+  el.querySelectorAll("th[data-k]").forEach(function(th){th.onclick=function(){var k=th.dataset.k;if(state.sort===k)state.dir*=-1;else{state.sort=k;state.dir=1;}renderTable(el,cols,rows,onRow);};});
+  el.querySelectorAll("input[data-f]").forEach(function(inp){inp.oninput=function(){state.filters[inp.dataset.f]=inp.value;var pos=inp.selectionStart;renderTable(el,cols,rows,onRow);var again=el.querySelector('input[data-f="'+inp.dataset.f+'"]');if(again){again.focus();again.setSelectionRange(pos,pos);}};});
+  if(onRow)el.querySelectorAll("tbody tr[data-i]").forEach(function(tr){tr.onclick=function(e){if(e.target.tagName==="SELECT"||e.target.tagName==="A")return;onRow(filtered[+tr.dataset.i]);};});
+  return filtered.length;
+}
+var statusPill=function(s){return'<span class="pill s-'+esc(s)+'">'+esc(s)+'</span>';};
+
+/* ---------- stats ---------- */
+function loadStats(){
+  return api("stats").then(function(s){
+    $("tiles").innerHTML=[
+      ["New leads to answer",s.leads_new,"Status = new"],["Leads, last 7 days",s.leads_7d,""],["All leads",s.leads_total,""],
+      ["Visitors, 7 days",s.visitors_7d,s.views_7d+" page views"],["Checkout clicks, 7 days",s.checkouts_7d,"Buy / Subscribe buttons"],
+      ["Sales, 30 days",money(s.sales_30d.s),s.sales_30d.n+" payments"],["Pipeline value",money(s.pipeline_value),"contacted + demo + quoted"]
+    ].map(function(t){return'<div class="tile"><b>'+t[1]+'</b><span>'+esc(t[0])+(t[2]?" · "+esc(t[2]):"")+'</span></div>';}).join("");
+  });
+}
+
+/* ---------- leads ---------- */
+var LEADS=[];
+var leadCols=[
+  {key:"created_at",label:"When",val:function(r){return r.created_at;},render:function(r){return esc(fmtDate(r.created_at));}},
+  {key:"status",label:"Status",render:function(r){return statusPill(r.status);}},
+  {key:"priority",label:"Pri",render:function(r){return r.priority?'<span class="prio" title="Customer ticked priority">★</span>':"";}},
+  {key:"name",label:"Name"},{key:"company",label:"Company",clip:true},
+  {key:"email",label:"Email",render:function(r){return r.email?'<a href="mailto:'+esc(r.email)+'">'+esc(r.email)+'</a>':"";}},
+  {key:"phone",label:"Phone",render:function(r){return r.phone?'<a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a>':"";}},
+  {key:"wants",label:"Wants",clip:true,val:function(r){return r.item_label||r.interest||r.kind;}},
+  {key:"timeframe",label:"Needed"},{key:"value",label:"Value",val:function(r){return Number(r.value)||0;},render:function(r){return r.value?money(r.value):"";}},
+  {key:"ip_country",label:"Ctry"},{key:"snippet",label:"Message",clip:true}
+];
+function loadLeads(){
+  var qs="leads?status="+encodeURIComponent($("statusFilter").value)+"&q="+encodeURIComponent($("q").value.trim());
+  return api(qs).then(function(d){LEADS=d.leads||[];var n=renderTable($("leadsTable"),leadCols,LEADS,openLead);$("count").textContent=n+" of "+LEADS.length+" shown";});
+}
+var t;$("q").oninput=function(){clearTimeout(t);t=setTimeout(loadLeads,300);};
+$("statusFilter").onchange=loadLeads;$("refresh").onclick=function(){loadStats();loadLeads();};
+$("exportCsv").onclick=function(){fetch(API+"export.csv",{headers:{authorization:"Bearer "+KEY}}).then(function(r){return r.blob();}).then(function(b){var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="shellkey-leads.csv";a.click();});};
+
+/* ---------- drawer ---------- */
+function closeDrawer(){$("drawer").classList.remove("open");$("backdrop").classList.remove("show");}
+$("backdrop").onclick=closeDrawer;
+document.addEventListener("keydown",function(e){if(e.key==="Escape")closeDrawer();});
+function openLead(row){
+  var id=row.id||row.lead_id;if(!id)return;
+  api("lead/"+id).then(function(d){
+    var L=d.lead;var dr=$("drawer");
+    var opts=["new","contacted","demo","quoted","won","lost","stop"].map(function(s){return'<option value="'+s+'"'+(L.status===s?" selected":"")+'>'+s+'</option>';}).join("");
+    dr.innerHTML='<div class="row" style="justify-content:space-between"><h2>'+esc(L.company||L.name||L.email||"Lead #"+L.id)+'</h2><button class="btn ghost" id="dClose">Close</button></div>'
+      +'<div class="row">'+statusPill(L.status)+(L.priority?'<span class="prio">★ Priority</span>':"")+'<span style="color:var(--text2)">'+esc(L.kind)+' · '+esc(fmtDate(L.created_at))+'</span></div>'
+      +'<div class="row"><select id="dStatus">'+opts+'</select><input id="dValue" type="number" placeholder="Expected $" value="'+(L.value||"")+'" style="width:130px" /><button class="btn" id="dSave">Save</button>'
+      +(L.email?'<a class="btn ghost" href="mailto:'+esc(L.email)+'?subject='+encodeURIComponent("Re: "+(L.item_label||L.interest||"your request")+" — Shell Key")+'">Email</a>':"")
+      +(L.phone?'<a class="btn ghost" href="tel:'+esc(L.phone)+'">Call</a>':"")+'</div>'
+      +'<div class="kv"><div>Name</div><div>'+esc(L.name)+'</div><div>Company</div><div>'+esc(L.company)+'</div><div>Email</div><div>'+esc(L.email)+'</div><div>Phone</div><div>'+esc(L.phone)+'</div>'
+      +'<div>Address</div><div>'+esc([L.address,L.city,L.zip].filter(Boolean).join(", "))+'</div><div>Wants</div><div>'+esc(L.item_label||L.interest||"")+'</div><div>Needed</div><div>'+esc(L.timeframe)+'</div>'
+      +'<div>Came from</div><div>'+esc(L.page)+(L.utm_source?" · utm "+esc(L.utm_source):"")+(L.ip_country?" · "+esc(L.ip_country):"")+'</div></div>'
+      +'<h3>Message</h3><div class="msg">'+esc(L.message||"(none)")+'</div>'
+      +'<h3>Notes</h3><textarea id="dNotes" rows="4" style="width:100%">'+esc(L.notes)+'</textarea>'
+      +'<div class="row"><input id="dNote" placeholder="Log a call, email or note…" style="flex:1" /><button class="btn ghost" id="dLog">Log</button></div>'
+      +'<h3>Activity</h3><ul class="tl" id="dAct">'+(d.activity.map(function(a){return'<li><time>'+esc(fmtDate(a.at))+'</time>'+esc(a.kind)+': '+esc(a.body)+'</li>';}).join("")||'<li>No activity yet.</li>')+'</ul>'
+      +'<h3>PayPal</h3><ul class="tl">'+(d.sales.map(function(s){return'<li><time>'+esc(fmtDate(s.at))+'</time>'+esc(s.event_type)+' '+money(s.amount)+' '+esc(s.item||"")+'</li>';}).join("")||'<li>No payments from this email.</li>')+'</ul>'
+      +'<h3>Site visits before &amp; after ('+d.visits.length+')</h3><ul class="tl">'+(d.visits.map(function(v){return'<li><time>'+esc(fmtDate(v.at))+'</time>'+(v.type==="checkout"?'<b style="color:var(--accent)">CHECKOUT '+esc(v.item)+'</b> ':"")+esc(v.page)+(v.ref?' <span style="color:var(--text2)">from '+esc(v.ref.replace(/^https?:\/\//,"").slice(0,40))+'</span>':"")+'</li>';}).join("")||'<li>No tracked visits (form sent without a session id).</li>')+'</ul>'
+      +'<div class="row" style="margin-top:20px"><button class="btn danger" id="dDel">Delete lead</button></div>';
+    dr.classList.add("open");$("backdrop").classList.add("show");
+    $("dClose").onclick=closeDrawer;
+    $("dSave").onclick=function(){api("lead/"+L.id,{method:"PATCH",body:{status:$("dStatus").value,value:$("dValue").value,notes:$("dNotes").value}}).then(function(){toast("Saved");loadLeads();loadStats();openLead({id:L.id});});};
+    $("dLog").onclick=function(){var n=$("dNote").value.trim();if(!n)return;api("lead/"+L.id,{method:"PATCH",body:{note:n}}).then(function(){toast("Logged");openLead({id:L.id});});};
+    $("dDel").onclick=function(){if(!confirm("Delete this lead for good?"))return;api("lead/"+L.id,{method:"DELETE"}).then(function(){toast("Deleted");closeDrawer();loadLeads();loadStats();});};
+  });
+}
+
+/* ---------- visitors ---------- */
+function loadVisitors(){
+  api("visits?days="+$("days").value).then(function(d){
+    var max=Math.max.apply(null,d.daily.map(function(x){return x.views;}).concat([1]));
+    $("bars").innerHTML=d.daily.map(function(x){return'<div class="bar" style="height:'+Math.round(x.views/max*100)+'%" data-t="'+esc(x.d)+': '+x.views+' views, '+x.visitors+' visitors"><div class="bar v" style="position:absolute;bottom:0;left:0;right:0;height:'+Math.round(x.visitors/x.views*100)+'%"></div></div>';}).join("")||'<div class="empty" style="width:100%">No visits recorded yet. Open the site in another tab and refresh.</div>';
+    renderTable($("pagesTable"),[{key:"page",label:"Page"},{key:"views",label:"Views",val:function(r){return r.views;}},{key:"visitors",label:"Visitors",val:function(r){return r.visitors;}}],d.pages);
+    renderTable($("refsTable"),[{key:"ref",label:"Referrer",clip:true},{key:"n",label:"Views",val:function(r){return r.n;}}],d.refs);
+    renderTable($("countriesTable"),[{key:"country",label:"Country"},{key:"n",label:"Visitors",val:function(r){return r.n;}}],d.countries);
+    renderTable($("sessionsTable"),[
+      {key:"last_at",label:"Last seen",render:function(r){return esc(fmtDate(r.last_at));}},
+      {key:"lead_name",label:"Lead",render:function(r){return r.lead_id?'<span class="pill s-new">'+esc(r.lead_name||"#"+r.lead_id)+'</span>':'<span style="color:var(--text2)">anonymous</span>';}},
+      {key:"hits",label:"Pages",val:function(r){return r.hits;}},{key:"checkouts",label:"Checkout clicks",val:function(r){return r.checkouts;},render:function(r){return r.checkouts?'<b style="color:var(--accent)">'+r.checkouts+'</b>':"";}},
+      {key:"country",label:"Ctry"},{key:"device",label:"Device"},{key:"ref",label:"From",clip:true,val:function(r){return(r.ref||"").replace(/^https?:\/\//,"")||"(direct)";}},
+      {key:"path",label:"Path",clip:true}
+    ],d.sessions,function(r){if(r.lead_id)openLead({id:r.lead_id});});
+  });
+}
+$("days").onchange=loadVisitors;
+
+/* ---------- sales ---------- */
+function loadSales(){
+  api("sales").then(function(d){renderTable($("salesTable"),[
+    {key:"at",label:"When",render:function(r){return esc(fmtDate(r.at));}},{key:"event_type",label:"Event"},{key:"payer_name",label:"Payer"},
+    {key:"payer_email",label:"Email"},{key:"item",label:"Item / plan",clip:true},{key:"amount",label:"Amount",val:function(r){return Number(r.amount)||0;},render:function(r){return r.amount?money(r.amount)+" "+esc(r.currency):"";}},
+    {key:"subscription_id",label:"Subscription"},{key:"txn_id",label:"Txn"},{key:"status",label:"Verify"}
+  ],d.sales);});
+}
+
+/* ---------- tabs / boot ---------- */
+document.querySelectorAll(".tab[data-tab]").forEach(function(b){b.onclick=function(){
+  document.querySelectorAll(".tab[data-tab]").forEach(function(x){x.classList.remove("on");});b.classList.add("on");
+  ["pipeline","visitors","sales"].forEach(function(n){$("tab-"+n).classList.toggle("hidden",n!==b.dataset.tab);});
+  if(b.dataset.tab==="visitors")loadVisitors();if(b.dataset.tab==="sales")loadSales();
+};});
+function start(){
+  $("login").classList.add("hidden");$("app").classList.remove("hidden");
+  loadStats();loadLeads().then(function(){var m=location.hash.match(/lead=(\d+)/);if(m)openLead({id:+m[1]});});
+}
+if(KEY){api("stats").then(start).catch(function(){$("login").classList.remove("hidden");});}else{$("login").classList.remove("hidden");}
+})();
+</script>
+</body>
+</html>

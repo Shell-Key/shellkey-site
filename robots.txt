@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /crm.html
+Disallow: /api/
 
 Sitemap: https://shellkey.company/sitemap.xml

@@ -90,6 +90,8 @@
   </script>
   <link rel="stylesheet" href="assets/styles.css" />
   <link rel="stylesheet" href="assets/store.css" />
+  <!-- ANALYTICS: build_store.py inserts the Cloudflare/GA tags on generated pages once the
+       tokens are set; paste the same two tags here (see DEPLOY-TONIGHT.md step 6). -->
 </head>
 
 <body>
@@ -444,29 +446,57 @@
 
           <div class="card contact-card">
             <div class="card-body">
-              <h3>Quick Message</h3>
+              <h3>Request a Demo</h3>
 
-              <!-- No server needed: opens whatever email app is connected -->
               <form id="contactForm" class="form">
+                <div class="field-2">
+                  <label>
+                    <span>Name *</span>
+                    <input id="qName" type="text" required placeholder="Your name" autocomplete="name" />
+                  </label>
+                  <label>
+                    <span>Company</span>
+                    <input id="qCompany" type="text" placeholder="Company" autocomplete="organization" />
+                  </label>
+                </div>
+                <div class="field-2">
+                  <label>
+                    <span>Email *</span>
+                    <input id="qEmail" type="email" required placeholder="you@company.com" autocomplete="email" />
+                  </label>
+                  <label>
+                    <span>Phone</span>
+                    <input id="qPhone" type="tel" placeholder="Optional" autocomplete="tel" />
+                  </label>
+                </div>
                 <label>
-                  <span>Name</span>
-                  <input id="qName" type="text" placeholder="Your name" autocomplete="name" />
+                  <span>I'm interested in</span>
+                  <select id="qInterest">
+                    <option value="dashboards">Executive dashboards / wall charts</option>
+                    <option value="bid-board">Bid Board (Louisiana public bids)</option>
+                    <option value="inspection-system">Inspection System (NDE / API)</option>
+                    <option value="apps">Field / mobile applications</option>
+                    <option value="ai-website-studio">A website for my business</option>
+                    <option value="training">Training or SOPs</option>
+                    <option value="other">Something else</option>
+                  </select>
                 </label>
-
-                <label>
-                  <span>Email (optional)</span>
-                  <input id="qEmail" type="email" placeholder="you@example.com" autocomplete="email" />
-                </label>
-
                 <label>
                   <span>Message</span>
-                  <textarea id="qMsg" rows="5" placeholder="How can we help?"></textarea>
+                  <textarea id="qMsg" rows="5" placeholder="What are you working on?"></textarea>
                 </label>
 
-                <button class="btn btn-primary" type="submit">Send Email</button>
-                <p class="muted tiny">
-                  Opens your default mail app (Outlook/Gmail/Yahoo—whatever is connected). No account required on this website.
-                </p>
+                <button class="btn btn-primary" type="submit">Request a Demo</button>
+                <div class="form-ok" id="contactOk">
+                  <strong>Got it.</strong> You'll hear back the same business day. Need it faster? Call
+                  <a href="tel:+13372548321">+1 (337) 254-8321</a>.
+                </div>
+                <div class="form-err" id="contactErr">
+                  <strong>That did not go through.</strong> Email
+                  <a href="mailto:support@shellkey.company">support@shellkey.company</a> or call
+                  <a href="tel:+13372548321">+1 (337) 254-8321</a>.
+                </div>
+                <p class="muted tiny">Goes straight to Kirby. No account needed. <a href="privacy.html">Privacy</a>.</p>
               </form>
             </div>
           </div>
@@ -479,7 +509,13 @@
   <!-- Footer -->
   <footer class="site-footer">
     <div class="container footer-inner">
-      <div class="muted">© 2025 Shell Key. All rights reserved.</div>
+      <div class="muted">&copy; 2026 Shell Key. All rights reserved. Lafayette, Louisiana.</div>
+      <div class="muted footer-links">
+        <a href="privacy.html">Privacy</a> &middot;
+        <a href="terms.html">Terms</a> &middot;
+        <a href="mailto:support@shellkey.company">support@shellkey.company</a> &middot;
+        <a href="tel:+13372548321">+1 (337) 254-8321</a>
+      </div>
     </div>
   </footer>
 

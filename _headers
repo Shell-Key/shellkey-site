@@ -1,0 +1,6 @@
+/crm.html
+  X-Robots-Tag: noindex, nofollow
+  Cache-Control: no-store
+/api/*
+  X-Robots-Tag: noindex
+  Cache-Control: no-store
