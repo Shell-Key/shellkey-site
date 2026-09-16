@@ -454,3 +454,15 @@ textarea:invalid:not(:placeholder-shown){
 .demo-gate .card,.demo-missing .card{max-width:560px;width:100%}
 @media (max-width:760px){.demo-bar{padding:8px 12px}.demo-actions .btn{padding:8px 10px;font-size:13px}}
 .demo-gate[hidden],.demo-missing[hidden],.demo-frame[hidden]{display:none}
+
+/* --- uniform cards: same height, buttons on the same line --- */
+.grid{align-items:stretch}
+.product-card .card-body{min-height:0}
+.product-card .card-short{
+  display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;
+  min-height:calc(1.55em * 4);margin-bottom:10px
+}
+.product-card .bullets{min-height:calc(3 * 1.9em)}
+.product-card .price-row{min-height:44px;align-items:center}
+.card-actions{grid-template-rows:auto auto;align-content:end}
+.card-actions .btn{white-space:nowrap}

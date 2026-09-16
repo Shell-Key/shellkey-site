@@ -62,7 +62,6 @@ PRODUCTS = [
          img=f"{IMG}/covers/bid-board.jpg",
          price="$75", price_note="first month, then $295 / month", status="available", subscribe=True,
          paypal=PAYPAL_BIDBOARD, feature=True,
-         demo="https://shellkey-bidboard.pages.dev",
          short="Bid intelligence for Louisiana contractors. LaPAC, DOTD, parish and SAM.gov bids in one place, go / no-go scoring against your license and certifications, a company vault for your documents, and a bid-kit generator that assembles the government package.",
          bullets=["All open Louisiana public bids on one board",
                   "Go / no-go score matched to your license class",
@@ -819,6 +818,7 @@ def seo(title, desc, root="", path="", image="assets/img/social/og-image.jpg"):
   <link rel="icon" type="image/png" sizes="192x192" href="{root}assets/img/logo/favicon-192.png" />
   <link rel="icon" type="image/png" sizes="512x512" href="{root}assets/img/logo/favicon-512.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="{root}assets/img/logo/apple-touch-icon.png" />
+  <link rel="manifest" href="{root}site.webmanifest" />
   <meta name="application-name" content="Shell Key" />
   <meta name="apple-mobile-web-app-title" content="Shell Key" />
   <meta name="theme-color" content="#07142a" />
@@ -951,7 +951,9 @@ def action_button(p, root=""):
 
 
 def demo_link(p, root=""):
-    """'Try the free demo' button — opens the demo inside the Shell Key demo frame."""
+    """'Try the free demo' button — opens the demo inside the Shell Key demo frame.
+    Cards without a demo get an empty slot of the same height so every card's
+    Details / Buy buttons sit on the same line."""
     if not p.get("demo"):
         return ""
     return (f'<a class="btn btn-demo btn-block" href="{root}demo.html?item={p["slug"]}" '
@@ -971,12 +973,11 @@ def card(p):
             <div class="card-body">
               <div class="card-tags">{status_badge(p)}</div>
               <h3><a class="plain" href="products/{p['slug']}.html">{p['name']}</a></h3>
-              <p>{p['short']}</p>
+              <p class="card-short" title="{html.escape(re.sub('<[^>]+>','',p['short']))}">{p['short']}</p>
               <ul class="bullets">{bullets}</ul>
               {price_block(p)}
               <div class="card-actions">
-                {demo_link(p)}
-                <a class="btn btn-ghost btn-block" href="products/{p['slug']}.html">Details</a>
+                {demo_link(p) or f'<a class="btn btn-ghost btn-block" href="products/{p["slug"]}.html">Details</a>'}
                 {action_button(p)}
               </div>
             </div>
