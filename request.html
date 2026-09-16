@@ -10,8 +10,13 @@
   <link rel="canonical" href="https://shellkey.company/request.html" />
   <link rel="icon" href="favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="assets/img/logo/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="assets/img/logo/favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="assets/img/logo/favicon-96.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="assets/img/logo/favicon-192.png" />
-  <link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="assets/img/logo/favicon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/img/logo/apple-touch-icon.png" />
+  <meta name="application-name" content="Shell Key" />
+  <meta name="apple-mobile-web-app-title" content="Shell Key" />
   <meta name="theme-color" content="#07142a" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta property="og:type" content="website" />
@@ -26,6 +31,10 @@
   <meta name="twitter:title" content="Request Information | Shell Key" />
   <meta name="twitter:description" content="Request a product, a quote, or priority build. Tell us what you need and we will come back within two business days." />
   <meta name="twitter:image" content="https://shellkey.company/assets/img/social/og-image.jpg" />
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebSite","name":"Shell Key","alternateName":"ShellKey",
+   "url":"https://shellkey.company/","publisher":{"@id":"https://shellkey.company/#organization"}}
+  </script>
 </head>
 <body>
   <header class="site-header">
@@ -83,7 +92,16 @@
             <div class="card-body">
               <h3>Your details</h3>
               <form id="requestForm" class="form">
-                <label><span>What are you interested in? *</span>
+                <label><span>What do you need? *</span>
+                  <select id="rType" required>
+                    <option value="Information">Information / a question</option>
+                    <option value="Purchase">Purchase this product</option>
+                    <option value="Customization">Customize it for my company</option>
+                    <option value="Quote">A quote for a custom build</option>
+                    <option value="Priority build">Priority build — I need it fast</option>
+                  </select>
+                </label>
+                <label><span>Which product? *</span>
                   <select id="rItem" required>
                     <option value="">Select an item&hellip;</option>
                     <optgroup label="Software Subscriptions">

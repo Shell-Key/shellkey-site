@@ -269,7 +269,13 @@
   var requestForm = document.getElementById("requestForm");
   if (requestForm) {
     var itemSelect = document.getElementById("rItem");
-    var slug = new URLSearchParams(window.location.search).get("item");
+    var qs = new URLSearchParams(window.location.search);
+    var slug = qs.get("item");
+    var rType = document.getElementById("rType");
+    if (rType && qs.get("type")) {
+      var want = qs.get("type").toLowerCase();
+      Array.prototype.forEach.call(rType.options, function (o) { if (o.value.toLowerCase() === want) rType.value = o.value; });
+    }
     if (slug && itemSelect) {
       var match = Array.prototype.find.call(itemSelect.options, function (o) { return o.value === slug; });
       if (match) itemSelect.value = slug;
@@ -282,11 +288,12 @@
       var itemLabel = itemSelect && itemSelect.selectedIndex >= 0 ? itemSelect.options[itemSelect.selectedIndex].text : "";
       var lead = {
         kind: "request", item: itemSelect ? itemSelect.value : "", item_label: itemLabel,
+        interest: val("rType"),
         priority: priority, name: val("rName"), company: val("rCompany"), email: val("rEmail"),
         phone: val("rPhone"), address: val("rAddress"), city: val("rCity"), zip: val("rZip"),
         message: val("rNeed"), timeframe: val("rWhen")
       };
-      var subject = (priority ? "PRIORITY REQUEST: " : "Request: ") + itemLabel;
+      var subject = (priority ? "PRIORITY REQUEST: " : "Request: ") + val("rType") + " — " + itemLabel;
       var body = ["ITEM: " + itemLabel, "PRIORITY: " + (priority ? "YES" : "Standard"),
         "NAME: " + lead.name, "COMPANY: " + lead.company, "EMAIL: " + lead.email, "PHONE: " + lead.phone,
         "ADDRESS: " + lead.address + ", " + lead.city + " " + lead.zip, "WHEN: " + lead.timeframe, "",
@@ -303,5 +310,53 @@
         var er = document.getElementById("formErr"); if (er) er.classList.add("show");
       });
     });
+  }
+
+  /* ---------------------------------------------------------------
+     Demo frame (demo.html) — gate once, then load the product demo
+     with Buy / Request / Customize always one click away.
+     --------------------------------------------------------------- */
+  var demoFrame = document.getElementById("demoFrame");
+  if (demoFrame && window.SK_DEMOS) {
+    var dq = new URLSearchParams(window.location.search);
+    var dslug = dq.get("item") || "";
+    var D = window.SK_DEMOS[dslug];
+    var gate = document.getElementById("gate");
+    if (!D) {
+      gate.hidden = true; document.getElementById("missing").hidden = false;
+    } else {
+      document.title = "Free demo: " + D.name + " | Shell Key";
+      document.getElementById("dName").textContent = D.name;
+      document.getElementById("dPrice").textContent = D.price ? "· " + D.price + (D.note ? " " + D.note.replace(/&middot;/g, "·") : "") : "";
+      var buy = document.getElementById("dBuy");
+      if (D.buy) { buy.href = D.buy; buy.textContent = D.subscribe ? "Subscribe now" : "Buy now"; buy.setAttribute("data-track", "checkout"); buy.setAttribute("data-item", dslug); }
+      else { buy.href = "request.html?item=" + dslug + "&type=Purchase"; buy.textContent = "Order by request"; }
+      document.getElementById("dReq").href = "request.html?item=" + dslug + "&type=Purchase";
+      document.getElementById("dCust").href = "request.html?item=" + dslug + "&type=Customization";
+      document.getElementById("dOpen").href = D.demo;
+      buy.addEventListener("click", function () { track("checkout", { item: dslug }); });
+
+      var unlocked = false;
+      try { unlocked = !!localStorage.getItem("sk_demo_ok"); } catch (err) {}
+      var openDemo = function () {
+        gate.hidden = true;
+        demoFrame.src = D.demo;
+        demoFrame.hidden = false;
+        track("demo_open", { item: dslug });
+      };
+      if (unlocked) openDemo();
+
+      var gateForm = document.getElementById("gateForm");
+      gateForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        var v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
+        var lead = { kind: "demo", name: v("gName"), company: v("gCompany"), email: v("gEmail"), phone: v("gPhone"),
+                     item: dslug, item_label: D.name, interest: "Demo", message: "Opened the free demo of " + D.name };
+        setBusy(gateForm, true);
+        submitLead(lead, "Demo request: " + D.name, "Name: " + lead.name + "\nCompany: " + lead.company + "\nEmail: " + lead.email,
+          function () { setBusy(gateForm, false); try { localStorage.setItem("sk_demo_ok", "1"); } catch (err) {} openDemo(); },
+          function () { setBusy(gateForm, false); var er = document.getElementById("gateErr"); if (er) er.classList.add("show"); });
+      });
+    }
   }
 })();

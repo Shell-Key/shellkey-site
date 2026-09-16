@@ -814,8 +814,13 @@ def seo(title, desc, root="", path="", image="assets/img/social/og-image.jpg"):
     return f"""  <link rel="canonical" href="{url}" />
   <link rel="icon" href="{root}favicon.ico" sizes="any" />
   <link rel="icon" type="image/png" sizes="32x32" href="{root}assets/img/logo/favicon-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="{root}assets/img/logo/favicon-48.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="{root}assets/img/logo/favicon-96.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="{root}assets/img/logo/favicon-192.png" />
-  <link rel="apple-touch-icon" href="{root}assets/img/logo/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="{root}assets/img/logo/favicon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{root}assets/img/logo/apple-touch-icon.png" />
+  <meta name="application-name" content="Shell Key" />
+  <meta name="apple-mobile-web-app-title" content="Shell Key" />
   <meta name="theme-color" content="#07142a" />
   <meta name="robots" content="index, follow, max-image-preview:large" />
   <meta property="og:type" content="website" />
@@ -832,6 +837,12 @@ def seo(title, desc, root="", path="", image="assets/img/social/og-image.jpg"):
   <meta name="twitter:image" content="{SITE}/{image}" />
 """
 
+
+SITE_SCHEMA = """  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"WebSite","name":"Shell Key","alternateName":"ShellKey",
+   "url":"https://shellkey.company/","publisher":{"@id":"https://shellkey.company/#organization"}}
+  </script>
+"""
 
 ORG_SCHEMA = """  <script type="application/ld+json">
   {
@@ -884,7 +895,7 @@ def head(title, desc, root="", path="", schema=""):
   <meta name="description" content="{desc}" />
   <link rel="stylesheet" href="{root}assets/styles.css" />
   <link rel="stylesheet" href="{root}assets/store.css" />
-{seo(title, desc, root, path)}{schema}{analytics()}</head>
+{seo(title, desc, root, path)}{SITE_SCHEMA}{schema}{analytics()}</head>
 <body>
 """
 
@@ -940,10 +951,11 @@ def action_button(p, root=""):
 
 
 def demo_link(p, root=""):
+    """'Try the free demo' button — opens the demo inside the Shell Key demo frame."""
     if not p.get("demo"):
         return ""
-    return (f'<p class="muted tiny demo-link"><a href="{p["demo"]}" target="_blank" '
-            f'rel="noopener">See the live portal &rarr;</a></p>')
+    return (f'<a class="btn btn-demo btn-block" href="{root}demo.html?item={p["slug"]}" '
+            f'data-track="demo" data-item="{p["slug"]}">Try the free demo</a>')
 
 
 def card(p):
@@ -963,10 +975,10 @@ def card(p):
               <ul class="bullets">{bullets}</ul>
               {price_block(p)}
               <div class="card-actions">
+                {demo_link(p)}
                 <a class="btn btn-ghost btn-block" href="products/{p['slug']}.html">Details</a>
                 {action_button(p)}
               </div>
-              {demo_link(p)}
             </div>
           </article>
 """
@@ -1098,8 +1110,8 @@ def build_product(p):
             <p>{p['short']}</p>
             <ul class="bullets">{bullets}</ul>
             {price_block(p)}
-            {action_button(p, root)}
             {demo_link(p, root)}
+            {action_button(p, root)}
             <p class="muted tiny cta-note">{cta_note}</p>
           </div>
         </div>
@@ -1189,7 +1201,16 @@ def build_request():
             <div class="card-body">
               <h3>Your details</h3>
               <form id="requestForm" class="form">
-                <label><span>What are you interested in? *</span>
+                <label><span>What do you need? *</span>
+                  <select id="rType" required>
+                    <option value="Information">Information / a question</option>
+                    <option value="Purchase">Purchase this product</option>
+                    <option value="Customization">Customize it for my company</option>
+                    <option value="Quote">A quote for a custom build</option>
+                    <option value="Priority build">Priority build — I need it fast</option>
+                  </select>
+                </label>
+                <label><span>Which product? *</span>
                   <select id="rItem" required>
                     <option value="">Select an item&hellip;</option>
                     {opts}
@@ -1329,8 +1350,64 @@ TERMS = """
 """
 
 
+def build_demo():
+    """demo.html — the frame every free demo opens in. Product data is embedded as JSON."""
+    import json
+    items = {p["slug"]: {"name": re.sub("&amp;", "&", p["name"]), "demo": p["demo"],
+                         "price": p.get("price", ""), "note": p.get("price_note", ""),
+                         "buy": p["paypal"] if (p["status"] == "available" and live_link(p.get("paypal"))) else "",
+                         "subscribe": bool(p.get("subscribe"))}
+             for p in PRODUCTS if p.get("demo")}
+    parts = [head("Free Demo | Shell Key", "Try Shell Key software free, then buy or request a customized version.",
+                  path="demo.html")]
+    parts.append("""  <main class="demo-page">
+    <div class="demo-bar">
+      <a class="brand" href="index.html"><img class="brand-logo" src="assets/img/logo/ShellKeyWhiteTrace.png" alt="Shell Key" /></a>
+      <div class="demo-title"><span class="tag tag-live">Free demo</span> <strong id="dName">Shell Key</strong>
+        <span class="muted" id="dPrice"></span></div>
+      <div class="demo-actions">
+        <a class="btn btn-primary" id="dBuy" href="#">Buy now</a>
+        <a class="btn btn-ghost" id="dReq" href="#">Request purchase</a>
+        <a class="btn btn-ghost" id="dCust" href="#">Request customization</a>
+        <a class="btn btn-ghost" id="dOpen" href="#" target="_blank" rel="noopener" title="Open the demo in its own tab">&#8599;</a>
+      </div>
+    </div>
+    <div class="demo-gate" id="gate">
+      <div class="card"><div class="card-body">
+        <h2>Start the free demo</h2>
+        <p class="muted">Tell us who you are and the demo opens right here. No card, no install. We'll follow up once to see if it fits &mdash; that's it.</p>
+        <form id="gateForm" class="form">
+          <div class="field-2">
+            <label><span>Name *</span><input id="gName" type="text" required autocomplete="name" placeholder="Your name" /></label>
+            <label><span>Company</span><input id="gCompany" type="text" autocomplete="organization" placeholder="Company" /></label>
+          </div>
+          <div class="field-2">
+            <label><span>Work email *</span><input id="gEmail" type="email" required autocomplete="email" placeholder="you@company.com" /></label>
+            <label><span>Phone</span><input id="gPhone" type="tel" autocomplete="tel" placeholder="Optional" /></label>
+          </div>
+          <button class="btn btn-primary btn-block" type="submit">Open the demo</button>
+          <div class="form-err" id="gateErr"><strong>That did not go through.</strong> Refresh and try again, or call <a href="tel:+13372548321">+1 (337) 254-8321</a>.</div>
+          <p class="muted tiny">By continuing you agree to the <a href="terms.html">terms</a> and <a href="privacy.html">privacy policy</a>.</p>
+        </form>
+      </div></div>
+    </div>
+    <iframe id="demoFrame" class="demo-frame" title="Product demo" hidden></iframe>
+    <div class="demo-missing" id="missing" hidden>
+      <div class="card"><div class="card-body">
+        <h2>That demo isn't available yet</h2>
+        <p class="muted">Pick a product from the <a href="store.html">store</a>, or <a href="request.html">request a walkthrough</a>.</p>
+      </div></div>
+    </div>
+  </main>
+""")
+    parts.append("  <script>window.SK_DEMOS = " + json.dumps(items) + ";</script>\n")
+    parts.append(SCRIPT.format(root=""))
+    parts.append("</body>\n</html>\n")
+    return "".join(parts)
+
+
 def build_sitemap():
-    urls = ["", "store.html", "request.html", "privacy.html", "terms.html"] + \
+    urls = ["", "store.html", "request.html", "demo.html", "privacy.html", "terms.html"] + \
            [f"products/{p['slug']}.html" for p in PRODUCTS]
     rows = "".join(
         f"  <url><loc>{SITE}/{u}</loc>"
@@ -1368,6 +1445,10 @@ def main():
     with open("terms.html", "w", encoding="utf-8") as f:
         f.write(build_legal("Terms of Service", "terms.html", TERMS))
     print("wrote privacy.html + terms.html")
+
+    with open("demo.html", "w", encoding="utf-8") as f:
+        f.write(build_demo())
+    print("wrote demo.html")
 
     with open("request.html", "w", encoding="utf-8") as f:
         f.write(build_request())
