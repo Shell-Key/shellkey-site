@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AWS-CWI IM — Demo</title>
+<style>
+  :root {
+    --brand:#123b5d;
+    --brand-2:#0d6f82;
+    --accent:#e1a925;
+    --bg:#eef3f7;
+    --surface:#ffffff;
+    --text:#17212b;
+    --muted:#647484;
+    --line:#d8e0e7;
+    --good:#237a57;
+    --warn:#b87816;
+    --bad:#b53b3b;
+    --info:#2f6fb0;
+    --shadow:0 8px 24px rgba(28,51,75,.10);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;font-size:14px}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer}
+  .app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+  .sidebar{background:linear-gradient(180deg,var(--brand),#0b2c45);color:white;padding:22px 16px;position:sticky;top:0;height:100vh;overflow:auto}
+  .brand{display:flex;align-items:center;gap:12px;padding:0 8px 22px;border-bottom:1px solid rgba(255,255,255,.14)}
+  .brand-mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#fff,var(--accent));color:var(--brand);display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 5px 15px rgba(0,0,0,.15)}
+  .brand h1{font-size:18px;margin:0;letter-spacing:.2px}
+  .brand p{font-size:11px;margin:4px 0 0;color:#d7e3ed}
+  .nav{margin-top:20px;display:grid;gap:6px}
+  .nav button{width:100%;border:0;background:transparent;color:#e4edf4;padding:11px 12px;border-radius:9px;text-align:left;display:flex;align-items:center;gap:10px}
+  .nav button:hover,.nav button.active{background:rgba(255,255,255,.13);color:white}
+  .nav .count{margin-left:auto;background:rgba(255,255,255,.16);padding:2px 7px;border-radius:20px;font-size:11px}
+  .sidebar-footer{margin-top:24px;padding:14px;border-radius:10px;background:rgba(255,255,255,.08);color:#d7e3ed;font-size:12px;line-height:1.5}
+  .main{min-width:0}
+  .topbar{background:white;height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:10}
+  .topbar .title h2{margin:0;font-size:20px}
+  .topbar .title p{margin:3px 0 0;color:var(--muted);font-size:12px}
+  .top-actions{display:flex;align-items:center;gap:10px}
+  .user-chip{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--brand);color:white;display:grid;place-items:center;font-weight:700}
+  .content{padding:24px;max-width:1650px;margin:0 auto}
+  .view{display:none}.view.active{display:block}
+  .btn{border:1px solid transparent;border-radius:9px;padding:9px 13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+  .btn.primary{background:var(--brand);color:white}.btn.primary:hover{filter:brightness(1.06)}
+  .btn.secondary{background:white;border-color:var(--line);color:var(--text)}
+  .btn.good{background:var(--good);color:white}.btn.warn{background:var(--warn);color:white}.btn.bad{background:var(--bad);color:white}
+  .btn.small{padding:6px 9px;font-size:12px}.btn:disabled{opacity:.45;cursor:not-allowed}
+  .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}
+  .page-head h3{font-size:24px;margin:0}.page-head p{color:var(--muted);margin:6px 0 0;max-width:780px}
+  .grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(6,minmax(150px,1fr));margin-bottom:18px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .kpi{padding:17px;position:relative;overflow:hidden}
+  .kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--info)}
+  .kpi.good:before{background:var(--good)}.kpi.warn:before{background:var(--warn)}.kpi.bad:before{background:var(--bad)}
+  .kpi .label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .kpi .value{font-size:27px;font-weight:800;margin-top:7px}.kpi .sub{font-size:11px;color:var(--muted);margin-top:4px}
+  .two-col{grid-template-columns:1.5fr 1fr}.three-col{grid-template-columns:1fr 1fr 1fr}
+  .panel-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .panel-head h4{margin:0;font-size:16px}.panel-body{padding:17px 18px}
+  .table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:950px}
+  .table th{font-size:11px;text-transform:uppercase;letter-spacing:.45px;color:var(--muted);background:#f6f8fa;text-align:left;padding:11px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .table td{padding:11px;border-bottom:1px solid #edf1f4;vertical-align:middle}.table tr:hover td{background:#fbfcfd}
+  .clickable-row{cursor:pointer}.clickable-row:hover td{background:#f4f8fb!important}
+  #inspectionsView .table-wrap,#recommendationsView .table-wrap,#reportsView .table-wrap{max-height:calc(100vh - 285px);overflow:auto}
+  .status{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:800;white-space:nowrap}
+  .status:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .status.assigned{color:#2869a4;background:#eaf3fb}.status.progress{color:#9a6813;background:#fff4dc}.status.review{color:#8c4b94;background:#f6eafa}.status.approved{color:#1e744f;background:#e8f6ef}.status.overdue{color:#a72f2f;background:#fdeaea}.status.closed{color:#4d5b67;background:#edf1f4}
+  .progress{height:8px;background:#e8edf1;border-radius:20px;overflow:hidden;min-width:90px}.progress span{display:block;height:100%;background:var(--brand-2);border-radius:inherit}
+  /* Keep status pills readable. The status 'progress' class must not inherit progress-bar sizing. */
+  .status.progress{height:auto;min-width:max-content;overflow:visible;background:#fff4dc;border-radius:20px}
+  .table td .status{min-width:max-content;max-width:none}
+  .action-row{display:flex;gap:6px;flex-wrap:wrap}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .filters input,.filters select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:white}
+  .empty{padding:36px;text-align:center;color:var(--muted)}
+  .chart-list{display:grid;gap:11px}.bar-row{display:grid;grid-template-columns:130px 1fr 40px;align-items:center;gap:10px}.bar{height:13px;background:#e8edf1;border-radius:20px;overflow:hidden}.bar span{display:block;height:100%;background:var(--brand-2);border-radius:20px}
+  .activity-feed{display:grid;gap:12px}.feed-item{display:grid;grid-template-columns:36px 1fr;gap:10px}.feed-icon{width:32px;height:32px;border-radius:9px;background:#eaf3fb;color:var(--brand);display:grid;place-items:center;font-weight:800}.feed-item p{margin:0;line-height:1.45}.feed-item small{color:var(--muted)}
+  .stepper{display:flex;gap:0;overflow:auto;padding-bottom:6px;margin-bottom:8px}
+  #wizardView .page-head{margin-bottom:10px}
+  .step{min-width:116px;position:relative;text-align:center;color:var(--muted);font-size:11px;padding-top:31px}
+  .step:before{content:attr(data-step);position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#dfe6ec;color:#607180;font-weight:800;z-index:2}
+  .step:after{content:"";position:absolute;left:0;right:0;top:12px;height:2px;background:#dfe6ec;z-index:1}.step:first-child:after{left:50%}.step:last-child:after{right:50%}
+  .step.done:before,.step.active:before{background:var(--brand);color:white}.step.done:after,.step.active:after{background:var(--brand)}.step.active{color:var(--brand);font-weight:800}
+  .step.clickable{cursor:pointer}.step.clickable:hover{color:var(--brand);font-weight:800}.step.clickable:hover:before{transform:translateX(-50%) scale(1.08);box-shadow:0 0 0 4px rgba(18,59,93,.12)}
+  .step.locked{cursor:not-allowed}.step.locked:not(.active){opacity:.72}
+  .wizard-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;height:calc(100vh - 265px);min-height:480px}
+  .wizard-card{padding:0;height:100%;min-height:0;display:flex;flex-direction:column}.wizard-header{padding:12px 16px;border-bottom:1px solid var(--line)}.wizard-header h4{margin:0 0 4px;font-size:18px}.wizard-header p{margin:0;color:var(--muted);line-height:1.35;font-size:12px}
+  .wizard-body{padding:13px 16px;flex:1;min-height:0;overflow:auto}.wizard-footer{padding:10px 16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}.form-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.form-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}.field.full{grid-column:1/-1}
+  .scroll-list{max-height:calc(100vh - 390px);overflow:auto;padding-right:5px}
+  .field label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin-bottom:6px}.req{color:var(--bad)}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 9px;outline:none}.field textarea{min-height:72px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(13,111,130,.12)}
+  .help{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4}.tip{background:#eef7f8;border-left:4px solid var(--brand-2);border-radius:8px;padding:12px 13px;margin-bottom:16px;line-height:1.5}.tip strong{color:var(--brand)}
+  .check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.check{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fbfcfd}.check input{margin-top:2px}
+  .side-help{padding:17px;position:sticky;top:90px;height:max-content}.side-help h4{margin:0 0 10px}.side-help p,.side-help li{color:var(--muted);line-height:1.5;font-size:12px}.side-help ul{padding-left:18px}.side-help .mini-progress{margin-top:12px}
+  .component-list{display:grid;gap:10px}.component-card{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fbfcfd}.component-card h5{margin:0 0 10px;font-size:15px;display:flex;justify-content:space-between}.component-card .form-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.photo-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:white}.photo-card img{width:100%;height:160px;object-fit:cover;background:#e8edf1}.photo-meta{padding:10px}.photo-meta input,.photo-meta select{width:100%;margin-top:7px;border:1px solid var(--line);border-radius:7px;padding:7px}
+  .upload-zone{border:2px dashed #aab8c4;border-radius:10px;padding:24px;text-align:center;background:#f9fbfc}.upload-zone input{margin-top:10px}
+  .qa-list{display:grid;gap:9px}.qa-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px}.qa-icon{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;color:white;font-size:12px;font-weight:900}.qa-item.good .qa-icon{background:var(--good)}.qa-item.warn .qa-icon{background:var(--warn)}.qa-item.bad .qa-icon{background:var(--bad)}.qa-item .qa-text{flex:1}.qa-item small{color:var(--muted)}
+  .rec-card{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:11px;background:#fbfcfd}.rec-card h5{margin:0 0 10px}
+  .tutorial-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tutorial-card{padding:18px}.tutorial-icon{width:44px;height:44px;border-radius:11px;background:#eaf3fb;color:var(--brand);display:grid;place-items:center;font-size:20px;font-weight:900}.tutorial-card h4{margin:13px 0 6px}.tutorial-card p{color:var(--muted);line-height:1.5;min-height:42px}.tutorial-card .meta{font-size:11px;color:var(--muted);margin-bottom:12px}
+  .accordion{display:grid;gap:10px}.acc{border:1px solid var(--line);border-radius:10px;background:white;overflow:hidden}.acc button{width:100%;border:0;background:white;padding:14px 16px;text-align:left;font-weight:800;display:flex;justify-content:space-between}.acc .acc-body{display:none;padding:0 16px 16px;color:var(--muted);line-height:1.6}.acc.open .acc-body{display:block}
+  .report-sheet{background:white;color:#111;padding:34px;max-width:950px;margin:auto;border:1px solid #cfd6dc;box-shadow:var(--shadow)}
+  .report-top{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;border-bottom:3px solid #111;padding-bottom:12px}.report-title{font-size:24px;font-weight:900}.report-sub{font-size:15px;font-weight:800;margin-top:10px}.report-meta{text-align:right;font-size:12px;font-weight:700;line-height:1.45}
+  .report-table{width:100%;border-collapse:collapse;margin:14px 0}.report-table th,.report-table td{border:1px solid #777;padding:8px;font-size:12px}.report-table th{background:#e6e6e6;text-transform:uppercase}.report-section{margin-top:17px}.report-section h4{font-size:13px;margin:0 0 6px;text-transform:uppercase;text-decoration:underline}.report-section p{font-size:12px;line-height:1.5;white-space:pre-wrap}.report-photos{display:grid;grid-template-columns:1fr 1fr;gap:12px}.report-photo{border:1px solid #777;padding:6px}.report-photo img{width:100%;height:220px;object-fit:contain;background:#f1f1f1}.report-photo p{font-size:11px;margin:6px 0 0}.report-footer{margin-top:28px;border-top:1px solid #aaa;padding-top:8px;font-size:10px;text-align:center;color:#555}
+  .modal{position:fixed;inset:0;background:rgba(6,19,31,.65);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}.modal.open{display:flex}.modal-card{width:min(920px,96vw);max-height:92vh;overflow:auto;background:white;border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.28)}.modal-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0}.modal-body{padding:18px}.close{border:0;background:#edf1f4;width:32px;height:32px;border-radius:8px}
+  .onboard{display:grid;grid-template-columns:1.1fr .9fr;min-height:450px}.onboard-copy{padding:32px}.onboard-copy h2{font-size:30px;margin:0 0 10px;color:var(--brand)}.onboard-copy p{color:var(--muted);line-height:1.65}.onboard-list{display:grid;gap:10px;margin:22px 0}.onboard-item{display:flex;gap:10px;align-items:flex-start}.onboard-item b{width:25px;height:25px;border-radius:50%;background:var(--brand);color:white;display:grid;place-items:center;flex:0 0 auto}.onboard-art{background:linear-gradient(145deg,var(--brand),var(--brand-2));color:white;padding:32px;display:flex;flex-direction:column;justify-content:center}.onboard-art .big{font-size:62px;font-weight:900;line-height:.95}.onboard-art p{line-height:1.6;color:#e2f0f4}
+  .notice{padding:12px 14px;border-radius:9px;margin-bottom:14px}.notice.info{background:#eaf3fb;color:#245d91}.notice.warn{background:#fff3da;color:#8b5c0c}.notice.good{background:#e8f6ef;color:#1d6b49}
+  .hidden{display:none!important}
+  .demo-banner{background:#fff4dc;border-bottom:1px solid #e4c36d;color:#744d08;padding:9px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:12px;position:sticky;top:68px;z-index:9}
+  .demo-banner strong{font-size:12px}.demo-banner .demo-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .demo-chip{display:inline-flex;align-items:center;gap:6px;background:#ffe8a6;color:#744d08;border-radius:999px;padding:4px 9px;font-weight:800;white-space:nowrap}
+  .purchase-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.purchase-option{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fbfcfd}.purchase-option h4{margin:0 0 7px;font-size:18px}.purchase-option p,.purchase-option li{color:var(--muted);line-height:1.5}.purchase-option ul{padding-left:18px}.purchase-option .btn{width:100%;margin-top:10px}
+  .report-sheet{position:relative;overflow:hidden}.demo-watermark{position:absolute;inset:38% -20% auto -20%;transform:rotate(-27deg);text-align:center;font-size:56px;font-weight:900;letter-spacing:8px;color:rgba(181,59,59,.11);pointer-events:none;z-index:0}.report-sheet>*:not(.demo-watermark){position:relative;z-index:1}
+  .demo-lock{border:1px dashed #d6b253;border-radius:10px;padding:14px;background:#fffaf0;color:#744d08}.demo-lock .action-row{margin-top:10px}
+  @media(max-width:1250px){.kpis{grid-template-columns:repeat(3,1fr)}.tutorial-grid{grid-template-columns:repeat(2,1fr)}.photo-grid{grid-template-columns:repeat(2,1fr)}.form-grid.four{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media(max-width:900px){.demo-banner{position:static;padding:9px 14px;align-items:flex-start;flex-direction:column}.purchase-grid{grid-template-columns:1fr}.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:50;transform:translateX(-100%);transition:.2s;width:250px}.sidebar.open{transform:none}.topbar{padding:0 14px}.content{padding:14px}.two-col,.three-col,.wizard-layout,.onboard{grid-template-columns:1fr}.wizard-layout{height:auto;min-height:0}.wizard-card{height:auto}.wizard-body{overflow:visible}.form-grid,.form-grid.three,.form-grid.four,.component-card .form-grid{grid-template-columns:1fr}.side-help{position:static}.kpis{grid-template-columns:repeat(2,1fr)}.mobile-menu{display:inline-flex!important}.tutorial-grid,.photo-grid{grid-template-columns:1fr}}
+  .mobile-menu{display:none}
+  @media print{body{background:white}.sidebar,.topbar,.page-head,.report-actions{display:none!important}.app{display:block}.content{padding:0}.view{display:none!important}#reportView{display:block!important}.report-sheet{border:0;box-shadow:none;max-width:none;padding:18px}.report-photo img{height:240px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">CWI</div>
+      <div><h1>AWS-CWI IM</h1><p>Inspection Management System</p></div>
+    </div>
+    <nav class="nav" id="nav">
+      <button class="active" data-view="dashboard">▦ Dashboard</button>
+      <button data-view="inspections">☷ My Weld Inspections <span class="count" id="navInspectionCount">0</span></button>
+      <button data-view="register">▥ Weld Register</button>
+      <button data-view="qualifications">◫ Qualifications</button>
+      <button data-view="wizard" data-new="true">＋ Start Weld Inspection</button>
+      <button data-view="recommendations">⚑ Corrective Actions <span class="count" id="navRecCount">0</span></button>
+      <button data-view="reports">▤ Reports</button>
+      <button data-view="tutorials">▶ Tutorials</button>
+      <button data-view="information">ⓘ AWS-CWI Information</button>
+      <button data-view="admin">⚙ Administration</button>
+    </nav>
+    <div class="sidebar-footer">
+      <strong id="licensedToSide">Licensed to: Demo Welding Inspection Company</strong><br>
+      Weld traceability • Qualification control • Repair closure
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn secondary mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div class="title"><h2 id="topTitle">Dashboard</h2><p id="topSub">Track welds, qualifications, inspection status, NDE, repairs, and approvals.</p></div>
+      </div>
+      <div class="top-actions">
+        <button class="btn warn" type="button" onclick="openPurchaseModal()">Annual Plans / Cloud</button>
+        <button class="btn secondary" onclick="openTutorial('quickstart')">? Help</button>
+        <button class="user-chip" type="button" onclick="showSessionUserPrompt()" title="Change current user" style="cursor:pointer;text-align:left"><div class="avatar" id="userInitials">KI</div><div><strong id="userName">Kirby Inspector</strong><br><small id="userRole" style="color:var(--muted)">Administrator</small></div></button>
+      </div>
+    </header>
+    <div class="demo-banner">
+      <div><span class="demo-chip">DEMO MODE</span> <strong>Temporary session:</strong> changes are available while this page remains open, but all entered data resets when the app is closed or refreshed.</div>
+      <div class="demo-actions"><button class="btn small secondary" type="button" onclick="resetDemoSession()">Reset Demo</button><button class="btn small primary" type="button" onclick="openPurchaseModal()">View Annual Plans</button></div>
+    </div>
+
+    <div class="content">
+      <section class="view active" id="dashboardView">
+        <div class="page-head">
+          <div><h3>Welding Quality Dashboard</h3><p>Track fabrication and field welds, WPS/PQR/WPQ traceability, visual inspection, NDE, repairs, approvals, and turnover readiness.</p></div>
+          <button class="btn primary" onclick="startNewInspection()">＋ Start New Weld Inspection</button>
+        </div>
+        <div class="grid kpis" id="kpiGrid"></div>
+        <div class="grid two-col">
+          <div class="card">
+            <div class="panel-head"><h4>Outstanding Weld Quality Tracking</h4><button class="btn small secondary" onclick="showView('inspections')">View All</button></div>
+            <div class="table-wrap"><table class="table"><thead><tr><th>Inspection</th><th>Weld Joint / Line</th><th>Client</th><th>Assigned Inspector</th><th>Due</th><th>Completion</th><th>Status</th><th>Actions</th></tr></thead><tbody id="dashboardInspectionRows"></tbody></table></div>
+          </div>
+          <div class="grid" style="align-content:start">
+            <div class="card">
+              <div class="panel-head"><h4>Workload by Status</h4></div>
+              <div class="panel-body"><div class="chart-list" id="statusBars"></div></div>
+            </div>
+            <div class="card">
+              <div class="panel-head"><h4>Recent Activity</h4></div>
+              <div class="panel-body"><div class="activity-feed" id="activityFeed"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="inspectionsView">
+        <div class="page-head"><div><h3>My Weld Inspections</h3><p>Open an assigned weld joint, continue a draft, review NDE and repair status, or prepare the final report.</p></div><button class="btn primary" onclick="startNewInspection()">＋ Start Weld Inspection</button></div>
+        <div class="card">
+          <div class="filters"><input id="inspectionSearch" placeholder="Search joint, line, WPS, welder, project, or report..." oninput="renderInspections()"><select id="inspectionStatusFilter" onchange="renderInspections()"><option value="">All statuses</option><option>Assigned</option><option>In Progress</option><option>Waiting Review</option><option>Corrections Required</option><option>Approved</option><option>Sent</option><option>Accepted</option></select></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Inspection</th><th>Client / Project</th><th>Weld Joint / Line</th><th>Weld Type</th><th>Weld / Inspection Date</th><th>Due Date</th><th>Assigned Inspector</th><th>Reviewed By</th><th>Photos</th><th>Completion</th><th>Status</th><th>Actions</th></tr></thead><tbody id="inspectionRows"></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="view" id="registerView">
+        <div class="page-head"><div><h3>Master Weld Register</h3><p>Review each weld from drawing and material traceability through WPS, welder qualification, inspection, NDE, repair, and final disposition.</p></div><button class="btn primary" onclick="startNewInspection()">＋ Add Weld Record</button></div>
+        <div class="grid kpis" id="registerKpis"></div>
+        <div class="card">
+          <div class="filters"><input id="registerSearch" placeholder="Search weld ID, project, drawing, WPS, PQR, welder, material, or NDE..." oninput="renderRegister()"><select id="registerStatusFilter" onchange="renderRegister()"><option value="">All statuses</option><option>Assigned</option><option>In Progress</option><option>Waiting Review</option><option>Corrections Required</option><option>Approved</option><option>Sent</option><option>Accepted</option></select></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Weld ID</th><th>Project / Area</th><th>Component / Drawing</th><th>Weld Type</th><th>WPS</th><th>PQR</th><th>Welder / WPQ</th><th>Material</th><th>NDE</th><th>Disposition</th><th>Status</th><th>Actions</th></tr></thead><tbody id="weldRegisterRows"></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="view" id="qualificationsView">
+        <div class="page-head"><div><h3>Qualification Control</h3><p>Verify procedure, performance, continuity, and inspector qualification records before weld release.</p></div></div>
+        <div class="grid kpis" id="qualificationKpis"></div>
+        <div class="grid" style="gap:18px">
+          <div class="card"><div class="panel-head"><h4>WPS / PQR Register</h4><span class="status approved">Controlled</span></div><div class="table-wrap"><table class="table"><thead><tr><th>WPS</th><th>Supporting PQR</th><th>Process</th><th>Base Material</th><th>Qualified Range</th><th>Revision</th><th>Status</th></tr></thead><tbody id="wpsRows"></tbody></table></div></div>
+          <div class="card"><div class="panel-head"><h4>Welder / Operator WPQ & Continuity</h4><span class="status progress">Review Before Assignment</span></div><div class="table-wrap"><table class="table"><thead><tr><th>Welder ID</th><th>Name</th><th>Processes</th><th>Positions</th><th>WPQ Record</th><th>Continuity Through</th><th>Status</th></tr></thead><tbody id="welderRows"></tbody></table></div></div>
+          <div class="card"><div class="panel-head"><h4>Inspector Qualifications</h4></div><div class="table-wrap"><table class="table"><thead><tr><th>Inspector</th><th>Qualification</th><th>Identification</th><th>Expiration / Review</th><th>Role</th><th>Status</th></tr></thead><tbody id="inspectorQualificationRows"></tbody></table></div></div>
+        </div>
+      </section>
+
+      <section class="view" id="wizardView">
+        <div class="page-head"><div><h3 id="wizardPageTitle">Guided Inspection</h3><p>Complete each step in order so every weld joint is traceable and documented consistently.</p></div><div><button class="btn secondary" onclick="saveCurrentInspection(true)">Save Draft</button></div></div>
+        <div class="stepper" id="stepper"></div>
+        <div class="wizard-layout">
+          <div class="card wizard-card">
+            <div class="wizard-header"><h4 id="stepTitle"></h4><p id="stepInstructions"></p></div>
+            <div class="wizard-body" id="wizardBody"></div>
+            <div class="wizard-footer"><div><button class="btn secondary" id="backBtn" onclick="previousStep()">← Back</button></div><div style="display:flex;gap:8px"><button class="btn secondary" onclick="saveCurrentInspection(true)">Save Draft</button><button class="btn primary" id="nextBtn" onclick="nextStep()">Save and Continue →</button></div></div>
+          </div>
+          <aside class="card side-help" id="sideHelp"></aside>
+        </div>
+      </section>
+
+      <section class="view" id="recommendationsView">
+        <div class="page-head"><div><h3>Corrective Action Register</h3><p>Track every reject, repair, reinspection, documentation deficiency, verification, acceptance, and closure.</p></div><button class="btn primary" onclick="openRecommendationModal()">＋ Add Corrective Action</button></div>
+        <div class="grid kpis" id="recKpis"></div>
+        <div class="card"><div class="filters"><input id="recSearch" placeholder="Search joint, line, finding, action, or assignee..." oninput="renderRecommendationRegister()"><select id="recStatusFilter" onchange="renderRecommendationRegister()"><option value="">All statuses</option><option>Open</option><option>Assigned</option><option>Disposition Review</option><option>Repair Planned</option><option>Repair In Progress</option><option>Reinspection Required</option><option>Complete</option><option>Verified</option><option>Accepted</option><option>Closed</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th>Action</th><th>Inspection</th><th>Weld Joint / Line</th><th>Checkpoint</th><th>Priority</th><th>Assigned Inspector</th><th>Target Date</th><th>Status</th><th>Acceptance</th><th>Actions</th></tr></thead><tbody id="recRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="reportsView">
+        <div class="page-head"><div><h3>Reports</h3><p>Preview, print, email, revise, and track acceptance of approved weld inspection reports.</p></div></div>
+        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Report</th><th>Weld Joint / Line</th><th>Client</th><th>Inspector</th><th>Reviewer</th><th>Revision</th><th>Status</th><th>Photos</th><th>Sent</th><th>Acceptance</th><th>Actions</th></tr></thead><tbody id="reportRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="tutorialsView">
+        <div class="page-head"><div><h3>Tutorials & Guided Learning</h3><p>Inspectors can learn the application while completing work. Every tutorial uses the same steps, terminology, and examples as the inspection wizard.</p></div><button class="btn secondary" onclick="resetTutorials()">Reset Progress</button></div>
+        <div class="grid tutorial-grid" id="tutorialGrid"></div>
+      </section>
+
+      <section class="view" id="informationView">
+        <div class="page-head"><div><h3>AWS-CWI Workflow & Reference Library</h3><p>Plain-language reference for welding inspection workflow, qualification traceability, examination, repairs, and reporting. The project-adopted construction code, specifications, approved procedures, and authorized engineering decisions remain controlling.</p></div></div>
+        <div class="notice warn"><strong>Important:</strong> AWS-CWI is an inspector credential and body-of-knowledge framework—not a universal construction acceptance code. This demo organizes records and workflow; it does not replace the project-adopted code, contract requirements, approved WPS/PQR/WPQ records, NDE interpretation, engineering evaluation, or inspector judgment.</div>
+        <div class="accordion" id="infoAccordion"></div>
+      </section>
+
+      <section class="view" id="adminView">
+        <div class="page-head"><div><h3>Administration</h3><p>Configure company branding, report defaults, inspector assignments, and consistent workflow controls.</p></div><button class="btn primary" onclick="saveAdmin()">Save Settings</button></div>
+        <div class="grid two-col">
+          <div class="card"><div class="panel-head"><h4>Company Branding</h4></div><div class="panel-body"><div class="form-grid">
+            <div class="field full"><label>Licensed Company Name</label><input id="adminCompany"></div>
+            <div class="field"><label>Primary Color</label><input id="adminColor" type="color"></div>
+            <div class="field"><label>Default Report Prefix</label><input id="adminPrefix" placeholder="CWI"></div>
+            <div class="field full"><label>Report Footer / Confidentiality Statement</label><textarea id="adminFooter"></textarea></div>
+            <div class="field full"><label>Default Email Message</label><textarea id="adminEmail"></textarea></div>
+          </div></div></div>
+          <div class="grid" style="align-content:start">
+            <div class="card"><div class="panel-head"><h4>Current User & Inspector Profile</h4></div><div class="panel-body">
+              <div class="notice info"><strong>Profile use:</strong> This name appears in the upper-right corner and becomes the default inspector for new inspections. Existing reports keep their assigned inspector so issued records are not changed.</div>
+              <div class="form-grid">
+                <div class="field full"><label>Inspector / User Name</label><input id="adminInspectorName" placeholder="Inspector name"></div>
+                <div class="field"><label>Role</label><select id="adminInspectorRole"><option>Administrator</option><option>Welding QC Manager</option><option>Welding Inspector</option><option>NDE Coordinator</option><option>Welding QC Reviewer</option><option>Turnover / Report Coordinator</option></select></div>
+                <div class="field"><label>Initials</label><input id="adminInspectorInitials" maxlength="3" placeholder="KI"></div>
+                <div class="field full"><label>Default Inspector Qualification / ID</label><input id="adminInspectorApi" placeholder="Example: CWI-123456 or company ID"></div>
+              </div>
+              <div class="action-row" style="margin-top:12px"><button class="btn secondary" type="button" onclick="applyInspectorToOpenInspections()">Apply to Open Inspections</button></div>
+            </div></div>
+            <div class="card"><div class="panel-head"><h4>Workflow Controls</h4></div><div class="panel-body"><div class="check-grid" style="grid-template-columns:1fr">
+              <label class="check"><input type="checkbox" checked disabled> Require all mandatory weld inspection steps</label>
+              <label class="check"><input type="checkbox" checked disabled> Require captions for report photos</label>
+              <label class="check"><input type="checkbox" checked disabled> Require inspector certification before review</label>
+              <label class="check"><input type="checkbox" checked disabled> Require reviewer approval before final PDF</label>
+              <label class="check"><input type="checkbox" checked disabled> Track report revisions and status changes</label>
+              <label class="check"><input type="checkbox" checked disabled> Track client acceptance</label>
+            </div></div></div>
+            <div class="card"><div class="panel-head"><h4>Demo Data & Subscription</h4></div><div class="panel-body">
+              <div class="demo-lock"><strong>This demonstration does not retain data.</strong><br>Weld records, photos, settings, and tutorial progress reset when the page is closed or refreshed. Persistent storage, backups, annual licensed use, and company deployment are available only in a production subscription.
+                <div class="action-row"><button class="btn secondary" type="button" onclick="removeExampleRecords()">Remove Example Records This Session</button><button class="btn secondary" type="button" onclick="restoreDemoData()">Restore Demo Examples</button><button class="btn primary" type="button" onclick="openPurchaseModal()">Annual Plans</button></div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="reportView">
+        <div class="page-head report-actions"><div><h3>Report Preview</h3><p>Review the report before printing or sending it to the client.</p></div><div class="action-row"><button class="btn secondary" onclick="showView('reports')">← Reports</button><button class="btn secondary" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn primary" onclick="emailCurrentReport()">✉ Prepare Email</button></div></div>
+        <div id="reportSheet" class="report-sheet"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseModalTitle">
+  <div class="modal-card" style="width:min(900px,96vw)">
+    <div class="modal-head"><h3 id="purchaseModalTitle">AWS-CWI IM Annual Subscription</h3><button class="close" type="button" onclick="closeModal('purchaseModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="notice warn"><strong>Demo limitation:</strong> This copy is for evaluation and training. It does not retain weld inspection data after the page is closed or refreshed, and generated reports include a demo watermark.</div>
+      <div class="purchase-grid">
+        <section class="purchase-option">
+          <div class="status approved" style="display:inline-flex;margin-bottom:10px">ANNUAL SUBSCRIPTION</div>
+          <h4>Individual — Single User</h4>
+          <p>For one named welding inspector, reviewer, or small office using one designated computer.</p>
+          <ul><li>Renewable 12-month subscription</li><li>Production data saving while the subscription is active</li><li>Annual license activation for one named user</li><li>Company branding and controlled report templates</li><li>Backup export, restore, printing, and email preparation</li><li>Product updates and subscription support</li><li>No shared cloud database or simultaneous team access</li></ul>
+          <button class="btn primary" type="button" onclick="requestSubscription('Annual Subscription — Individual Single User')">Request Annual Subscription</button>
+        </section>
+        <section class="purchase-option">
+          <div class="status progress" style="display:inline-flex;margin-bottom:10px">CUSTOM CLOUD REQUEST</div>
+          <h4>Multiuser Cloud Deployment</h4>
+          <p>For companies that need multiple inspectors, reviewers, administrators, or project locations working from shared records.</p>
+          <ul><li>Custom annual subscription based on users and deployment scope</li><li>Secure named user accounts and role-based access</li><li>Shared weld register, inspections, NDE reviews, and corrective actions</li><li>Central photo, attachment, and report storage</li><li>Backups, audit history, remote access, and account administration</li><li>Company configuration, branding, onboarding, and support</li><li>Implementation requirements confirmed before quotation</li></ul>
+          <button class="btn primary" type="button" onclick="requestSubscription('Multiuser Cloud Deployment Request')">Request Multiuser Cloud Use</button>
+        </section>
+      </div>
+      <div class="notice info" style="margin-top:14px"><strong>Next production stages:</strong> After this demo is approved, the annual single-user edition will be prepared first. The activation generator and annual renewal controls will then be developed as a separate administration tool.</div>
+      <div class="help" style="margin-top:14px">Annual subscription and cloud deployment requests are prepared by email to <strong>support@shellkey.company</strong>. Billing, annual activation, cloud hosting, user provisioning, and production data storage are not performed by this standalone demo file.</div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="sessionUserModal" role="dialog" aria-modal="true" aria-labelledby="sessionUserTitle">
+  <div class="modal-card" style="width:min(560px,96vw)">
+    <div class="modal-head"><h3 id="sessionUserTitle">Who is using AWS-CWI IM?</h3></div>
+    <div class="modal-body">
+      <div class="notice info"><strong>Required each time the app opens:</strong> Confirm or update your name and role before continuing. This identifies the current user and becomes the default assignment for new weld inspections.</div>
+      <div class="form-grid">
+        <div class="field full"><label>Your Name <span class="req">*</span></label><input id="sessionInspectorName" autocomplete="name" placeholder="Enter inspector or user name"></div>
+        <div class="field full"><label>Your Role <span class="req">*</span></label><select id="sessionInspectorRole"><option value="">Select role</option><option>Administrator</option><option>Welding QC Manager</option><option>Welding Inspector</option><option>NDE Coordinator</option><option>Welding QC Reviewer</option><option>Turnover / Report Coordinator</option></select></div>
+        <div class="field"><label>Initials</label><input id="sessionInspectorInitials" maxlength="3" placeholder="KI"></div>
+        <div class="field"><label>Inspector Qualification / ID</label><input id="sessionInspectorApi" placeholder="Example: CWI-123456 or company ID"></div>
+      </div>
+      <div class="help" style="margin-top:10px">Existing inspections and issued reports will keep their current assigned inspector. The confirmed name is used for the header and new inspections.</div>
+      <div class="action-row" style="margin-top:18px;justify-content:flex-end"><button class="btn primary" type="button" onclick="confirmSessionUser()">Continue to AWS-CWI IM</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="recommendationModal" role="dialog" aria-modal="true" aria-labelledby="recommendationModalTitle">
+  <div class="modal-card" style="width:min(820px,96vw)">
+    <div class="modal-head"><h3 id="recommendationModalTitle">Edit Corrective Action</h3><button class="close" onclick="closeModal('recommendationModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="notice info"><strong>Track the repair or follow-up:</strong> Update assignment, target date, repair status, reinspection, verification, and acceptance.</div>
+      <div class="form-grid three">
+        <div class="field"><label>Inspection <span class="req">*</span></label><select id="modalRecInspection"></select></div>
+        <div class="field"><label>Action #</label><input id="modalRecId" readonly></div>
+        <div class="field"><label>Component</label><select id="modalRecComponent"><option>Traceability</option><option>Fit-Up</option><option>Root Pass</option><option>Hot Pass</option><option>Fill &amp; Cap</option><option>Visual Examination</option><option>Radiographic Testing</option><option>Ultrasonic Testing</option><option>Magnetic Particle Testing</option><option>Liquid Penetrant Testing</option><option>Repair Area Preparation</option><option>Repair / Reinspection</option><option>Other</option></select></div>
+        <div class="field"><label>Priority</label><select id="modalRecPriority"><option>Stop work / immediate</option><option>Before next weld operation</option><option>Before coating / insulation</option><option>Before pressure test / load release</option><option>Before turnover</option><option>Short term</option><option>Monitor</option><option>Informational</option></select></div>
+        <div class="field"><label>Status</label><select id="modalRecStatus"><option>Open</option><option>Assigned</option><option>Disposition Review</option><option>Repair Planned</option><option>Repair In Progress</option><option>Reinspection Required</option><option>Complete</option><option>Verified</option><option>Accepted</option><option>Closed</option></select></div>
+        <div class="field"><label>Acceptance</label><select id="modalRecAcceptance"><option>Pending</option><option>Accepted</option><option>Rejected</option></select></div>
+        <div class="field full"><label>Finding</label><textarea id="modalRecFinding"></textarea></div>
+        <div class="field full"><label>Required Action / Repair</label><textarea id="modalRecAction"></textarea></div>
+        <div class="field"><label>Assigned To</label><input id="modalRecAssignedTo"></div>
+        <div class="field"><label>Target Date</label><input id="modalRecTargetDate" type="date"></div>
+      </div>
+      <div class="action-row" style="margin-top:18px;justify-content:space-between">
+        <button class="btn bad" id="modalRecDeleteBtn" type="button" onclick="deleteRecommendationFromModal()">Delete Corrective Action</button>
+        <div class="action-row"><button class="btn secondary" type="button" onclick="closeModal('recommendationModal')">Cancel</button><button class="btn primary" type="button" onclick="saveRecommendationFromModal()">Save Corrective Action</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="tutorialModal"><div class="modal-card"><div class="modal-head"><h3 id="tutorialModalTitle">Tutorial</h3><button class="close" onclick="closeModal('tutorialModal')">✕</button></div><div class="modal-body" id="tutorialModalBody"></div></div></div>
+<div class="modal" id="onboardModal"><div class="modal-card"><div class="onboard"><div class="onboard-copy"><h2>Welcome to AWS-CWI IM</h2><p>This demonstration guides inspectors through the same controlled reporting process every time. Data is temporary and resets when the page is closed or refreshed.</p><div class="onboard-list"><div class="onboard-item"><b>1</b><span>Review assigned weld joints, NDE status, and due dates.</span></div><div class="onboard-item"><b>2</b><span>Complete the guided weld inspection one step at a time.</span></div><div class="onboard-item"><b>3</b><span>Upload weld photos and enter consistent captions.</span></div><div class="onboard-item"><b>4</b><span>Run the report readiness check before submission.</span></div><div class="onboard-item"><b>5</b><span>Open saved weld reports and click any numbered step to review or edit them.</span></div><div class="onboard-item"><b>6</b><span>Review the annual individual subscription or request a multiuser cloud deployment.</span></div></div><div class="action-row"><button class="btn primary" onclick="closeOnboarding();startNewInspection()">Start Practice Weld Inspection</button><button class="btn secondary" onclick="closeOnboarding()">Go to Dashboard</button><button class="btn warn" onclick="closeOnboarding();openPurchaseModal()">Annual Plans</button></div></div><div class="onboard-art"><div class="big">AWS<br>CWI IM</div><p>Qualified procedures.<br>Traceable welds.<br>Controlled release.</p></div></div></div></div>
+
+<script>
+const stepDefinitions=[
+ {name:'Project / Weld',title:'Step 1 — Project, Weld and Drawing Identification',instructions:'Confirm the project, area, component, weld ID, drawing or weld map, WPS, supporting PQR, welder/WPQ identification, inspection date, and assignment.'},
+ {name:'Scope',title:'Step 2 — Authorized Inspection Scope',instructions:'Select the weld type, document reviews, hold points, visual checkpoints, dimensional checks, and NDE methods included in the approved inspection and test plan.'},
+ {name:'Conditions',title:'Step 3 — Materials, Fit-Up and Welding Conditions',instructions:'Document material traceability, joint preparation, alignment, consumable controls, preheat/interpass controls, access, limitations, and immediate hold points.'},
+ {name:'Checkpoints',title:'Step 4 — Welding Inspection Checkpoints',instructions:'Record the result, indication or issue, exact weld location, repair requirement, and supporting detail for each selected checkpoint.'},
+ {name:'Photos',title:'Step 5 — Weld and Inspection Photographs',instructions:'Upload clear photographs. Every photo included in the report requires a checkpoint, weld location, and meaningful caption.'},
+ {name:'NDE',title:'Step 6 — Visual, Dimensional and NDE Results',instructions:'Record visual and nondestructive examination reports, dimensions, results, repair cycle, acceptance basis, and final disposition.'},
+ {name:'Repairs',title:'Step 7 — Nonconformance, Repair and Reinspection',instructions:'Create one trackable action for each reject, repair, reinspection, documentation deficiency, hold point, or required follow-up.'},
+ {name:'Readiness',title:'Step 8 — Weld Record Readiness Check',instructions:'Resolve missing drawing, material, WPS/PQR/WPQ, examination, repair, photograph, and approval records before submission.'},
+ {name:'Certification',title:'Step 9 — Inspector Certification',instructions:'Confirm the welding inspection record is accurate, complete, and ready for authorized technical review under the project requirements.'},
+ {name:'Report',title:'Step 10 — Review, Release and Turnover',instructions:'Assign the reviewer, record approval, generate the controlled weld report, and track release, issue, and owner acceptance.'}
+];
+const tutorials=[
+ {id:'quickstart',icon:'①',title:'Quick Start',time:'5 minutes',desc:'Learn the complete weld-joint inspection-to-report workflow.',steps:['Confirm your name and inspection role each time the demo opens.','Open My Inspections to review assigned weld joints.','Select Continue Inspection or Start Inspection.','Complete the ten guided steps in order.','Run the Report Readiness Check.','Submit the record for review and resolve comments.','Generate, print, or prepare the approved weld report email.']},
+ {id:'dashboard',icon:'▦',title:'Using the Dashboard',time:'3 minutes',desc:'Understand open joints, rejected welds, review status, approvals, and overdue reports.',steps:['Use the KPI cards to understand workload.','Open a weld inspection from the tracking table.','Watch due dates and rejected or repair-required records.','Use Corrective Actions to track repair and reinspection.','Delete controls are intentionally kept off dashboard and list screens.']},
+ {id:'newinspection',icon:'＋',title:'Starting and Editing Weld Inspections',time:'6 minutes',desc:'Create a traceable weld inspection record and navigate saved demo records.',steps:['Select Start Inspection.','Confirm project, weld ID, drawing or weld map, material records, PQR, WPS, welder/WPQ, and assignment.','For a new unsaved record, use Save and Continue in order.','After the record is saved, click any numbered step to jump directly to that section.','Save Draft keeps work only for the current demo session.','Open a saved weld from My Inspections to review or edit it.','To remove a record, open it, go to Step 10 — Report, and use Delete Inspection.']},
+ {id:'photos',icon:'▧',title:'Adding Weld Photos',time:'4 minutes',desc:'Upload, classify, caption, and include weld-joint photographs.',steps:['Open the Photographs step.','Select images from the device.','Assign the checkpoint and joint location.','Enter a clear caption describing what is visible.','Confirm Include in Report.','Use Remove to delete an unwanted photo before final issue.']},
+ {id:'recommendations',icon:'⚑',title:'Repairs and Corrective Actions',time:'6 minutes',desc:'Create, edit, update, verify, and close repair or follow-up actions.',steps:['Create one action for each separate reject or required follow-up.','Open Corrective Actions from the menu.','Click a row or its Edit button.','Update the checkpoint, finding, repair action, assignee, target date, status, and acceptance.','Record reinspection or NDE acceptance before closure.','Use Delete only when the record should be permanently removed.']},
+ {id:'review',icon:'✓',title:'Review and Approval',time:'5 minutes',desc:'Check traceability, submit, review, correct, approve, and issue the report.',steps:['Run the readiness check.','Complete inspector certification.','Assign the welding QC or technical reviewer.','Resolve returned comments.','Record reviewer approval.','Generate and issue the final report.']},
+ {id:'records',icon:'⌫',title:'Editing and Deleting Records',time:'4 minutes',desc:'Keep the weld register accurate without exposing destructive controls on working lists.',steps:['Use My Inspections or Reports to open the record with Edit.','Inside the saved inspection, click Step 10 — Report.','Select Delete Inspection only when the complete weld record should be removed.','Deleting a weld record also removes its photos and connected corrective actions.','Use the corrective-action pop-up to delete one action only.','This demo resets when closed or refreshed.']},
+ {id:'cleanstart',icon:'★',title:'Demo and Annual Subscription',time:'3 minutes',desc:'Understand temporary demonstration data and the two planned production subscription paths.',steps:['The demo keeps changes only while the page remains open.','Closing or refreshing restores the original AWS-CWI sample data.','Generated reports include a DEMO watermark.','The annual individual subscription is intended for one named user on one designated computer.','Multiuser cloud use is requested separately for shared access, central records, backups, and role-based users.','Select Annual Plans / Cloud to request the appropriate subscription path.']}
+];
+const infoTopics=[
+ ['Purpose and Control','AWS-CWI IM organizes welding inspection records, drawing and material traceability, WPS/PQR/WPQ verification, examination results, repairs, approvals, and turnover reports. The project-adopted construction code, specifications, approved procedures, and authorized reviewers remain controlling.'],
+ ['Weld Traceability','Confirm the project, area, component, weld ID, drawing or weld map, material heat or lot numbers, WPS, supporting PQR, welding process, and welder/WPQ identification before accepting the record.'],
+ ['Fit-Up and Welding Checkpoints','Document applicable fit-up, alignment, bevel preparation, root opening, preheat, interpass control, welding sequence, visual condition, and any project hold points.'],
+ ['Visual Examination','Record the exact joint location, observed condition, extent, result, supporting photograph, and whether repair or additional examination is required.'],
+ ['Nondestructive Examination','Record the authorized NDE method, request and report number, examination date, result, examiner or company, repair cycle, and final reinspection status.'],
+ ['Acceptance Decisions','Do not hard-code or assume acceptance limits. Acceptance must be determined using the project-adopted construction code and edition, owner requirements, approved procedures, engineering dispositions, and authorized personnel.'],
+ ['Repairs and Reinspection','Each rejected weld or documentation deficiency should have a separate traceable action showing disposition, repair method, responsible party, target date, reinspection result, verification, and closure.'],
+ ['Report Revisions','Final reports should retain the report number, revision, issue date, inspector, reviewer, WPS and welder traceability, NDE references, repair history, and client delivery status.']
+];
+const defaultAdmin={company:'Demo Welding Inspection Company',color:'#123b5d',prefix:'CWI',footer:'Welding inspection report contents are confidential and intended for the named client and project. Unauthorized use, reproduction, or distribution is prohibited.',email:'Please find the attached AWS-CWI IM welding inspection report for your review. Please contact us with any questions or requested revisions.',inspectorName:'Kirby Inspector',inspectorRole:'AWS Certified Welding Inspector',inspectorInitials:'KI',inspectorApi:'CWI-DEMO-001'};
+let admin={...defaultAdmin};
+let tutorialProgress={};
+let inspections=seedInspections();
+let demoOnboarded=false;
+let demoNextInspectionNumber=12;
+let currentInspection=null;
+let currentStep=0;
+let activeReportId=null;
+let currentInspectionSaved=false;
+let editingRecommendationKey=null;
+const demoInspectionIds=['CWI-2026-0012','CWI-2026-0011','CWI-2026-0010','CWI-2026-0009'];
+inspections.forEach(i=>{if(demoInspectionIds.includes(i.id)&&typeof i.isDemo==='undefined')i.isDemo=true});
+
+function seedInspections(){
+ return [
+  {id:'CWI-2026-0012',isDemo:true,client:'Gulf Coast Fabrication',facility:'Hydrogen Expansion Project',unit:'Pipe Rack 4 / Module M-210',tank:'PW-M210-048',description:'10-P-4201 / Spool 10-P-4201-17',inspectionDate:'2026-07-16',dueDate:'2026-07-20',assignedTo:'J. Smith',reviewedBy:'M. Davis',status:'In Progress',completion:60,photos:6,reviewStatus:'Not Submitted',acceptance:'Pending',revision:'0',sentDate:'',priority:'High',summary:'Process piping butt weld completed. Fit-up and final visual inspection are acceptable; radiographic examination remains pending.',repairs:'No repair started. Hold coating and pressure-test release until NDE acceptance is recorded.',futureRecommendations:'Complete RT review, confirm report traceability, and attach the signed NDE report before turnover.',scope:['Piping Butt Weld','Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Preheat / Interpass','Root Pass','Intermediate Passes','Final Visual Examination','Radiographic Testing'],general:{cleaned:'Yes',accessible:'Yes',immediate:'Hold — NDE pending',limitations:'No access limitations. Weld remains uncoated for examination.',fitup:'Accepted',environment:'Controlled',preheat:'Verified'},components:sampleComponents({'Radiographic Testing':{condition:'Pending',damage:'Examination Pending',finding:'RT request submitted; final interpretation not yet received.',location:'Complete weld circumference',repair:'No',recommendation:'Yes'}}),measurements:{visualReport:'VT-PW-0048',visualResult:'Accepted',ndeMethod:'RT',ndeRequest:'NDE-RT-8842',ndeReport:'Pending',ndeDate:'2026-07-16',ndeResult:'Pending',defectType:'',rejectLength:'',repairCycle:'0',finalDisposition:'Hold — NDE pending',acceptanceBasis:'ASME B31.3, project specification, approved WPS and ITP'},recommendations:[{id:'ACT-001',component:'Radiographic Testing',finding:'Final RT interpretation has not been received.',action:'Complete radiographic examination review and attach the signed NDE report before pressure-test release.',priority:'Before pressure test',assignedTo:'NDE Coordinator',targetDate:'2026-07-18',status:'Assigned',acceptance:'Pending'}],photoItems:[],inspectorApi:'CWI-DEMO-001',certified:false,reviewApproved:false,clientEmail:'client@example.com',akz:'Piping Butt Weld',legacy:'ISO-10-P-4201-S17',nbic:'PQR-P1-014 Rev 2',sapEquipment:'WPS-GTAW-SMAW-P1-01 Rev 4',pid:'WL-214 / WPQ-214-6G',serial:'A106 Gr B / A234 WPB',sapNotification:'H-78442 / H-78443',workOrder:'CWP-PIP-024',yearBuilt:'10 in / 0.500 in',ndeRequest:'NDE-RT-8842',codeEdition:'ASME B31.3 / ASME Section IX / Project Specification',weldProcess:'GTAW / SMAW'},
+  {id:'CWI-2026-0011',isDemo:true,client:'River Bend Steel Constructors',facility:'Compressor Building Expansion',unit:'Roof Truss Grid C-7',tank:'SW-C7-023',description:'Truss T-07 / Detail 5-S401',inspectionDate:'2026-07-14',dueDate:'2026-07-18',assignedTo:'A. Brown',reviewedBy:'M. Davis',status:'Waiting Review',completion:100,photos:12,reviewStatus:'Submitted',acceptance:'Pending',revision:'0',sentDate:'',priority:'Normal',summary:'Structural CJP groove weld completed and examined. VT and UT results are acceptable; final QC review is pending.',repairs:'No repair required.',futureRecommendations:'Release the connection after reviewer approval and bolt/weld turnover package confirmation.',scope:['Structural Groove Weld','Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Preheat / Interpass','Root Pass','Intermediate Passes','Final Visual Examination','Ultrasonic Testing'],general:{cleaned:'Yes',accessible:'Yes',immediate:'No',limitations:'Elevated inspection performed from approved access platform with adequate lighting.',fitup:'Accepted',environment:'Controlled',preheat:'Verified'},components:sampleComponents(),measurements:{visualReport:'VT-SW-C7-023',visualResult:'Accepted',ndeMethod:'UT',ndeRequest:'NDE-UT-5517',ndeReport:'UT-5517-R0',ndeDate:'2026-07-15',ndeResult:'Accepted',defectType:'None',rejectLength:'0',repairCycle:'0',finalDisposition:'Accepted — Pending reviewer release',acceptanceBasis:'AWS D1.1, approved WPS, drawings and project specification'},recommendations:[],photoItems:[],inspectorApi:'CWI-DEMO-002',certified:true,reviewApproved:false,clientEmail:'operations@example.com',akz:'Structural Groove Weld',legacy:'S401 / Detail 5 / Weld Map WM-C7',nbic:'PQR-FCAW-021 Rev 1',sapEquipment:'WPS-FCAW-CJP-03 Rev 5',pid:'WL-033 / WPQ-033-3G-4G',serial:'ASTM A572 Gr 50',sapNotification:'MTR-H77102 / H77103',workOrder:'CWP-STEEL-007',yearBuilt:'1.00 in plate / CJP',ndeRequest:'NDE-UT-5517',codeEdition:'AWS D1.1 / Project Structural Specification',weldProcess:'FCAW-G'},
+  {id:'CWI-2026-0010',isDemo:true,client:'Prairie Process Equipment',facility:'Reactor Fabrication Package',unit:'Vessel V-301 / Nozzle N6',tank:'VW-V301-N6-R1',description:'Nozzle-to-Shell Attachment / Drawing V301-101',inspectionDate:'2026-07-08',dueDate:'2026-07-12',assignedTo:'J. Smith',reviewedBy:'R. Cole',status:'Approved',completion:100,photos:9,reviewStatus:'Approved',acceptance:'Pending',revision:'1',sentDate:'',priority:'High',summary:'Nozzle attachment repair completed after MT rejection. Final MT/PT and visual reinspection are acceptable.',repairs:'Localized excavation and repair completed using the approved repair procedure. Final surface examinations accepted.',futureRecommendations:'Maintain the original indication record, repair map, consumable log, and final NDE reports together in the vessel data package.',scope:['Pressure Vessel Attachment Weld','Document / Qualification Review','Material Traceability','Repair Area Preparation','Preheat / Interpass','Final Visual Examination','Magnetic Particle Testing','Liquid Penetrant Testing','Repair / Reinspection'],general:{cleaned:'Yes',accessible:'Yes',immediate:'No',limitations:'Internal surface access limited; external and accessible internal areas examined per approved plan.',fitup:'Accepted',environment:'Controlled',preheat:'Verified'},components:sampleComponents({'Magnetic Particle Testing':{condition:'Accepted',damage:'Prior Reject — Repaired',finding:'Initial MT identified a relevant linear indication. Repair completed and final MT accepted.',location:'Nozzle N6 toe at 2:00 position',repair:'Yes',recommendation:'No'},'Repair / Reinspection':{condition:'Accepted',damage:'None',finding:'Excavation, repair welding, VT, MT and PT documented and accepted.',location:'Nozzle N6 toe at 2:00 position',repair:'No',recommendation:'No'}}),measurements:{visualReport:'VT-V301-N6-R1',visualResult:'Accepted',ndeMethod:'MT / PT',ndeRequest:'NDE-MT-7731-R1',ndeReport:'MT-7731-R1 / PT-7731-R1',ndeDate:'2026-07-09',ndeResult:'Accepted after repair',defectType:'Linear surface indication',rejectLength:'1.25 in',repairCycle:'1',finalDisposition:'Accepted',acceptanceBasis:'ASME Section VIII, ASME Section IX, approved repair procedure and project specification'},recommendations:[{id:'ACT-002',component:'Document / Qualification Review',finding:'Original reject images and repair records must remain linked to the final weld ID.',action:'Verify all original and final NDE reports, repair map, and welding records are indexed in the MDR.',priority:'Before turnover',assignedTo:'Document Control',targetDate:'2026-07-15',status:'Complete',acceptance:'Accepted'}],photoItems:[],inspectorApi:'CWI-DEMO-001',certified:true,reviewApproved:true,clientEmail:'inspection@example.com',akz:'Pressure Vessel Attachment Weld',legacy:'V301-101 / Detail N6 / Repair Map RM-06',nbic:'PQR-P8-006 Rev 3',sapEquipment:'WPS-GTAW-SMAW-P8-04 Rev 2',pid:'WL-111 / WPQ-111-6G',serial:'SA-516 Gr 70 / SA-182 F316L',sapNotification:'MTR-70221 / 70222',workOrder:'NCR-PIPE-7731',yearBuilt:'Shell 1.25 in / Nozzle 8 in Sch 160',ndeRequest:'NDE-MT-7731-R1',codeEdition:'ASME Section VIII Div. 1 / ASME Section IX',weldProcess:'GTAW / SMAW'},
+  {id:'CWI-2026-0009',isDemo:true,client:'Delta Tank Services',facility:'Terminal Tank T-410 Replacement',unit:'Shell Course 3 / Vertical Seam V-12',tank:'TW-T410-V12',description:'Tank T-410 / Drawing T410-SH-03',inspectionDate:'2026-06-28',dueDate:'2026-07-02',assignedTo:'A. Brown',reviewedBy:'R. Cole',status:'Accepted',completion:100,photos:14,reviewStatus:'Approved',acceptance:'Accepted',revision:'0',sentDate:'2026-07-01',priority:'Normal',summary:'Tank shell vertical seam inspection completed, approved, issued, and accepted by the owner.',repairs:'No repair required.',futureRecommendations:'Record closed. Maintain with the tank construction turnover package.',scope:['Tank Shell Weld','Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Preheat / Interpass','Root Pass','Intermediate Passes','Final Visual Examination','Radiographic Testing'],general:{cleaned:'Yes',accessible:'Yes',immediate:'No',limitations:'None.',fitup:'Accepted',environment:'Controlled',preheat:'Verified'},components:sampleComponents(),measurements:{visualReport:'VT-T410-V12',visualResult:'Accepted',ndeMethod:'RT',ndeRequest:'NDE-RT-6609',ndeReport:'RT-6609-R0',ndeDate:'2026-06-29',ndeResult:'Accepted',defectType:'None',rejectLength:'0',repairCycle:'0',finalDisposition:'Accepted / Released',acceptanceBasis:'API 650, approved WPS, drawings and project specification'},recommendations:[],photoItems:[],inspectorApi:'CWI-DEMO-002',certified:true,reviewApproved:true,clientEmail:'records@example.com',akz:'Tank Shell Weld',legacy:'T410-SH-03 / Weld Map WM-S3',nbic:'PQR-SAW-011 Rev 2',sapEquipment:'WPS-SAW-SHELL-02 Rev 4',pid:'WL-055 / WPQ-055-3G',serial:'ASTM A36 / Heat H60117-H60118',sapNotification:'PLATE-H60117 / H60118',workOrder:'CWP-TANK-410',yearBuilt:'0.500 in shell plate',ndeRequest:'NDE-RT-6609',codeEdition:'API 650 / Project Tank Specification',weldProcess:'SAW'}
+ ];
+}
+function defaultComponents(){
+ const names=['Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Preheat / Interpass','Root Pass','Intermediate Passes','Final Visual Examination','Dimensional Verification','Radiographic Testing','Ultrasonic Testing','Magnetic Particle Testing','Liquid Penetrant Testing','PWHT / Hardness','Repair Area Preparation','Repair / Reinspection'];
+ const out={};names.forEach(n=>out[n]={inspected:'Yes',condition:'Accepted',damage:'None',finding:'No rejectable condition documented.',location:'Complete weld / applicable area',repair:'No',recommendation:'No'});return out;
+}
+function sampleComponents(overrides={}){const out=defaultComponents();Object.entries(overrides).forEach(([k,v])=>{out[k]={...(out[k]||{}),...v}});return out;}
+function nextInspectionId(){
+ const year=new Date().getFullYear();
+ const prefix=(admin.prefix||'CWI').trim()||'CWI';
+ const nums=inspections.map(i=>{const m=String(i.id||'').match(/(\d{4})$/);return m?Number(m[1]):0});
+ demoNextInspectionNumber=Math.max(demoNextInspectionNumber,...nums,0)+1;
+ return `${prefix}-${year}-${String(demoNextInspectionNumber).padStart(4,'0')}`;
+}
+function newInspection(){
+ return {id:nextInspectionId(),isDemo:false,client:'',facility:'',tank:'',description:'',unit:'',akz:'Piping Butt Weld',legacy:'',nbic:'',sapEquipment:'',pid:'',serial:'',sapNotification:'',workOrder:'',yearBuilt:'',ndeRequest:'',codeEdition:'Project-adopted construction code / specification',weldProcess:'',inspectionDate:new Date().toISOString().slice(0,10),dueDate:'',assignedTo:admin.inspectorName,reviewedBy:'',status:'Assigned',completion:0,photos:0,reviewStatus:'Not Submitted',acceptance:'Pending',revision:'0',sentDate:'',priority:'Normal',summary:'',repairs:'',futureRecommendations:'',scope:['Piping Butt Weld','Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Final Visual Examination','Radiographic Testing'],general:{cleaned:'',accessible:'',immediate:'',limitations:'',fitup:'',environment:'',preheat:''},components:defaultComponents(),measurements:{visualReport:'',visualResult:'',ndeMethod:'',ndeRequest:'',ndeReport:'',ndeDate:'',ndeResult:'',defectType:'',rejectLength:'',repairCycle:'0',finalDisposition:'',acceptanceBasis:'Project-adopted construction code, specifications, approved procedures and ITP'},recommendations:[],photoItems:[],inspectorApi:admin.inspectorApi||'',certified:false,reviewApproved:false,clientEmail:''};
+}
+
+function persist(){/* Demo mode: in-memory only. Nothing is written to browser storage. */}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function val(id){return document.getElementById(id)?.value||''}
+function checked(id){return !!document.getElementById(id)?.checked}
+function fmtDate(d){if(!d)return'—';const x=new Date(d+'T00:00:00');return x.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}
+function isOverdue(i){return i.dueDate&&new Date(i.dueDate+'T23:59:59')<new Date()&&!['Approved','Sent','Accepted','Closed'].includes(i.status)}
+function statusClass(s){if(isOverdue({status:s,dueDate:''}))return'overdue';return ({'Assigned':'assigned','In Progress':'progress','Waiting Review':'review','Corrections Required':'overdue','Approved':'approved','Sent':'approved','Accepted':'approved','Closed':'closed'})[s]||'assigned'}
+function showView(view){document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(view+'View').classList.add('active');document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));document.getElementById('sidebar').classList.remove('open');const map={dashboard:['Dashboard','Track weld inspections, NDE status, repairs, reviews, and approvals.'],inspections:['My Weld Inspections','Continue field work, NDE tracking, draft reports, and reviews.'],register:['Weld Register','Review weld traceability, qualifications, NDE and disposition in one controlled list.'],qualifications:['Qualifications','Verify WPS/PQR, welder WPQ/continuity, and inspector qualification records.'],wizard:['Guided Weld Inspection','Complete each required weld inspection step consistently.'],recommendations:['Corrective Actions','Track rejects, repairs, reinspection, verification, and closure.'],reports:['Reports','Preview, print, email, revise, and issue weld inspection reports.'],tutorials:['Tutorials','Learn the application while completing weld inspection work.'],information:['AWS-CWI Information','Welding inspection workflow and qualification-control reference.'],admin:['Administration','Configure temporary demo branding and review licensing options.'],report:['Report Preview','Review the generated weld inspection report.']};const m=map[view]||map.dashboard;document.getElementById('topTitle').textContent=m[0];document.getElementById('topSub').textContent=m[1];if(view==='dashboard')renderDashboard();if(view==='inspections')renderInspections();if(view==='register')renderRegister();if(view==='qualifications')renderQualifications();if(view==='recommendations')renderRecommendationRegister();if(view==='reports')renderReports();if(view==='tutorials')renderTutorials();if(view==='information')renderInfo();if(view==='admin')renderAdmin();window.scrollTo({top:0,behavior:'smooth'});}
+
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button[data-view]');if(!b)return;if(b.dataset.new==='true')startNewInspection();else showView(b.dataset.view)});
+
+function renderDashboard(){
+ const counts={outstanding:inspections.filter(i=>!['Accepted','Closed'].includes(i.status)).length,inprogress:inspections.filter(i=>i.status==='In Progress').length,review:inspections.filter(i=>i.status==='Waiting Review').length,approved:inspections.filter(i=>i.status==='Approved').length,overdue:inspections.filter(isOverdue).length,repairs:inspections.flatMap(i=>i.recommendations||[]).filter(r=>!['Accepted','Closed'].includes(r.status)).length};
+ const cards=[['Open Weld Records',counts.outstanding,'Not accepted or closed',''],['Active Inspections',counts.inprogress,'Field, shop or NDE work','warn'],['Waiting Review',counts.review,'Submitted to welding QC',''],['Approved',counts.approved,'Ready to issue or release','good'],['Overdue Records',counts.overdue,'Past required completion date','bad'],['Open NCR / Actions',counts.repairs,'Repair or follow-up required','warn']];
+ document.getElementById('kpiGrid').innerHTML=cards.map(c=>`<div class="card kpi ${c[3]}"><div class="label">${c[0]}</div><div class="value">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('');
+ const rows=inspections.filter(i=>!['Accepted','Closed'].includes(i.status)).slice(0,6);document.getElementById('dashboardInspectionRows').innerHTML=rows.map(i=>inspectionRow(i,true)).join('')||'<tr><td colspan="8" class="empty">No outstanding weld inspections.</td></tr>';
+ const statuses=['Assigned','In Progress','Waiting Review','Approved','Accepted'];const max=Math.max(1,...statuses.map(s=>inspections.filter(i=>i.status===s).length));document.getElementById('statusBars').innerHTML=statuses.map(s=>{const n=inspections.filter(i=>i.status===s).length;return`<div class="bar-row"><span>${s}</span><div class="bar"><span style="width:${n/max*100}%"></span></div><strong>${n}</strong></div>`}).join('');
+ document.getElementById('activityFeed').innerHTML=`<div class="feed-item"><div class="feed-icon">✓</div><div><p><strong>CWI-2026-0010</strong> vessel repair weld approved after final MT/PT.</p><small>Today</small></div></div><div class="feed-item"><div class="feed-icon">↗</div><div><p><strong>SW-C7-023</strong> structural CJP weld submitted for welding QC review.</p><small>Yesterday</small></div></div><div class="feed-item"><div class="feed-icon">⚑</div><div><p>Action <strong>ACT-001</strong> assigned to the NDE Coordinator.</p><small>2 days ago</small></div></div>`;
+ document.getElementById('navInspectionCount').textContent=counts.outstanding;document.getElementById('navRecCount').textContent=counts.repairs;
+}
+function inspectionRow(i,compact=false){
+ const overdue=isOverdue(i);const s=overdue?'Overdue':i.status;
+ if(compact)return`<tr><td><strong>${esc(i.id)}</strong></td><td><strong>${esc(i.tank)}</strong><br><small>${esc(i.description)}</small></td><td>${esc(i.client)}</td><td>${esc(i.assignedTo)}</td><td>${fmtDate(i.dueDate)}</td><td><div class="progress"><span style="width:${i.completion}%"></span></div><small>${i.completion}%</small></td><td><span class="status ${overdue?'overdue':statusClass(i.status)}">${s}</span></td><td><div class="action-row"><button class="btn small primary" onclick="openInspection('${i.id}')">Open</button></div></td></tr>`;
+ return`<tr><td><strong>${esc(i.id)}</strong></td><td>${esc(i.client)}<br><small>${esc(i.facility)}</small></td><td><strong>${esc(i.tank)}</strong><br><small>${esc(i.description)}</small></td><td>${esc(i.akz||'—')}</td><td>${fmtDate(i.inspectionDate)}</td><td>${fmtDate(i.dueDate)}</td><td>${esc(i.assignedTo)}</td><td>${esc(i.reviewedBy||'Unassigned')}</td><td>${i.photos||0}</td><td><div class="progress"><span style="width:${i.completion}%"></span></div><small>${i.completion}%</small></td><td><span class="status ${overdue?'overdue':statusClass(i.status)}">${s}</span></td><td><div class="action-row"><button class="btn small primary" onclick="openInspection('${i.id}')">${i.completion<100?'Continue':'Edit'}</button><button class="btn small secondary" onclick="previewReport('${i.id}')">Report</button></div></td></tr>`;
+}
+function renderInspections(){const q=val('inspectionSearch').toLowerCase(),f=val('inspectionStatusFilter');const filtered=inspections.filter(i=>(!f||i.status===f)&&(!q||[i.id,i.client,i.facility,i.unit,i.tank,i.description,i.akz,i.legacy,i.sapEquipment,i.pid,i.assignedTo].join(' ').toLowerCase().includes(q)));document.getElementById('inspectionRows').innerHTML=filtered.map(i=>inspectionRow(i)).join('')||'<tr><td colspan="12" class="empty">No weld inspections match the selected filters.</td></tr>';}
+const qualificationData={
+ wps:[
+  {wps:'WPS-GTAW-SMAW-P1-01',pqr:'PQR-P1-014',process:'GTAW / SMAW',base:'P-No. 1',range:'0.188–1.000 in',rev:'4',status:'Approved'},
+  {wps:'WPS-FCAW-CJP-03',pqr:'PQR-FCAW-021',process:'FCAW-G',base:'A572 Gr 50',range:'3/8–2 in CJP',rev:'5',status:'Approved'},
+  {wps:'WPS-GTAW-SMAW-P8-04',pqr:'PQR-P8-006',process:'GTAW / SMAW',base:'P-No. 8 to P-No. 1',range:'0.250–1.500 in',rev:'2',status:'Approved'},
+  {wps:'WPS-SAW-SHELL-02',pqr:'PQR-SAW-011',process:'SAW',base:'A36 / Group I',range:'0.250–0.750 in',rev:'4',status:'Approved'}
+ ],
+ welders:[
+  {id:'WL-214',name:'Daniel Cruz',process:'GTAW / SMAW',positions:'6G',wpq:'WPQ-214-6G',continuity:'2026-11-30',status:'Current'},
+  {id:'WL-033',name:'Maria Lewis',process:'FCAW-G',positions:'3G / 4G',wpq:'WPQ-033-3G-4G',continuity:'2026-08-15',status:'Review Soon'},
+  {id:'WL-111',name:'James Carter',process:'GTAW / SMAW',positions:'6G',wpq:'WPQ-111-6G',continuity:'2027-01-31',status:'Current'},
+  {id:'WL-055',name:'Andre Martin',process:'SAW',positions:'3G',wpq:'WPQ-055-3G',continuity:'2026-10-20',status:'Current'}
+ ],
+ inspectors:[
+  {name:'Kirby Inspector',qualification:'AWS CWI',id:'CWI-DEMO-001',expiration:'2027-05-31',role:'Administrator / Reviewer',status:'Current'},
+  {name:'A. Brown',qualification:'AWS CWI',id:'CWI-DEMO-002',expiration:'2026-12-31',role:'Welding Inspector',status:'Current'},
+  {name:'M. Davis',qualification:'Company Welding QC Reviewer',id:'QC-REV-014',expiration:'Annual review 2027-01',role:'Technical Reviewer',status:'Current'}
+ ]
+};
+function renderRegister(){
+ const q=val('registerSearch').toLowerCase(),f=val('registerStatusFilter');
+ const filtered=inspections.filter(i=>(!f||i.status===f)&&(!q||[i.id,i.client,i.facility,i.unit,i.tank,i.description,i.akz,i.legacy,i.sapEquipment,i.nbic,i.pid,i.serial,i.measurements?.ndeMethod,i.measurements?.finalDisposition].join(' ').toLowerCase().includes(q)));
+ const pending=inspections.filter(i=>['Pending',''].includes(i.measurements?.ndeResult||'')).length;
+ const repaired=inspections.filter(i=>Number(i.measurements?.repairCycle||0)>0).length;
+ const released=inspections.filter(i=>String(i.measurements?.finalDisposition||'').toLowerCase().includes('accepted')).length;
+ const cards=[['Total Welds',inspections.length,'Current demo register',''],['NDE Pending',pending,'Cannot release until complete','warn'],['Repair Cycles',repaired,'Welds with repair history','bad'],['Released',released,'Accepted final disposition','good']];
+ document.getElementById('registerKpis').innerHTML=cards.map(c=>`<div class="card kpi ${c[3]}"><div class="label">${c[0]}</div><div class="value">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('');
+ document.getElementById('weldRegisterRows').innerHTML=filtered.map(i=>`<tr class="clickable-row" onclick="openInspection('${i.id}')"><td><strong>${esc(i.tank)}</strong><br><small>${esc(i.id)}</small></td><td>${esc(i.facility)}<br><small>${esc(i.unit)}</small></td><td>${esc(i.description)}<br><small>${esc(i.legacy)}</small></td><td>${esc(i.akz)}</td><td>${esc(i.sapEquipment)}</td><td>${esc(i.nbic)}</td><td>${esc(i.pid)}</td><td>${esc(i.serial)}</td><td>${esc(i.measurements?.ndeMethod||'—')}<br><small>${esc(i.measurements?.ndeResult||'Pending')}</small></td><td>${esc(i.measurements?.finalDisposition||'Pending')}</td><td><span class="status ${statusClass(i.status)}">${esc(i.status)}</span></td><td><button class="btn small primary" onclick="event.stopPropagation();openInspection('${i.id}')">Open</button></td></tr>`).join('')||'<tr><td colspan="12" class="empty">No welds match the selected filters.</td></tr>';
+}
+function renderQualifications(){
+ const soon=qualificationData.welders.filter(w=>w.status!=='Current').length;
+ const cards=[['Approved WPS',qualificationData.wps.filter(x=>x.status==='Approved').length,'Linked to supporting PQR','good'],['Welder WPQ',qualificationData.welders.length,'Performance records in register',''],['Continuity Review',soon,'Requires upcoming verification','warn'],['Qualified Inspectors',qualificationData.inspectors.filter(x=>x.status==='Current').length,'Current demo records','good']];
+ document.getElementById('qualificationKpis').innerHTML=cards.map(c=>`<div class="card kpi ${c[3]}"><div class="label">${c[0]}</div><div class="value">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('');
+ document.getElementById('wpsRows').innerHTML=qualificationData.wps.map(x=>`<tr><td><strong>${esc(x.wps)}</strong></td><td>${esc(x.pqr)}</td><td>${esc(x.process)}</td><td>${esc(x.base)}</td><td>${esc(x.range)}</td><td>${esc(x.rev)}</td><td><span class="status approved">${esc(x.status)}</span></td></tr>`).join('');
+ document.getElementById('welderRows').innerHTML=qualificationData.welders.map(x=>`<tr><td><strong>${esc(x.id)}</strong></td><td>${esc(x.name)}</td><td>${esc(x.process)}</td><td>${esc(x.positions)}</td><td>${esc(x.wpq)}</td><td>${fmtDate(x.continuity)}</td><td><span class="status ${x.status==='Current'?'approved':'progress'}">${esc(x.status)}</span></td></tr>`).join('');
+ document.getElementById('inspectorQualificationRows').innerHTML=qualificationData.inspectors.map(x=>`<tr><td><strong>${esc(x.name)}</strong></td><td>${esc(x.qualification)}</td><td>${esc(x.id)}</td><td>${esc(x.expiration)}</td><td>${esc(x.role)}</td><td><span class="status approved">${esc(x.status)}</span></td></tr>`).join('');
+}
+
+function startNewInspection(){currentInspection=newInspection();currentInspectionSaved=false;currentStep=0;showView('wizard');renderWizard()}
+function openInspection(id){const found=inspections.find(i=>i.id===id);if(!found)return;currentInspection=JSON.parse(JSON.stringify(found));currentInspectionSaved=true;currentStep=Math.min(9,Math.floor((currentInspection.completion||0)/10));showView('wizard');renderWizard()}
+function renderStepper(){const canJump=currentInspectionSaved;document.getElementById('stepper').innerHTML=stepDefinitions.map((s,idx)=>`<div class="step ${idx<currentStep?'done':idx===currentStep?'active':''} ${canJump?'clickable':'locked'}" data-step="${idx+1}" ${canJump?`onclick="goToStep(${idx})" title="Open ${s.name}"`:'title="Save the new inspection before jumping between steps"'}>${s.name}</div>`).join('')}
+function goToStep(idx){if(!currentInspectionSaved)return;saveStepData();saveCurrentInspection(false);currentStep=Math.max(0,Math.min(9,idx));renderWizard();window.scrollTo({top:0,behavior:'smooth'})}
+function renderWizard(){
+ if(!currentInspection)currentInspection=newInspection();renderStepper();
+ const d=stepDefinitions[currentStep];document.getElementById('stepTitle').textContent=d.title;document.getElementById('stepInstructions').textContent=d.instructions;document.getElementById('backBtn').disabled=currentStep===0;document.getElementById('nextBtn').textContent=currentStep===9?'Save Inspection':'Save and Continue →';document.getElementById('wizardPageTitle').textContent=currentInspection.id||'Guided Inspection';
+ const renderers=[stepTank,stepScope,stepCondition,stepFindings,stepPhotos,stepCalculations,stepRecommendations,stepQA,stepCertification,stepReport];document.getElementById('wizardBody').innerHTML=renderers[currentStep]();renderSideHelp();bindDynamic();
+}
+function renderSideHelp(){
+ const tips=[['Confirm joint traceability','Use the current drawing, weld map or joint schedule, material records, WPS/PQR register, welder WPQ and continuity roster. Confirm the exact weld before proceeding.'],['Define the authorized scope','Select only the weld type, checkpoints, and examination methods required by the project inspection plan.'],['Record field conditions','Document access, surface preparation, fit-up readiness, environmental controls, preheat verification, limitations, and hold points.'],['Use consistent checkpoint results','State what was inspected, the result, exact weld location, side, member, or clock position, extent, and required disposition.'],['Caption every photo','Describe the joint ID, checkpoint, clock position or side, direction, and why the photograph is relevant.'],['Link NDE and disposition','Record the request and report number, method, examination date, result, repair cycle, acceptance basis, and final release status.'],['Make repairs traceable','Use one corrective action per reject or deficiency and identify responsibility, target date, reinspection, verification, and closure.'],['Resolve every warning','Complete missing traceability, NDE, photos, actions, and certifications before submission.'],['Certification is controlled','The inspector confirms completeness and accuracy; acceptance remains subject to project procedures and qualified review.'],['Issue only approved records','Final reports and release should occur only after the required welding QC and client review.']];
+ const t=tips[currentStep];document.getElementById('sideHelp').innerHTML=`<h4>Inspector Guidance</h4><p><strong>${t[0]}</strong></p><p>${t[1]}</p><ul><li>Required fields are marked with an asterisk.</li><li>Data is held only for the current demo session.</li><li>Select Help for the related tutorial.</li><li>${currentInspectionSaved?'This is a saved weld record: click any numbered step to jump directly to it.':'New weld records must be completed in sequence until the first save.'}</li></ul><button class="btn secondary" style="width:100%" onclick="openTutorial('${tutorialForStep()}')">Open Tutorial</button><div class="mini-progress"><small>Report progress</small><div class="progress" style="margin-top:6px"><span style="width:${Math.max(currentInspection.completion||0,currentStep*10)}%"></span></div></div>`;
+}
+function tutorialForStep(){return ['newinspection','newinspection','newinspection','newinspection','photos','recommendations','recommendations','review','review','review'][currentStep]}
+function stepTank(){const i=currentInspection;return`<div class="tip"><strong>Before you begin:</strong> Confirm the exact weld, drawing, materials, procedure, and personnel qualifications. This information appears in the final report and master weld register.</div><div class="form-grid four">
+ ${field('Client','client',i.client,true)}${field('Project','facility',i.facility,true)}${field('Area / Location','unit',i.unit)}${field('Weld Joint ID','tank',i.tank,true)}${field('Component / Drawing / Service','description',i.description,true)}<div class="field"><label>Weld Type</label>${select('f_akz',['Structural Groove Weld','Structural Fillet Weld','Piping Butt Weld','Piping Socket Weld','Pressure Vessel Seam Weld','Pressure Vessel Attachment Weld','Tank Shell Weld','Tank Bottom Weld','Repair Weld','Welder Qualification Coupon','Other'],i.akz)}</div>${field('Weld / Inspection Date','inspectionDate',i.inspectionDate,true,'date')}${field('Report Due Date','dueDate',i.dueDate,true,'date')}${field('Assigned Inspector','assignedTo',i.assignedTo,true)}${field('Reviewed By','reviewedBy',i.reviewedBy)}${field('Work Package','workOrder',i.workOrder)}${field('Drawing / Isometric / Weld Map','legacy',i.legacy,true)}${field('PQR Number / Revision','nbic',i.nbic,true)}${field('WPS Number / Revision','sapEquipment',i.sapEquipment,true)}${field('Welder ID(s) / WPQ','pid',i.pid,true)}${field('Base Material / Grade','serial',i.serial)}${field('Heat / Lot Number(s)','sapNotification',i.sapNotification)}${field('Thickness / Diameter','yearBuilt',i.yearBuilt)}${field('NDE Request Number','ndeRequest',i.ndeRequest)}${field('Welding Process','weldProcess',i.weldProcess)}${field('Governing Code / Specification','codeEdition',i.codeEdition)}${field('Client Email','clientEmail',i.clientEmail,false,'email')}
+ </div>`}
+function field(label,id,value,req=false,type='text'){return`<div class="field"><label>${label}${req?'<span class="req">*</span>':''}</label><input id="f_${id}" type="${type}" value="${esc(value)}"></div>`}
+function stepScope(){const opts=['Structural Groove Weld','Structural Fillet Weld','Piping Butt Weld','Piping Socket Weld','Pressure Vessel Seam Weld','Pressure Vessel Attachment Weld','Tank Shell Weld','Tank Bottom Weld','Repair Weld','Welder Qualification Coupon','Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Preheat / Interpass','Root Pass','Intermediate Passes','Final Visual Examination','Dimensional Verification','Radiographic Testing','Ultrasonic Testing','Magnetic Particle Testing','Liquid Penetrant Testing','PWHT / Hardness','Repair Area Preparation','Repair / Reinspection'];return`<div class="tip"><strong>How this works:</strong> Select the weld type plus every document review, hold point, checkpoint, dimensional check, and NDE method included in the authorized inspection scope.</div><div class="check-grid">${opts.map(o=>`<label class="check"><input type="checkbox" class="scopeCheck" value="${o}" ${currentInspection.scope.includes(o)?'checked':''}><span><strong>${o}</strong><br><small>${scopeHelp(o)}</small></span></label>`).join('')}</div>`}
+function scopeHelp(o){return({
+'Document / Qualification Review':'Drawing, specification, WPS, PQR, WPQ, continuity, and inspector authorization.',
+'Material Traceability':'Base material, filler metal, heat or lot numbers, MTR/CMTR, and identification-transfer controls.',
+'Joint Preparation / Fit-Up':'Joint detail, bevel, alignment, root opening, backing, cleanliness, and tack condition.',
+'Preheat / Interpass':'Preheat method, minimum/maximum temperature, interpass controls, and measurement records.',
+'Root Pass':'Root condition and required hold-point observations.',
+'Intermediate Passes':'Cleaning, bead placement, interpass condition, and welding progression.',
+'Final Visual Examination':'Completed-weld profile, dimensions, surface condition, and disposition.',
+'Dimensional Verification':'Size, length, reinforcement, undercut, alignment, or other required dimensions.',
+'Radiographic Testing':'RT request, report, interpretation, repair cycle, and final result.',
+'Ultrasonic Testing':'UT/AUT request, report, interpretation, repair cycle, and final result.',
+'Magnetic Particle Testing':'MT examination of the applicable surface or repair area.',
+'Liquid Penetrant Testing':'PT examination of the applicable surface or repair area.',
+'PWHT / Hardness':'Postweld heat-treatment charts, temperature controls, and hardness verification.',
+'Repair Area Preparation':'Excavation, defect removal, preparation, and readiness for repair.',
+'Repair / Reinspection':'Repair welding, visual reinspection, NDE, and final disposition.'
+})[o]||'Include this item when it is part of the approved inspection and test plan.'}
+function stepCondition(){const g=currentInspection.general;return`<div class="form-grid three">
+ <div class="field"><label>Weld area clean and suitable for examination?<span class="req">*</span></label>${select('g_cleaned',['','Yes','No','Partially'],g.cleaned)}</div>
+ <div class="field"><label>Required weld area accessible?<span class="req">*</span></label>${select('g_accessible',['','Yes','No','Partially'],g.accessible)}</div>
+ <div class="field"><label>Joint preparation / fit-up status</label>${select('g_fitup',['','Accepted','Accepted with comments','Rejected','Not observed','Not applicable'],g.fitup)}</div>
+ <div class="field"><label>Environmental controls</label>${select('g_environment',['','Controlled / Acceptable','Wind protection required','Moisture present','Temperature concern','Not observed'],g.environment)}</div>
+ <div class="field"><label>Preheat / interpass verification</label>${select('g_preheat',['','Verified','Not required','Not verified','Out of range','Not observed'],g.preheat)}</div>
+ <div class="field"><label>Hold point or immediate action?<span class="req">*</span></label>${select('g_immediate',['','No','Hold — Documentation incomplete','Hold — Fit-up rejected','Hold — Visual reject','Hold — NDE pending','Hold — Repair / reinspection required','Engineering / client review required'],g.immediate)}</div>
+ <div class="field"><label>Inspection Priority</label>${select('f_priority',['Normal','High','Urgent'],currentInspection.priority)}</div>
+ <div class="field full"><label>Inspection Limitations</label><textarea id="g_limitations">${esc(g.limitations)}</textarea><div class="help">Identify access restrictions, coating, lighting, weather, production timing, unavailable records, unsafe areas, or any condition that limited examination.</div></div>
+ <div class="field full"><label>Preliminary Weld Summary</label><textarea id="f_summary">${esc(currentInspection.summary)}</textarea><div class="help">Provide a brief overall statement including pending NDE, rejects, repairs, or release restrictions.</div></div>
+ </div>`}
+function select(id,options,value){return`<select id="${id}">${options.map(o=>`<option ${o===value?'selected':''}>${esc(o)}</option>`).join('')}</select>`}
+function selectedComponents(){return currentInspection.scope.filter(x=>['Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Preheat / Interpass','Root Pass','Intermediate Passes','Final Visual Examination','Dimensional Verification','Radiographic Testing','Ultrasonic Testing','Magnetic Particle Testing','Liquid Penetrant Testing','PWHT / Hardness','Repair Area Preparation','Repair / Reinspection'].includes(x))}
+function stepFindings(){const comps=selectedComponents();return`<div class="scroll-list"><div class="component-list">${comps.map((c,idx)=>{const x=currentInspection.components[c]||{};return`<div class="component-card"><h5>${idx+1}. ${c}<span class="status ${x.condition==='Accepted'?'approved':x.condition==='Rejected'?'overdue':x.condition==='Pending'?'review':'progress'}">${x.condition||'Not Rated'}</span></h5><div class="form-grid"><div class="field"><label>Inspected / Verified?</label>${select(`c_${slug(c)}_inspected`,['Yes','No','Partially','Not Applicable'],x.inspected)}</div><div class="field"><label>Result</label>${select(`c_${slug(c)}_condition`,['Accepted','Accepted with comments','Pending','Rejected','Not Applicable'],x.condition)}</div><div class="field"><label>Indication / Issue Type</label>${select(`c_${slug(c)}_damage`,['None','Documentation / Qualification','Material Traceability','Misalignment / Hi-Lo','Root Opening / Fit-Up','Undercut','Porosity','Slag Inclusion','Lack of Fusion','Incomplete Penetration','Crack / Crack-Like Indication','Arc Strike / Arc Burn','Burn-Through','Concavity','Excess Reinforcement','Surface Profile / Finish','Dimensional Nonconformance','Examination Pending','Prior Reject — Repaired','Other'],x.damage)}</div><div class="field full"><label>Finding / Examination Detail</label><textarea id="c_${slug(c)}_finding">${esc(x.finding)}</textarea></div><div class="field"><label>Weld Location / Side / Clock Position</label><input id="c_${slug(c)}_location" value="${esc(x.location)}"></div><div class="field"><label>Repair Required?</label>${select(`c_${slug(c)}_repair`,['No','Yes','Pending disposition'],x.repair)}</div><div class="field"><label>Corrective Action Required?</label>${select(`c_${slug(c)}_recommendation`,['No','Yes'],x.recommendation)}</div></div></div>`}).join('')}</div></div>`}
+function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'_')}
+function stepPhotos(){return`<div class="upload-zone"><strong>Add Inspection Photos</strong><p style="color:var(--muted)">Choose photos from a phone, tablet, or computer. Images are held temporarily for this demo session and reset when the page is closed or refreshed.</p><input type="file" id="photoUpload" accept="image/*" multiple></div><div class="scroll-list" style="margin-top:12px"><div class="photo-grid" id="photoGrid">${photoCards()}</div></div>`}
+function photoCards(){return (currentInspection.photoItems||[]).map((p,idx)=>`<div class="photo-card"><img src="${p.data}" alt="Weld inspection photo"><div class="photo-meta"><strong>Photo ${idx+1}</strong>${select(`p_${idx}_component`,['Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Preheat / Interpass','Root Pass','Intermediate Passes','Final Visual Examination','Dimensional Verification','Radiographic Testing','Ultrasonic Testing','Magnetic Particle Testing','Liquid Penetrant Testing','PWHT / Hardness','Repair Area Preparation','Repair / Reinspection','Other'],p.component)}<input id="p_${idx}_location" placeholder="Joint location / clock position" value="${esc(p.location)}"><input id="p_${idx}_caption" placeholder="Required caption" value="${esc(p.caption)}"><label style="display:flex;gap:6px;margin-top:8px"><input id="p_${idx}_include" type="checkbox" ${p.include?'checked':''}> Include in report</label><button class="btn small bad" style="margin-top:8px" onclick="removePhoto(${idx})">Remove</button></div></div>`).join('')||'<div class="empty" style="grid-column:1/-1">No weld photos uploaded yet.</div>'}
+function stepCalculations(){const m=currentInspection.measurements;return`<div class="notice warn"><strong>Acceptance control:</strong> This demo organizes results but does not determine code acceptance. Use the project-adopted construction code and edition, specifications, approved procedures, engineering dispositions, and authorized interpretation.</div><div class="card" style="box-shadow:none;margin-bottom:14px"><div class="panel-head"><h4>Visual Examination</h4></div><div class="panel-body"><div class="form-grid three">${field('Visual Report / Log Number','visualReport',m.visualReport)}<div class="field"><label>Visual Result</label>${select('f_visualResult',['','Accepted','Accepted with comments','Rejected','Pending','Not Applicable'],m.visualResult)}</div>${field('Acceptance Basis','acceptanceBasis',m.acceptanceBasis)}</div></div></div><div class="card" style="box-shadow:none;margin-bottom:14px"><div class="panel-head"><h4>Nondestructive Examination</h4></div><div class="panel-body"><div class="form-grid three"><div class="field"><label>NDE Method</label>${select('f_ndeMethod',['','RT','UT','AUT','PAUT','TOFD','MT','PT','VT Only','Other'],m.ndeMethod)}</div>${field('NDE Request Number','mNdeRequest',m.ndeRequest||currentInspection.ndeRequest)}${field('NDE Report Number','ndeReport',m.ndeReport)}${field('NDE Date','ndeDate',m.ndeDate,false,'date')}<div class="field"><label>NDE Result</label>${select('f_ndeResult',['','Accepted','Accepted after repair','Rejected','Pending','Not Applicable'],m.ndeResult)}</div>${field('Indication / Defect Type','defectType',m.defectType)}${field('Reject Length / Extent','rejectLength',m.rejectLength)}${field('Repair Cycle','repairCycle',m.repairCycle)}<div class="field"><label>Final Disposition</label>${select('f_finalDisposition',['','Accepted / Released','Accepted — Pending reviewer release','Hold — NDE pending','Repair required','Reinspection required','Rejected / Cutout required','Engineering / client review'],m.finalDisposition)}</div></div></div></div>`}
+function stepRecommendations(){return`<div class="tip"><strong>Traceability rule:</strong> Create one corrective action for each separate reject, repair, reinspection, missing record, or release restriction.</div><div class="scroll-list" id="recommendationCards">${recommendationCards()}</div><button class="btn secondary" onclick="addRecommendation()">＋ Add Corrective Action</button><div class="form-grid" style="margin-top:16px"><div class="field full"><label>Repair / Rework Summary</label><textarea id="f_repairs">${esc(currentInspection.repairs)}</textarea></div><div class="field full"><label>Turnover / Follow-Up Summary</label><textarea id="f_futureRecommendations">${esc(currentInspection.futureRecommendations)}</textarea></div></div>`}
+function recommendationCards(){return(currentInspection.recommendations||[]).map((r,idx)=>`<div class="rec-card"><h5>Corrective Action ${idx+1}</h5><div class="form-grid three"><div class="field"><label>Checkpoint</label>${select(`r_${idx}_component`,['Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Preheat / Interpass','Root Pass','Intermediate Passes','Final Visual Examination','Dimensional Verification','Radiographic Testing','Ultrasonic Testing','Magnetic Particle Testing','Liquid Penetrant Testing','PWHT / Hardness','Repair Area Preparation','Repair / Reinspection','Other'],r.component)}</div><div class="field"><label>Priority</label>${select(`r_${idx}_priority`,['Stop work / immediate','Before next weld operation','Before coating / insulation','Before pressure test / load release','Before turnover','Short term','Monitor','Informational'],r.priority)}</div><div class="field"><label>Status</label>${select(`r_${idx}_status`,['Open','Assigned','Disposition Review','Repair Planned','Repair In Progress','Reinspection Required','Complete','Verified','Accepted','Closed'],r.status)}</div><div class="field full"><label>Finding / Reject</label><textarea id="r_${idx}_finding">${esc(r.finding)}</textarea></div><div class="field full"><label>Required Action / Repair</label><textarea id="r_${idx}_action">${esc(r.action)}</textarea></div><div class="field"><label>Assigned To</label><input id="r_${idx}_assignedTo" value="${esc(r.assignedTo)}"></div><div class="field"><label>Target Date</label><input type="date" id="r_${idx}_targetDate" value="${esc(r.targetDate)}"></div><div class="field"><label>Verification / Acceptance</label>${select(`r_${idx}_acceptance`,['Pending','Accepted','Rejected','Revision Required'],r.acceptance)}</div></div><button class="btn small bad" onclick="removeRecommendation(${idx})">Remove</button></div>`).join('')||'<div class="empty">No corrective actions have been added.</div>'}
+function qaChecks(){
+ const i=currentInspection,photos=i.photoItems||[],recs=i.recommendations||[],m=i.measurements||{},checks=[];
+ checks.push(['Project, weld and qualification traceability complete',!!(i.client&&i.facility&&i.tank&&i.description&&i.inspectionDate&&i.dueDate&&i.legacy&&i.nbic&&i.sapEquipment&&i.pid),'Complete client, project, weld ID, component or drawing, dates, drawing or weld map, PQR, WPS, and welder/WPQ records.']);
+ checks.push(['Inspection scope complete',i.scope.length>1,'Select the weld type and applicable document, inspection, dimensional, or NDE checkpoints.']);
+ checks.push(['Field conditions complete',!!(i.general.cleaned&&i.general.accessible&&i.general.immediate),'Complete the required surface, access, and hold-point questions.']);
+ const comps=selectedComponentsFor(i);checks.push(['Selected checkpoints addressed',comps.length>0&&comps.every(c=>i.components[c]?.condition),'Record a result for every selected checkpoint.']);
+ checks.push(['Photograph information complete',(i.photos||0)>0&&(photos.length===0||photos.filter(p=>p.include).every(p=>p.component&&p.location&&p.caption)),'Upload at least one weld photo and complete its checkpoint, location, and caption.']);
+ checks.push(['Visual / NDE disposition recorded',!!(m.visualResult&&m.ndeMethod&&m.ndeResult&&m.finalDisposition),'Complete visual result, NDE method and result, and final disposition.']);
+ checks.push(['Corrective actions are trackable',recs.every(r=>r.component&&r.finding&&r.action&&r.priority&&r.assignedTo&&r.targetDate),'Complete the action, priority, assignee, and target date for every corrective action.']);
+ checks.push(['Inspector qualification or ID entered',!!i.inspectorApi,'Enter the inspector qualification, certification, or company identification number.']);
+ checks.push(['Inspector certification complete',!!i.certified,'Complete certification in Step 9.']);
+ return checks;
+}
+function stepQA(){const checks=qaChecks();const good=checks.filter(c=>c[1]).length,pct=Math.round(good/checks.length*100);return`<div class="notice ${pct===100?'good':pct>=75?'warn':'info'}"><strong>Report Readiness: ${pct}%</strong><br>${pct===100?'All mandatory prototype checks are complete.':'Resolve the incomplete items before technical review.'}</div><div class="qa-list">${checks.map(c=>`<div class="qa-item ${c[1]?'good':'bad'}"><div class="qa-icon">${c[1]?'✓':'!'}</div><div class="qa-text"><strong>${c[0]}</strong><br><small>${c[1]?'Complete':c[2]}</small></div></div>`).join('')}</div>`}
+function stepCertification(){return`<div class="notice info"><strong>Inspector certification:</strong> Review joint traceability, field conditions, checkpoint results, NDE reports, photographs, repairs, corrective actions, and final disposition before submitting the record.</div><div class="form-grid"><div class="field"><label>Inspector Name<span class="req">*</span></label><input id="f_assignedTo" value="${esc(currentInspection.assignedTo)}"></div><div class="field"><label>Inspector Qualification / ID<span class="req">*</span></label><input id="f_inspectorApi" value="${esc(currentInspection.inspectorApi)}"></div><div class="field full"><label>Final Weld Inspection Summary<span class="req">*</span></label><textarea id="f_summary">${esc(currentInspection.summary)}</textarea></div><div class="field full"><label class="check"><input type="checkbox" id="f_certified" ${currentInspection.certified?'checked':''}><span><strong>I certify that I reviewed this weld inspection record.</strong><br><small>I confirm that the documented traceability, observations, examination results, repairs, and disposition accurately represent the work to the best of my professional judgment and assigned authority.</small></span></label></div></div>`}
+function stepReport(){const ready=qaChecks().every(c=>c[1]);return`<div class="notice ${ready?'good':'warn'}"><strong>${ready?'Ready for controlled welding QC review':'Not ready for final issue'}</strong><br>${ready?'Assign the reviewer, record approval, and generate the weld inspection report.':'Return to the Readiness Check and complete the missing traceability or examination information.'}</div><div class="form-grid"><div class="field"><label>Welding QC / Technical Reviewer</label><input id="f_reviewedBy" value="${esc(currentInspection.reviewedBy)}"></div><div class="field"><label>Workflow Status</label>${select('f_status',['Assigned','In Progress','Waiting Review','Corrections Required','Approved','Sent','Accepted'],currentInspection.status)}</div><div class="field"><label>Report Revision</label><input id="f_revision" value="${esc(currentInspection.revision)}"></div><div class="field"><label>Client / Owner Acceptance</label>${select('f_acceptance',['Pending','Accepted with comments','Accepted','Rejected','Revision Requested'],currentInspection.acceptance)}</div><div class="field full"><label class="check"><input type="checkbox" id="f_reviewApproved" ${currentInspection.reviewApproved?'checked':''}><span><strong>Reviewer approval recorded</strong><br><small>Final issue and weld release should occur only after the required project review and approval.</small></span></label></div></div><div class="action-row" style="margin-top:18px"><button class="btn secondary" onclick="saveCurrentInspection(true);previewReport('${currentInspection.id}')">Preview Report</button><button class="btn secondary" onclick="saveCurrentInspection(false);previewReport(currentInspection.id);setTimeout(()=>window.print(),250)">Print / Save PDF</button><button class="btn primary" onclick="saveCurrentInspection(true);emailCurrentInspection()">Prepare Email</button>${currentInspectionSaved?'<button class="btn bad" style="margin-left:auto" onclick="deleteCurrentInspectionFromEditor()">Delete Weld Record</button>':''}</div><div class="help" style="margin-top:10px">Delete is available only inside the opened weld record so it cannot be removed accidentally from dashboard or list screens.</div>`}
+function bindDynamic(){
+ if(currentStep===4){document.getElementById('photoUpload').addEventListener('change',handlePhotos)}
+}
+function saveStepData(){const i=currentInspection;if(!i)return;
+ if(currentStep===0){['client','facility','unit','tank','description','inspectionDate','dueDate','assignedTo','reviewedBy','akz','legacy','nbic','sapEquipment','pid','serial','sapNotification','workOrder','yearBuilt','ndeRequest','weldProcess','codeEdition','clientEmail'].forEach(k=>{const e=document.getElementById('f_'+k);if(e)i[k]=e.value.trim()})}
+ if(currentStep===1)i.scope=[...document.querySelectorAll('.scopeCheck:checked')].map(x=>x.value);
+ if(currentStep===2){i.general.cleaned=val('g_cleaned');i.general.accessible=val('g_accessible');i.general.fitup=val('g_fitup');i.general.environment=val('g_environment');i.general.preheat=val('g_preheat');i.general.immediate=val('g_immediate');i.general.limitations=val('g_limitations');i.priority=val('f_priority');i.summary=val('f_summary')}
+ if(currentStep===3){selectedComponents().forEach(c=>{const s=slug(c);i.components[c]={inspected:val(`c_${s}_inspected`),condition:val(`c_${s}_condition`),damage:val(`c_${s}_damage`),finding:val(`c_${s}_finding`),location:val(`c_${s}_location`),repair:val(`c_${s}_repair`),recommendation:val(`c_${s}_recommendation`)}})}
+ if(currentStep===4){(i.photoItems||[]).forEach((p,idx)=>{p.component=val(`p_${idx}_component`);p.location=val(`p_${idx}_location`);p.caption=val(`p_${idx}_caption`);p.include=checked(`p_${idx}_include`)});i.photos=i.photoItems.length}
+ if(currentStep===5){const m=i.measurements;m.visualReport=val('f_visualReport');m.visualResult=val('f_visualResult');m.acceptanceBasis=val('f_acceptanceBasis');m.ndeMethod=val('f_ndeMethod');m.ndeRequest=val('f_mNdeRequest');m.ndeReport=val('f_ndeReport');m.ndeDate=val('f_ndeDate');m.ndeResult=val('f_ndeResult');m.defectType=val('f_defectType');m.rejectLength=val('f_rejectLength');m.repairCycle=val('f_repairCycle');m.finalDisposition=val('f_finalDisposition');i.ndeRequest=m.ndeRequest||i.ndeRequest}
+ if(currentStep===6){(i.recommendations||[]).forEach((r,idx)=>{['component','priority','status','finding','action','assignedTo','targetDate','acceptance'].forEach(k=>{const e=document.getElementById(`r_${idx}_${k}`);if(e)r[k]=e.value})});i.repairs=val('f_repairs');i.futureRecommendations=val('f_futureRecommendations')}
+ if(currentStep===8){i.assignedTo=val('f_assignedTo');i.inspectorApi=val('f_inspectorApi');i.summary=val('f_summary');i.certified=checked('f_certified')}
+ if(currentStep===9){i.reviewedBy=val('f_reviewedBy');i.status=val('f_status');i.revision=val('f_revision');i.acceptance=val('f_acceptance');i.reviewApproved=checked('f_reviewApproved')}
+ i.completion=Math.max(i.completion||0,(currentStep+1)*10);if(i.completion>0&&i.status==='Assigned')i.status='In Progress';
+}
+function validateCurrent(){saveStepData();if(currentStep===0){const req=['client','facility','tank','description','inspectionDate','dueDate','legacy','nbic','sapEquipment','pid'];const miss=req.filter(k=>!currentInspection[k]);if(miss.length){alert('Complete the required Project and Weld Joint Information fields before continuing.');return false}}if(currentStep===1&&currentInspection.scope.length<2){alert('Select the weld type and at least one inspection or NDE checkpoint.');return false}return true}
+function nextStep(){if(!validateCurrent())return;saveCurrentInspection(false);if(currentStep<9){currentStep++;renderWizard();window.scrollTo({top:0,behavior:'smooth'})}else{saveCurrentInspection(true);renderDashboard();alert('Inspection saved for this demo session only. You can review, preview, print, or prepare the client email until the page is closed or refreshed.')}}
+function previousStep(){saveStepData();if(currentStep>0){currentStep--;renderWizard();window.scrollTo({top:0,behavior:'smooth'})}}
+function saveCurrentInspection(showMessage=false){saveStepData();const idx=inspections.findIndex(x=>x.id===currentInspection.id);if(idx>=0)inspections[idx]=JSON.parse(JSON.stringify(currentInspection));else inspections.unshift(JSON.parse(JSON.stringify(currentInspection)));currentInspectionSaved=true;persist();renderDashboard();renderStepper();if(showMessage)alert('Draft saved for this demo session only. Closing or refreshing the page will reset all demo changes. You can now click any numbered step to review or edit it.')}
+function addRecommendation(){saveStepData();currentInspection.recommendations=currentInspection.recommendations||[];currentInspection.recommendations.push({id:`ACT-${String(inspections.flatMap(i=>i.recommendations||[]).length+1).padStart(3,'0')}`,component:'Visual Examination',finding:'',action:'',priority:'Before turnover',assignedTo:'',targetDate:'',status:'Open',acceptance:'Pending'});renderWizard()}
+function removeRecommendation(idx){saveStepData();const r=currentInspection.recommendations[idx];if(!r)return;if(!confirm(`Delete ${r.id||'this recommendation'}? This cannot be undone.`))return;currentInspection.recommendations.splice(idx,1);renderWizard()}
+function handlePhotos(e){const files=[...e.target.files];if(!files.length)return;currentInspection.photoItems=currentInspection.photoItems||[];files.forEach(file=>compressImage(file,data=>{currentInspection.photoItems.push({data,component:'Visual Examination',location:'',caption:'',include:true});currentInspection.photos=currentInspection.photoItems.length;document.getElementById('photoGrid').innerHTML=photoCards()}));e.target.value=''}
+function compressImage(file,cb){const reader=new FileReader();reader.onload=ev=>{const img=new Image();img.onload=()=>{const max=1000,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.78))};img.src=ev.target.result};reader.readAsDataURL(file)}
+function removePhoto(idx){saveStepData();currentInspection.photoItems.splice(idx,1);currentInspection.photos=currentInspection.photoItems.length;renderWizard()}
+
+function allRecommendations(){return inspections.flatMap(i=>(i.recommendations||[]).map(r=>({...r,inspection:i.id,tank:i.tank,line:i.description,client:i.client}))) }
+function nextRecommendationId(){const nums=allRecommendations().map(r=>{const m=String(r.id||'').match(/(\d+)$/);return m?Number(m[1]):0});return `ACT-${String(Math.max(...nums,0)+1).padStart(3,'0')}`}
+function recommendationStatusClass(s){return ['Accepted','Closed','Complete','Verified'].includes(s)?'approved':['Disposition Review','Reinspection Required'].includes(s)?'review':['Repair In Progress'].includes(s)?'progress':['Assigned','Repair Planned'].includes(s)?'assigned':'progress'}
+function renderRecommendationRegister(){
+ const all=allRecommendations(),q=val('recSearch').toLowerCase(),f=val('recStatusFilter');const filtered=all.filter(r=>(!f||r.status===f)&&(!q||[r.id,r.inspection,r.tank,r.line,r.component,r.finding,r.action,r.assignedTo].join(' ').toLowerCase().includes(q)));
+ document.getElementById('recRows').innerHTML=filtered.map(r=>`<tr class="clickable-row" onclick="openRecommendationModal('${r.inspection}','${r.id}')"><td><strong>${esc(r.id)}</strong></td><td>${esc(r.inspection)}</td><td><strong>${esc(r.tank)}</strong><br><small>${esc(r.line)}</small></td><td>${esc(r.component)}</td><td>${esc(r.priority)}</td><td>${esc(r.assignedTo||'Unassigned')}</td><td>${fmtDate(r.targetDate)}</td><td><span class="status ${recommendationStatusClass(r.status)}">${esc(r.status)}</span></td><td>${esc(r.acceptance)}</td><td><button class="btn small primary" onclick="event.stopPropagation();openRecommendationModal('${r.inspection}','${r.id}')">Edit</button></td></tr>`).join('')||'<tr><td colspan="10" class="empty">No corrective actions match the selected filters.</td></tr>';
+ const open=all.filter(r=>!['Accepted','Closed'].includes(r.status)).length,urgent=all.filter(r=>['Stop work / immediate','Before next weld operation','Before coating / insulation','Before pressure test / load release'].includes(r.priority)&&!['Accepted','Closed'].includes(r.status)).length,accepted=all.filter(r=>r.acceptance==='Accepted').length,overdue=all.filter(r=>r.targetDate&&new Date(r.targetDate)<new Date()&&!['Accepted','Closed'].includes(r.status)).length;
+ document.getElementById('recKpis').innerHTML=[['Open',open,'Active corrective actions',''],['High Priority',urgent,'Release or test restriction','bad'],['Overdue',overdue,'Past target date','warn'],['Accepted',accepted,'Verified and accepted','good']].map(c=>`<div class="card kpi ${c[3]}"><div class="label">${c[0]}</div><div class="value">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('')
+}
+function openRecommendationModal(inspectionId='',recId=''){
+ if(!inspections.length){alert('Create and save a weld inspection before adding a corrective action.');return}
+ const modal=document.getElementById('recommendationModal');const selectEl=document.getElementById('modalRecInspection');selectEl.innerHTML=inspections.map(i=>`<option value="${esc(i.id)}">${esc(i.id)} — ${esc(i.tank||'Joint not entered')} — ${esc(i.description||'Line not entered')}</option>`).join('');const selectedInspection=inspectionId||inspections[0].id;selectEl.value=selectedInspection;const inspection=inspections.find(i=>i.id===selectedInspection);const rec=recId?(inspection?.recommendations||[]).find(r=>r.id===recId):null;editingRecommendationKey=rec?{inspectionId:selectedInspection,recId}:{inspectionId:selectedInspection,recId:null};document.getElementById('recommendationModalTitle').textContent=rec?'Edit Corrective Action':'Add Corrective Action';document.getElementById('modalRecId').value=rec?.id||nextRecommendationId();document.getElementById('modalRecComponent').value=rec?.component||'Visual Examination';document.getElementById('modalRecPriority').value=rec?.priority||'Before turnover';document.getElementById('modalRecStatus').value=rec?.status||'Open';document.getElementById('modalRecAcceptance').value=rec?.acceptance||'Pending';document.getElementById('modalRecFinding').value=rec?.finding||'';document.getElementById('modalRecAction').value=rec?.action||'';document.getElementById('modalRecAssignedTo').value=rec?.assignedTo||'';document.getElementById('modalRecTargetDate').value=rec?.targetDate||'';document.getElementById('modalRecDeleteBtn').style.display=rec?'inline-flex':'none';selectEl.disabled=!!rec;modal.classList.add('open');
+}
+function saveRecommendationFromModal(){
+ const inspectionId=val('modalRecInspection');
+ const inspection=inspections.find(i=>i.id===inspectionId);
+ if(!inspection){alert('Select a valid inspection.');return}
+ const data={id:val('modalRecId')||nextRecommendationId(),component:val('modalRecComponent'),priority:val('modalRecPriority'),status:val('modalRecStatus'),acceptance:val('modalRecAcceptance'),finding:val('modalRecFinding').trim(),action:val('modalRecAction').trim(),assignedTo:val('modalRecAssignedTo').trim(),targetDate:val('modalRecTargetDate')};
+ if(!data.finding||!data.action){alert('Enter both the finding and required action or repair.');return}
+ inspection.recommendations=inspection.recommendations||[];
+ const idx=editingRecommendationKey?.recId?inspection.recommendations.findIndex(r=>r.id===editingRecommendationKey.recId):-1;
+ if(idx>=0)inspection.recommendations[idx]=data;else inspection.recommendations.push(data);
+ if(currentInspection&&currentInspection.id===inspection.id)currentInspection=JSON.parse(JSON.stringify(inspection));
+ persist();closeModal('recommendationModal');renderRecommendationRegister();renderDashboard();renderInspections();renderReports();
+}
+function deleteRecommendationFromModal(){
+ const key=editingRecommendationKey;if(!key?.recId)return;
+ const inspection=inspections.find(i=>i.id===key.inspectionId);const rec=(inspection?.recommendations||[]).find(r=>r.id===key.recId);if(!rec)return;
+ if(!confirm(`Delete ${rec.id}? This cannot be undone.`))return;
+ inspection.recommendations=inspection.recommendations.filter(r=>r.id!==key.recId);
+ if(currentInspection&&currentInspection.id===inspection.id)currentInspection=JSON.parse(JSON.stringify(inspection));
+ persist();closeModal('recommendationModal');renderRecommendationRegister();renderDashboard();renderInspections();renderReports();
+}
+function deleteInspection(id){const i=inspections.find(x=>x.id===id);if(!i)return false;if(!confirm(`Delete ${i.id} for weld joint ${i.tank||'not entered'}? This permanently deletes the weld inspection, report, photos, and ${i.recommendations?.length||0} corrective action(s) from this demo session.`))return false;inspections=inspections.filter(x=>x.id!==id);if(currentInspection?.id===id){currentInspection=null;currentInspectionSaved=false}if(activeReportId===id)activeReportId=null;persist();renderDashboard();renderInspections();renderRecommendationRegister();renderReports();return true}
+function deleteCurrentInspectionFromEditor(){
+ const id=currentInspection?.id;
+ if(!id||!currentInspectionSaved)return;
+ if(deleteInspection(id))showView('inspections');
+}
+function renderReports(){document.getElementById('reportRows').innerHTML=inspections.filter(i=>i.completion>0).map(i=>`<tr><td><strong>${esc(i.id)}</strong></td><td><strong>${esc(i.tank)}</strong><br><small>${esc(i.description)}</small></td><td>${esc(i.client)}</td><td>${esc(i.assignedTo)}</td><td>${esc(i.reviewedBy||'Unassigned')}</td><td>${esc(i.revision)}</td><td><span class="status ${statusClass(i.status)}">${esc(i.status)}</span></td><td>${i.photos||0}</td><td>${i.sentDate?fmtDate(i.sentDate):'Not sent'}</td><td>${esc(i.acceptance)}</td><td><div class="action-row"><button class="btn small primary" onclick="openInspection('${i.id}')">Edit</button><button class="btn small secondary" onclick="previewReport('${i.id}')">Preview</button><button class="btn small secondary" onclick="previewReport('${i.id}');setTimeout(()=>window.print(),250)">Print</button><button class="btn small primary" onclick="emailInspection('${i.id}')">Email</button></div></td></tr>`).join('')||'<tr><td colspan="11" class="empty">No weld reports in this demo session. Start a weld inspection to create a temporary report record.</td></tr>'}
+function previewReport(id){const i=inspections.find(x=>x.id===id)||currentInspection;if(!i)return;activeReportId=i.id;document.getElementById('reportSheet').innerHTML=buildReport(i);showView('report')}
+function buildReport(i){
+ const photos=(i.photoItems||[]).filter(p=>p.include),m=i.measurements||{};const compRows=selectedComponentsFor(i).map(c=>{const x=i.components[c]||{};return`<div class="report-section"><h4>${esc(c)}:</h4><p><strong>Result:</strong> ${esc(x.condition||'Not entered')} &nbsp; | &nbsp; <strong>Issue:</strong> ${esc(x.damage||'Not entered')} &nbsp; | &nbsp; <strong>Location:</strong> ${esc(x.location||'Not entered')}<br>${esc(x.finding||'No finding entered.')}</p></div>`}).join('');
+ return`<div class="demo-watermark">DEMO — NOT FOR OFFICIAL USE</div><div class="report-top"><div><div class="report-title">${esc(admin.company)}</div><div class="report-sub">AWS-CWI WELDING INSPECTION REPORT</div></div><div class="report-meta">WELD QUALITY RECORD<br>REPORT: ${esc(i.id)}<br>REV: ${esc(i.revision)}<br>DATE: ${fmtDate(i.inspectionDate)}</div></div><table class="report-table"><tr><th>Client</th><td>${esc(i.client)}</td><th>Project</th><td>${esc(i.facility)}</td></tr><tr><th>Area / Location</th><td>${esc(i.unit)}</td><th>Work Package</th><td>${esc(i.workOrder)}</td></tr><tr><th>Component / Drawing / Service</th><td>${esc(i.description)}</td><th>Weld Joint ID</th><td>${esc(i.tank)}</td></tr><tr><th>Weld Type</th><td>${esc(i.akz)}</td><th>Welding Process</th><td>${esc(i.weldProcess)}</td></tr><tr><th>Drawing / Weld Map</th><td>${esc(i.legacy)}</td><th>PQR / Supporting Record</th><td>${esc(i.nbic)}</td></tr><tr><th>WPS / Revision</th><td>${esc(i.sapEquipment)}</td><th>Welder ID(s) / WPQ</th><td>${esc(i.pid)}</td></tr><tr><th>Base Material / Grade</th><td>${esc(i.serial)}</td><th>Heat / Lot Number(s)</th><td>${esc(i.sapNotification)}</td></tr><tr><th>Thickness / Diameter</th><td>${esc(i.yearBuilt)}</td><th>Code / Specification Basis</th><td>${esc(i.codeEdition)}</td></tr></table><div class="report-section"><h4>Inspection Summary:</h4><p>${esc(i.summary||'No summary entered.')}</p></div><table class="report-table"><tr><th>Visual Report</th><th>Visual Result</th><th>NDE Method</th><th>NDE Request</th><th>NDE Report</th><th>NDE Date</th></tr><tr><td>${esc(m.visualReport)}</td><td>${esc(m.visualResult)}</td><td>${esc(m.ndeMethod)}</td><td>${esc(m.ndeRequest||i.ndeRequest)}</td><td>${esc(m.ndeReport)}</td><td>${fmtDate(m.ndeDate)}</td></tr><tr><th>NDE Result</th><th>Defect / Indication</th><th>Reject Length / Extent</th><th>Repair Cycle</th><th colspan="2">Final Disposition</th></tr><tr><td>${esc(m.ndeResult)}</td><td>${esc(m.defectType)}</td><td>${esc(m.rejectLength)}</td><td>${esc(m.repairCycle)}</td><td colspan="2">${esc(m.finalDisposition)}</td></tr></table>${compRows}<div class="report-section"><h4>Repair / Rework Summary:</h4><p>${esc(i.repairs||'No repair or rework entered.')}</p></div><div class="report-section"><h4>Turnover / Follow-Up Summary:</h4><p>${esc(i.futureRecommendations||'No additional follow-up entered.')}</p></div><div class="report-section"><h4>Corrective Actions:</h4>${(i.recommendations||[]).length?`<table class="report-table"><tr><th>#</th><th>Checkpoint</th><th>Finding</th><th>Required Action</th><th>Priority</th><th>Assigned Inspector</th><th>Target</th><th>Status</th></tr>${i.recommendations.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.component)}</td><td>${esc(r.finding)}</td><td>${esc(r.action)}</td><td>${esc(r.priority)}</td><td>${esc(r.assignedTo)}</td><td>${fmtDate(r.targetDate)}</td><td>${esc(r.status)}</td></tr>`).join('')}</table>`:'<p>No trackable corrective actions entered.</p>'}</div><div class="report-section"><h4>Photos:</h4><div class="report-photos">${photos.length?photos.map((p,idx)=>`<div class="report-photo"><img src="${p.data}"><p><strong>Photo ${idx+1} — ${esc(p.component)}</strong><br>${esc(p.location)} — ${esc(p.caption)}</p></div>`).join(''):'<p>No report photographs embedded in this demonstration record.</p>'}</div></div><table class="report-table"><tr><th>Inspector</th><th>Qualification / ID</th><th>Weld / Inspection Date</th><th>Reviewed By</th><th>Review Approved</th></tr><tr><td>${esc(i.assignedTo)}</td><td>${esc(i.inspectorApi)}</td><td>${fmtDate(i.inspectionDate)}</td><td>${esc(i.reviewedBy)}</td><td>${i.reviewApproved?'Yes':'No'}</td></tr></table><div class="report-footer"><strong>DEMO VERSION — DATA IS NOT RETAINED — NOT FOR OFFICIAL ISSUE</strong><br>Acceptance criteria and disposition must be verified against the project-adopted construction code and edition, specifications, approved procedures, engineering dispositions, and authorized review.<br>${esc(admin.footer)}<br>${esc(i.id)} | Revision ${esc(i.revision)}</div>`
+}
+function selectedComponentsFor(i){return(i.scope||[]).filter(x=>['Document / Qualification Review','Material Traceability','Joint Preparation / Fit-Up','Preheat / Interpass','Root Pass','Intermediate Passes','Final Visual Examination','Dimensional Verification','Radiographic Testing','Ultrasonic Testing','Magnetic Particle Testing','Liquid Penetrant Testing','PWHT / Hardness','Repair Area Preparation','Repair / Reinspection'].includes(x))}
+function emailInspection(id){const i=inspections.find(x=>x.id===id);if(!i)return;const subject=encodeURIComponent(`${i.id} — ${i.tank} AWS-CWI Welding Inspection Report`);const body=encodeURIComponent(`${admin.email}\n\nReport: ${i.id}\nProject: ${i.facility}\nLine: ${i.description}\nWeld Joint: ${i.tank}\nInspection Date: ${fmtDate(i.inspectionDate)}\nDisposition: ${i.measurements?.finalDisposition||''}\n\nRegards,\n${admin.company}`);window.location.href=`mailto:${encodeURIComponent(i.clientEmail||'')}?subject=${subject}&body=${body}`}
+function emailCurrentInspection(){saveCurrentInspection(false);emailInspection(currentInspection.id)}
+function emailCurrentReport(){if(activeReportId)emailInspection(activeReportId)}
+
+function renderTutorials(){document.getElementById('tutorialGrid').innerHTML=tutorials.map(t=>`<div class="card tutorial-card"><div class="tutorial-icon">${t.icon}</div><h4>${t.title}</h4><div class="meta">${t.time} • ${tutorialProgress[t.id]?'Completed':'Not completed'}</div><p>${t.desc}</p><button class="btn ${tutorialProgress[t.id]?'good':'primary'}" onclick="openTutorial('${t.id}')">${tutorialProgress[t.id]?'Review Tutorial':'Start Tutorial'}</button></div>`).join('')}
+function openTutorial(id){const t=tutorials.find(x=>x.id===id)||tutorials[0];document.getElementById('tutorialModalTitle').textContent=t.title;document.getElementById('tutorialModalBody').innerHTML=`<div class="notice info"><strong>Purpose:</strong> ${t.desc}</div><ol style="line-height:1.8">${t.steps.map(s=>`<li>${s}</li>`).join('')}</ol><div class="notice warn"><strong>Common mistake:</strong> Skipping joint traceability, leaving NDE results unlinked, or closing repairs without documented reinspection and acceptance.</div><button class="btn primary" onclick="completeTutorial('${t.id}')">Mark Tutorial Complete</button>`;document.getElementById('tutorialModal').classList.add('open')}
+function completeTutorial(id){tutorialProgress[id]=true;closeModal('tutorialModal');renderTutorials()}
+function resetTutorials(){tutorialProgress={};renderTutorials()}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function closeOnboarding(){demoOnboarded=true;closeModal('onboardModal')}
+function renderInfo(){document.getElementById('infoAccordion').innerHTML=infoTopics.map((x,idx)=>`<div class="acc"><button onclick="this.parentElement.classList.toggle('open')">${x[0]} <span>＋</span></button><div class="acc-body">${x[1]}</div></div>`).join('')}
+function makeInitials(name){return String(name||'').trim().split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'U'}
+function showSessionUserPrompt(){
+ const modal=document.getElementById('sessionUserModal');
+ if(!modal)return;
+ document.getElementById('sessionInspectorName').value=admin.inspectorName||'';
+ document.getElementById('sessionInspectorRole').value=admin.inspectorRole||'';
+ document.getElementById('sessionInspectorInitials').value=admin.inspectorInitials||makeInitials(admin.inspectorName);
+ document.getElementById('sessionInspectorApi').value=admin.inspectorApi||'';
+ modal.classList.add('open');
+ setTimeout(()=>{const el=document.getElementById('sessionInspectorName');if(el){el.focus();el.select()}},50);
+}
+function confirmSessionUser(){
+ const name=val('sessionInspectorName').trim();
+ const role=val('sessionInspectorRole').trim();
+ if(!name){alert('Enter your name before continuing.');document.getElementById('sessionInspectorName').focus();return}
+ if(!role){alert('Select your role before continuing.');document.getElementById('sessionInspectorRole').focus();return}
+ const initials=(val('sessionInspectorInitials').trim()||makeInitials(name)).toUpperCase().slice(0,3);
+ const api=val('sessionInspectorApi').trim();
+ admin={...admin,inspectorName:name,inspectorRole:role,inspectorInitials:initials,inspectorApi:api};
+ applyAdmin();
+ renderAdmin();
+ closeModal('sessionUserModal');
+ if(!demoOnboarded)document.getElementById('onboardModal').classList.add('open');
+}
+function renderAdmin(){document.getElementById('adminCompany').value=admin.company;document.getElementById('adminColor').value=admin.color;document.getElementById('adminPrefix').value=admin.prefix;document.getElementById('adminFooter').value=admin.footer;document.getElementById('adminEmail').value=admin.email;document.getElementById('adminInspectorName').value=admin.inspectorName;document.getElementById('adminInspectorRole').value=admin.inspectorRole;document.getElementById('adminInspectorInitials').value=admin.inspectorInitials||makeInitials(admin.inspectorName);document.getElementById('adminInspectorApi').value=admin.inspectorApi||''}
+function saveAdmin(){const inspectorName=val('adminInspectorName').trim()||defaultAdmin.inspectorName;admin={company:val('adminCompany')||defaultAdmin.company,color:val('adminColor')||defaultAdmin.color,prefix:val('adminPrefix')||defaultAdmin.prefix,footer:val('adminFooter'),email:val('adminEmail'),inspectorName,inspectorRole:val('adminInspectorRole')||defaultAdmin.inspectorRole,inspectorInitials:(val('adminInspectorInitials').trim()||makeInitials(inspectorName)).toUpperCase().slice(0,3),inspectorApi:val('adminInspectorApi').trim()};applyAdmin();renderAdmin();alert('Settings applied for this demo session only. They reset when the page is closed or refreshed.')}
+function applyInspectorToOpenInspections(){const name=(val('adminInspectorName').trim()||admin.inspectorName||defaultAdmin.inspectorName);const api=val('adminInspectorApi').trim();const open=inspections.filter(i=>!['Approved','Sent','Accepted','Closed'].includes(i.status));if(!open.length){alert('There are no open inspections to update.');return}if(!confirm(`Apply ${name} as the inspector to ${open.length} open inspection(s)? Approved, sent, accepted, and closed reports will not be changed.`))return;open.forEach(i=>{i.assignedTo=name;if(api)i.inspectorApi=api});persist();renderDashboard();alert(`${open.length} open inspection(s) updated.`)}
+function exportDataBackup(){openPurchaseModal()}
+function importDataBackup(){openPurchaseModal()}
+function removeExampleRecords(){
+ const examples=inspections.filter(i=>i.isDemo||demoInspectionIds.includes(i.id));
+ if(!examples.length){alert('No example records were found in this demo session.');return}
+ if(!confirm(`Remove ${examples.length} example weld inspection(s) for this session? Refreshing the page restores them.`))return;
+ inspections=inspections.filter(i=>!(i.isDemo||demoInspectionIds.includes(i.id)));currentInspection=null;currentInspectionSaved=false;activeReportId=null;renderDashboard();renderInspections();renderRecommendationRegister();renderReports();alert('Example records removed for this demo session. Refresh the page to restore the original demo.');
+}
+function startCleanWorkspace(){resetDemoSession()}
+function restoreDemoData(){
+ const demos=seedInspections();const ids=new Set(inspections.map(i=>i.id));demos.forEach(i=>{if(!ids.has(i.id))inspections.push(i)});demoNextInspectionNumber=Math.max(12,demoNextInspectionNumber);renderDashboard();renderInspections();renderRecommendationRegister();renderReports();alert('Demo weld weld inspection records restored for this session.');
+}
+function openPurchaseModal(){document.getElementById('purchaseModal').classList.add('open')}
+function requestSubscription(plan){const subject=encodeURIComponent(`AWS-CWI IM Subscription Request — ${plan}`);const body=encodeURIComponent(`I would like subscription information for AWS-CWI IM.\n\nRequested option: ${plan}\nCompany: ${admin.company||''}\nName: ${admin.inspectorName||''}\nRole: ${admin.inspectorRole||''}\n\nPlease contact me with annual pricing, setup requirements, and next steps.`);window.location.href=`mailto:support@shellkey.company?subject=${subject}&body=${body}`;}
+function resetDemoSession(){
+ if(!confirm('Reset the demo now? All changes made during this session will be removed.'))return;
+ admin={...defaultAdmin};tutorialProgress={};inspections=seedInspections();currentInspection=null;currentStep=0;activeReportId=null;currentInspectionSaved=false;editingRecommendationKey=null;demoNextInspectionNumber=12;demoOnboarded=false;applyAdmin();renderDashboard();renderInspections();renderRecommendationRegister();renderReports();renderTutorials();renderAdmin();showView('dashboard');showSessionUserPrompt();
+}
+function applyAdmin(){document.documentElement.style.setProperty('--brand',admin.color);document.getElementById('licensedToSide').textContent='Licensed to: '+admin.company;document.getElementById('userName').textContent=admin.inspectorName;document.getElementById('userRole').textContent=admin.inspectorRole;document.getElementById('userInitials').textContent=admin.inspectorInitials||makeInitials(admin.inspectorName)}
+
+applyAdmin();renderDashboard();renderTutorials();renderInfo();
+showSessionUserPrompt();
+document.getElementById('sessionUserModal').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();confirmSessionUser()}});
+
+</script>
+</body>
+</html>

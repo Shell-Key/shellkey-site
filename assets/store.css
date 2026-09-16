@@ -466,3 +466,10 @@ textarea:invalid:not(:placeholder-shown){
 .product-card .price-row{min-height:44px;align-items:center}
 .card-actions{grid-template-rows:auto auto;align-content:end}
 .card-actions .btn{white-space:nowrap}
+
+/* --- real activity counters (filled from /api/stats) --- */
+.proof{min-height:20px;font-size:13px;color:var(--muted);display:flex;gap:6px 14px;flex-wrap:wrap;align-items:center;margin:-4px 0 12px}
+.proof span{white-space:nowrap}
+.proof b{color:var(--text);font-weight:600}
+.proof .sold{color:#cfff9b}
+.proof .sold b{color:var(--accent)}

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>API 653 IM — Demo</title>
+<style>
+  :root {
+    --brand:#123b5d;
+    --brand-2:#0d6f82;
+    --accent:#e1a925;
+    --bg:#eef3f7;
+    --surface:#ffffff;
+    --text:#17212b;
+    --muted:#647484;
+    --line:#d8e0e7;
+    --good:#237a57;
+    --warn:#b87816;
+    --bad:#b53b3b;
+    --info:#2f6fb0;
+    --shadow:0 8px 24px rgba(28,51,75,.10);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;font-size:14px}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer}
+  .app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+  .sidebar{background:linear-gradient(180deg,var(--brand),#0b2c45);color:white;padding:22px 16px;position:sticky;top:0;height:100vh;overflow:auto}
+  .brand{display:flex;align-items:center;gap:12px;padding:0 8px 22px;border-bottom:1px solid rgba(255,255,255,.14)}
+  .brand-mark{width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,#fff,var(--accent));color:var(--brand);display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 5px 15px rgba(0,0,0,.15)}
+  .brand h1{font-size:18px;margin:0;letter-spacing:.2px}
+  .brand p{font-size:11px;margin:4px 0 0;color:#d7e3ed}
+  .nav{margin-top:20px;display:grid;gap:6px}
+  .nav button{width:100%;border:0;background:transparent;color:#e4edf4;padding:11px 12px;border-radius:9px;text-align:left;display:flex;align-items:center;gap:10px}
+  .nav button:hover,.nav button.active{background:rgba(255,255,255,.13);color:white}
+  .nav .count{margin-left:auto;background:rgba(255,255,255,.16);padding:2px 7px;border-radius:20px;font-size:11px}
+  .sidebar-footer{margin-top:24px;padding:14px;border-radius:10px;background:rgba(255,255,255,.08);color:#d7e3ed;font-size:12px;line-height:1.5}
+  .main{min-width:0}
+  .topbar{background:white;height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:10}
+  .topbar .title h2{margin:0;font-size:20px}
+  .topbar .title p{margin:3px 0 0;color:var(--muted);font-size:12px}
+  .top-actions{display:flex;align-items:center;gap:10px}
+  .user-chip{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--brand);color:white;display:grid;place-items:center;font-weight:700}
+  .content{padding:24px;max-width:1650px;margin:0 auto}
+  .view{display:none}.view.active{display:block}
+  .btn{border:1px solid transparent;border-radius:9px;padding:9px 13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+  .btn.primary{background:var(--brand);color:white}.btn.primary:hover{filter:brightness(1.06)}
+  .btn.secondary{background:white;border-color:var(--line);color:var(--text)}
+  .btn.good{background:var(--good);color:white}.btn.warn{background:var(--warn);color:white}.btn.bad{background:var(--bad);color:white}
+  .btn.small{padding:6px 9px;font-size:12px}.btn:disabled{opacity:.45;cursor:not-allowed}
+  .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}
+  .page-head h3{font-size:24px;margin:0}.page-head p{color:var(--muted);margin:6px 0 0;max-width:780px}
+  .grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(6,minmax(150px,1fr));margin-bottom:18px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .kpi{padding:17px;position:relative;overflow:hidden}
+  .kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--info)}
+  .kpi.good:before{background:var(--good)}.kpi.warn:before{background:var(--warn)}.kpi.bad:before{background:var(--bad)}
+  .kpi .label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .kpi .value{font-size:27px;font-weight:800;margin-top:7px}.kpi .sub{font-size:11px;color:var(--muted);margin-top:4px}
+  .two-col{grid-template-columns:1.5fr 1fr}.three-col{grid-template-columns:1fr 1fr 1fr}
+  .panel-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .panel-head h4{margin:0;font-size:16px}.panel-body{padding:17px 18px}
+  .table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:950px}
+  .table th{font-size:11px;text-transform:uppercase;letter-spacing:.45px;color:var(--muted);background:#f6f8fa;text-align:left;padding:11px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .table td{padding:11px;border-bottom:1px solid #edf1f4;vertical-align:middle}.table tr:hover td{background:#fbfcfd}
+  .clickable-row{cursor:pointer}.clickable-row:hover td{background:#f4f8fb!important}
+  #inspectionsView .table-wrap,#recommendationsView .table-wrap,#reportsView .table-wrap{max-height:calc(100vh - 285px);overflow:auto}
+  .status{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:800;white-space:nowrap}
+  .status:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .status.assigned{color:#2869a4;background:#eaf3fb}.status.progress{color:#9a6813;background:#fff4dc}.status.review{color:#8c4b94;background:#f6eafa}.status.approved{color:#1e744f;background:#e8f6ef}.status.overdue{color:#a72f2f;background:#fdeaea}.status.closed{color:#4d5b67;background:#edf1f4}
+  .progress{height:8px;background:#e8edf1;border-radius:20px;overflow:hidden;min-width:90px}.progress span{display:block;height:100%;background:var(--brand-2);border-radius:inherit}
+  /* Keep status pills readable. The status 'progress' class must not inherit progress-bar sizing. */
+  .status.progress{height:auto;min-width:max-content;overflow:visible;background:#fff4dc;border-radius:20px}
+  .table td .status{min-width:max-content;max-width:none}
+  .action-row{display:flex;gap:6px;flex-wrap:wrap}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .filters input,.filters select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:white}
+  .empty{padding:36px;text-align:center;color:var(--muted)}
+  .chart-list{display:grid;gap:11px}.bar-row{display:grid;grid-template-columns:130px 1fr 40px;align-items:center;gap:10px}.bar{height:13px;background:#e8edf1;border-radius:20px;overflow:hidden}.bar span{display:block;height:100%;background:var(--brand-2);border-radius:20px}
+  .activity-feed{display:grid;gap:12px}.feed-item{display:grid;grid-template-columns:36px 1fr;gap:10px}.feed-icon{width:32px;height:32px;border-radius:9px;background:#eaf3fb;color:var(--brand);display:grid;place-items:center;font-weight:800}.feed-item p{margin:0;line-height:1.45}.feed-item small{color:var(--muted)}
+  .stepper{display:flex;gap:0;overflow:auto;padding-bottom:6px;margin-bottom:8px}
+  #wizardView .page-head{margin-bottom:10px}
+  .step{min-width:116px;position:relative;text-align:center;color:var(--muted);font-size:11px;padding-top:31px}
+  .step:before{content:attr(data-step);position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#dfe6ec;color:#607180;font-weight:800;z-index:2}
+  .step:after{content:"";position:absolute;left:0;right:0;top:12px;height:2px;background:#dfe6ec;z-index:1}.step:first-child:after{left:50%}.step:last-child:after{right:50%}
+  .step.done:before,.step.active:before{background:var(--brand);color:white}.step.done:after,.step.active:after{background:var(--brand)}.step.active{color:var(--brand);font-weight:800}
+  .step.clickable{cursor:pointer}.step.clickable:hover{color:var(--brand);font-weight:800}.step.clickable:hover:before{transform:translateX(-50%) scale(1.08);box-shadow:0 0 0 4px rgba(18,59,93,.12)}
+  .step.locked{cursor:not-allowed}.step.locked:not(.active){opacity:.72}
+  .wizard-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;height:calc(100vh - 265px);min-height:480px}
+  .wizard-card{padding:0;height:100%;min-height:0;display:flex;flex-direction:column}.wizard-header{padding:12px 16px;border-bottom:1px solid var(--line)}.wizard-header h4{margin:0 0 4px;font-size:18px}.wizard-header p{margin:0;color:var(--muted);line-height:1.35;font-size:12px}
+  .wizard-body{padding:13px 16px;flex:1;min-height:0;overflow:auto}.wizard-footer{padding:10px 16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}.form-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.form-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}.field.full{grid-column:1/-1}
+  .scroll-list{max-height:calc(100vh - 390px);overflow:auto;padding-right:5px}
+  .field label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin-bottom:6px}.req{color:var(--bad)}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 9px;outline:none}.field textarea{min-height:72px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(13,111,130,.12)}
+  .help{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4}.tip{background:#eef7f8;border-left:4px solid var(--brand-2);border-radius:8px;padding:12px 13px;margin-bottom:16px;line-height:1.5}.tip strong{color:var(--brand)}
+  .check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.check{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fbfcfd}.check input{margin-top:2px}
+  .side-help{padding:17px;position:sticky;top:90px;height:max-content}.side-help h4{margin:0 0 10px}.side-help p,.side-help li{color:var(--muted);line-height:1.5;font-size:12px}.side-help ul{padding-left:18px}.side-help .mini-progress{margin-top:12px}
+  .component-list{display:grid;gap:10px}.component-card{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fbfcfd}.component-card h5{margin:0 0 10px;font-size:15px;display:flex;justify-content:space-between}.component-card .form-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.photo-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:white}.photo-card img{width:100%;height:160px;object-fit:cover;background:#e8edf1}.photo-meta{padding:10px}.photo-meta input,.photo-meta select{width:100%;margin-top:7px;border:1px solid var(--line);border-radius:7px;padding:7px}
+  .upload-zone{border:2px dashed #aab8c4;border-radius:10px;padding:24px;text-align:center;background:#f9fbfc}.upload-zone input{margin-top:10px}
+  .qa-list{display:grid;gap:9px}.qa-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px}.qa-icon{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;color:white;font-size:12px;font-weight:900}.qa-item.good .qa-icon{background:var(--good)}.qa-item.warn .qa-icon{background:var(--warn)}.qa-item.bad .qa-icon{background:var(--bad)}.qa-item .qa-text{flex:1}.qa-item small{color:var(--muted)}
+  .rec-card{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:11px;background:#fbfcfd}.rec-card h5{margin:0 0 10px}
+  .tutorial-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tutorial-card{padding:18px}.tutorial-icon{width:44px;height:44px;border-radius:11px;background:#eaf3fb;color:var(--brand);display:grid;place-items:center;font-size:20px;font-weight:900}.tutorial-card h4{margin:13px 0 6px}.tutorial-card p{color:var(--muted);line-height:1.5;min-height:42px}.tutorial-card .meta{font-size:11px;color:var(--muted);margin-bottom:12px}
+  .accordion{display:grid;gap:10px}.acc{border:1px solid var(--line);border-radius:10px;background:white;overflow:hidden}.acc button{width:100%;border:0;background:white;padding:14px 16px;text-align:left;font-weight:800;display:flex;justify-content:space-between}.acc .acc-body{display:none;padding:0 16px 16px;color:var(--muted);line-height:1.6}.acc.open .acc-body{display:block}
+  .report-sheet{background:white;color:#111;padding:34px;max-width:950px;margin:auto;border:1px solid #cfd6dc;box-shadow:var(--shadow)}
+  .report-top{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;border-bottom:3px solid #111;padding-bottom:12px}.report-title{font-size:24px;font-weight:900}.report-sub{font-size:15px;font-weight:800;margin-top:10px}.report-meta{text-align:right;font-size:12px;font-weight:700;line-height:1.45}
+  .report-table{width:100%;border-collapse:collapse;margin:14px 0}.report-table th,.report-table td{border:1px solid #777;padding:8px;font-size:12px}.report-table th{background:#e6e6e6;text-transform:uppercase}.report-section{margin-top:17px}.report-section h4{font-size:13px;margin:0 0 6px;text-transform:uppercase;text-decoration:underline}.report-section p{font-size:12px;line-height:1.5;white-space:pre-wrap}.report-photos{display:grid;grid-template-columns:1fr 1fr;gap:12px}.report-photo{border:1px solid #777;padding:6px}.report-photo img{width:100%;height:220px;object-fit:contain;background:#f1f1f1}.report-photo p{font-size:11px;margin:6px 0 0}.report-footer{margin-top:28px;border-top:1px solid #aaa;padding-top:8px;font-size:10px;text-align:center;color:#555}
+  .modal{position:fixed;inset:0;background:rgba(6,19,31,.65);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}.modal.open{display:flex}.modal-card{width:min(920px,96vw);max-height:92vh;overflow:auto;background:white;border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.28)}.modal-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0}.modal-body{padding:18px}.close{border:0;background:#edf1f4;width:32px;height:32px;border-radius:8px}
+  .onboard{display:grid;grid-template-columns:1.1fr .9fr;min-height:450px}.onboard-copy{padding:32px}.onboard-copy h2{font-size:30px;margin:0 0 10px;color:var(--brand)}.onboard-copy p{color:var(--muted);line-height:1.65}.onboard-list{display:grid;gap:10px;margin:22px 0}.onboard-item{display:flex;gap:10px;align-items:flex-start}.onboard-item b{width:25px;height:25px;border-radius:50%;background:var(--brand);color:white;display:grid;place-items:center;flex:0 0 auto}.onboard-art{background:linear-gradient(145deg,var(--brand),var(--brand-2));color:white;padding:32px;display:flex;flex-direction:column;justify-content:center}.onboard-art .big{font-size:62px;font-weight:900;line-height:.95}.onboard-art p{line-height:1.6;color:#e2f0f4}
+  .notice{padding:12px 14px;border-radius:9px;margin-bottom:14px}.notice.info{background:#eaf3fb;color:#245d91}.notice.warn{background:#fff3da;color:#8b5c0c}.notice.good{background:#e8f6ef;color:#1d6b49}
+  .hidden{display:none!important}
+  .demo-banner{background:#fff4dc;border-bottom:1px solid #e4c36d;color:#744d08;padding:9px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:12px;position:sticky;top:68px;z-index:9}
+  .demo-banner strong{font-size:12px}.demo-banner .demo-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .demo-chip{display:inline-flex;align-items:center;gap:6px;background:#ffe8a6;color:#744d08;border-radius:999px;padding:4px 9px;font-weight:800;white-space:nowrap}
+  .purchase-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.purchase-option{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fbfcfd}.purchase-option h4{margin:0 0 7px;font-size:18px}.purchase-option p,.purchase-option li{color:var(--muted);line-height:1.5}.purchase-option ul{padding-left:18px}.purchase-option .btn{width:100%;margin-top:10px}
+  .report-sheet{position:relative;overflow:hidden}.demo-watermark{position:absolute;inset:38% -20% auto -20%;transform:rotate(-27deg);text-align:center;font-size:56px;font-weight:900;letter-spacing:8px;color:rgba(181,59,59,.11);pointer-events:none;z-index:0}.report-sheet>*:not(.demo-watermark){position:relative;z-index:1}
+  .demo-lock{border:1px dashed #d6b253;border-radius:10px;padding:14px;background:#fffaf0;color:#744d08}.demo-lock .action-row{margin-top:10px}
+  @media(max-width:1250px){.kpis{grid-template-columns:repeat(3,1fr)}.tutorial-grid{grid-template-columns:repeat(2,1fr)}.photo-grid{grid-template-columns:repeat(2,1fr)}.form-grid.four{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media(max-width:900px){.demo-banner{position:static;padding:9px 14px;align-items:flex-start;flex-direction:column}.purchase-grid{grid-template-columns:1fr}.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:50;transform:translateX(-100%);transition:.2s;width:250px}.sidebar.open{transform:none}.topbar{padding:0 14px}.content{padding:14px}.two-col,.three-col,.wizard-layout,.onboard{grid-template-columns:1fr}.wizard-layout{height:auto;min-height:0}.wizard-card{height:auto}.wizard-body{overflow:visible}.form-grid,.form-grid.three,.form-grid.four,.component-card .form-grid{grid-template-columns:1fr}.side-help{position:static}.kpis{grid-template-columns:repeat(2,1fr)}.mobile-menu{display:inline-flex!important}.tutorial-grid,.photo-grid{grid-template-columns:1fr}}
+  .mobile-menu{display:none}
+  @media print{body{background:white}.sidebar,.topbar,.page-head,.report-actions{display:none!important}.app{display:block}.content{padding:0}.view{display:none!important}#reportView{display:block!important}.report-sheet{border:0;box-shadow:none;max-width:none;padding:18px}.report-photo img{height:240px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">653</div>
+      <div><h1>API 653 IM</h1><p>Inspection Management System</p></div>
+    </div>
+    <nav class="nav" id="nav">
+      <button class="active" data-view="dashboard">▦ Dashboard</button>
+      <button data-view="inspections">☷ My Inspections <span class="count" id="navInspectionCount">0</span></button>
+      <button data-view="wizard" data-new="true">＋ Start Inspection</button>
+      <button data-view="recommendations">⚑ Recommendations <span class="count" id="navRecCount">0</span></button>
+      <button data-view="reports">▤ Reports</button>
+      <button data-view="tutorials">▶ Tutorials</button>
+      <button data-view="information">ⓘ API 653 Information</button>
+      <button data-view="admin">⚙ Administration</button>
+    </nav>
+    <div class="sidebar-footer">
+      <strong id="licensedToSide">Licensed to: Demo Inspection Company</strong><br>
+      Guided workflow • Consistent reports • Faster review
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn secondary mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div class="title"><h2 id="topTitle">Dashboard</h2><p id="topSub">Track inspections, reports, recommendations, and approvals.</p></div>
+      </div>
+      <div class="top-actions">
+        <button class="btn warn" type="button" onclick="openPurchaseModal()">Purchase / Activate</button>
+        <button class="btn secondary" onclick="openTutorial('quickstart')">? Help</button>
+        <button class="user-chip" type="button" onclick="showSessionUserPrompt()" title="Change current user" style="cursor:pointer;text-align:left"><div class="avatar" id="userInitials">KI</div><div><strong id="userName">Kirby Inspector</strong><br><small id="userRole" style="color:var(--muted)">Administrator</small></div></button>
+      </div>
+    </header>
+    <div class="demo-banner">
+      <div><span class="demo-chip">DEMO MODE</span> <strong>Temporary session:</strong> changes are available while this page remains open, but all entered data resets when the app is closed or refreshed.</div>
+      <div class="demo-actions"><button class="btn small secondary" type="button" onclick="resetDemoSession()">Reset Demo</button><button class="btn small primary" type="button" onclick="openPurchaseModal()">View Purchase Options</button></div>
+    </div>
+
+    <div class="content">
+      <section class="view active" id="dashboardView">
+        <div class="page-head">
+          <div><h3>Inspection Dashboard</h3><p>See what is assigned, outstanding, waiting for review, approved, accepted, or overdue.</p></div>
+          <button class="btn primary" onclick="startNewInspection()">＋ Start New Inspection</button>
+        </div>
+        <div class="grid kpis" id="kpiGrid"></div>
+        <div class="grid two-col">
+          <div class="card">
+            <div class="panel-head"><h4>Outstanding Inspection Tracking</h4><button class="btn small secondary" onclick="showView('inspections')">View All</button></div>
+            <div class="table-wrap"><table class="table"><thead><tr><th>Inspection</th><th>Tank</th><th>Client</th><th>Assigned To</th><th>Due</th><th>Completion</th><th>Status</th><th>Actions</th></tr></thead><tbody id="dashboardInspectionRows"></tbody></table></div>
+          </div>
+          <div class="grid" style="align-content:start">
+            <div class="card">
+              <div class="panel-head"><h4>Workload by Status</h4></div>
+              <div class="panel-body"><div class="chart-list" id="statusBars"></div></div>
+            </div>
+            <div class="card">
+              <div class="panel-head"><h4>Recent Activity</h4></div>
+              <div class="panel-body"><div class="activity-feed" id="activityFeed"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="inspectionsView">
+        <div class="page-head"><div><h3>My Inspections</h3><p>Open an assigned inspection, continue a draft, review report readiness, or prepare the final report.</p></div><button class="btn primary" onclick="startNewInspection()">＋ Start Inspection</button></div>
+        <div class="card">
+          <div class="filters"><input id="inspectionSearch" placeholder="Search tank, client, or inspection..." oninput="renderInspections()"><select id="inspectionStatusFilter" onchange="renderInspections()"><option value="">All statuses</option><option>Assigned</option><option>In Progress</option><option>Waiting Review</option><option>Corrections Required</option><option>Approved</option><option>Sent</option><option>Accepted</option></select></div>
+          <div class="table-wrap"><table class="table"><thead><tr><th>Inspection</th><th>Client / Facility</th><th>Tank</th><th>Inspection Date</th><th>Due Date</th><th>Assigned To</th><th>Reviewed By</th><th>Photos</th><th>Completion</th><th>Status</th><th>Actions</th></tr></thead><tbody id="inspectionRows"></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="view" id="wizardView">
+        <div class="page-head"><div><h3 id="wizardPageTitle">Guided Inspection</h3><p>Complete each step in order so every inspection is documented consistently.</p></div><div><button class="btn secondary" onclick="saveCurrentInspection(true)">Save Draft</button></div></div>
+        <div class="stepper" id="stepper"></div>
+        <div class="wizard-layout">
+          <div class="card wizard-card">
+            <div class="wizard-header"><h4 id="stepTitle"></h4><p id="stepInstructions"></p></div>
+            <div class="wizard-body" id="wizardBody"></div>
+            <div class="wizard-footer"><div><button class="btn secondary" id="backBtn" onclick="previousStep()">← Back</button></div><div style="display:flex;gap:8px"><button class="btn secondary" onclick="saveCurrentInspection(true)">Save Draft</button><button class="btn primary" id="nextBtn" onclick="nextStep()">Save and Continue →</button></div></div>
+          </div>
+          <aside class="card side-help" id="sideHelp"></aside>
+        </div>
+      </section>
+
+      <section class="view" id="recommendationsView">
+        <div class="page-head"><div><h3>Recommendations Register</h3><p>Track every recommendation from inspection finding through assignment, repair, verification, acceptance, and closure.</p></div><button class="btn primary" onclick="openRecommendationModal()">＋ Add Recommendation</button></div>
+        <div class="grid kpis" id="recKpis"></div>
+        <div class="card"><div class="filters"><input id="recSearch" placeholder="Search tank, finding, assignee..." oninput="renderRecommendationRegister()"><select id="recStatusFilter" onchange="renderRecommendationRegister()"><option value="">All statuses</option><option>Open</option><option>Assigned</option><option>In Progress</option><option>Complete</option><option>Accepted</option><option>Closed</option></select></div><div class="table-wrap"><table class="table"><thead><tr><th>Recommendation</th><th>Inspection</th><th>Tank</th><th>Component</th><th>Priority</th><th>Assigned To</th><th>Target Date</th><th>Status</th><th>Acceptance</th><th>Actions</th></tr></thead><tbody id="recRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="reportsView">
+        <div class="page-head"><div><h3>Reports</h3><p>Preview, print, email, revise, and track client acceptance of approved inspection reports.</p></div></div>
+        <div class="card"><div class="table-wrap"><table class="table"><thead><tr><th>Report</th><th>Tank</th><th>Client</th><th>Inspector</th><th>Reviewer</th><th>Revision</th><th>Status</th><th>Photos</th><th>Sent</th><th>Acceptance</th><th>Actions</th></tr></thead><tbody id="reportRows"></tbody></table></div></div>
+      </section>
+
+      <section class="view" id="tutorialsView">
+        <div class="page-head"><div><h3>Tutorials & Guided Learning</h3><p>Inspectors can learn the application while completing work. Every tutorial uses the same steps, terminology, and examples as the inspection wizard.</p></div><button class="btn secondary" onclick="resetTutorials()">Reset Progress</button></div>
+        <div class="grid tutorial-grid" id="tutorialGrid"></div>
+      </section>
+
+      <section class="view" id="informationView">
+        <div class="page-head"><div><h3>API 653 Information Library</h3><p>Plain-language reference material to support consistent reporting. Company procedures, current standards, engineering judgment, and authorized inspector review remain controlling.</p></div></div>
+        <div class="notice warn"><strong>Important:</strong> This prototype provides workflow guidance and report consistency. It is not a substitute for the current API standard, jurisdictional requirements, owner-user procedures, engineering evaluation, or inspector judgment.</div>
+        <div class="accordion" id="infoAccordion"></div>
+      </section>
+
+      <section class="view" id="adminView">
+        <div class="page-head"><div><h3>Administration</h3><p>Configure company branding, report defaults, inspector assignments, and consistent workflow controls.</p></div><button class="btn primary" onclick="saveAdmin()">Save Settings</button></div>
+        <div class="grid two-col">
+          <div class="card"><div class="panel-head"><h4>Company Branding</h4></div><div class="panel-body"><div class="form-grid">
+            <div class="field full"><label>Licensed Company Name</label><input id="adminCompany"></div>
+            <div class="field"><label>Primary Color</label><input id="adminColor" type="color"></div>
+            <div class="field"><label>Default Report Prefix</label><input id="adminPrefix" placeholder="API653"></div>
+            <div class="field full"><label>Report Footer / Confidentiality Statement</label><textarea id="adminFooter"></textarea></div>
+            <div class="field full"><label>Default Email Message</label><textarea id="adminEmail"></textarea></div>
+          </div></div></div>
+          <div class="grid" style="align-content:start">
+            <div class="card"><div class="panel-head"><h4>Current User & Inspector Profile</h4></div><div class="panel-body">
+              <div class="notice info"><strong>Profile use:</strong> This name appears in the upper-right corner and becomes the default inspector for new inspections. Existing reports keep their assigned inspector so issued records are not changed.</div>
+              <div class="form-grid">
+                <div class="field full"><label>Inspector / User Name</label><input id="adminInspectorName" placeholder="Inspector name"></div>
+                <div class="field"><label>Role</label><select id="adminInspectorRole"><option>Administrator</option><option>Inspection Manager</option><option>API 653 Inspector</option><option>Reviewer</option><option>Report Coordinator</option></select></div>
+                <div class="field"><label>Initials</label><input id="adminInspectorInitials" maxlength="3" placeholder="KI"></div>
+                <div class="field full"><label>Default API Certification Number</label><input id="adminInspectorApi" placeholder="Example: 653-12345"></div>
+              </div>
+              <div class="action-row" style="margin-top:12px"><button class="btn secondary" type="button" onclick="applyInspectorToOpenInspections()">Apply to Open Inspections</button></div>
+            </div></div>
+            <div class="card"><div class="panel-head"><h4>Workflow Controls</h4></div><div class="panel-body"><div class="check-grid" style="grid-template-columns:1fr">
+              <label class="check"><input type="checkbox" checked disabled> Require all mandatory inspection steps</label>
+              <label class="check"><input type="checkbox" checked disabled> Require captions for report photos</label>
+              <label class="check"><input type="checkbox" checked disabled> Require inspector certification before review</label>
+              <label class="check"><input type="checkbox" checked disabled> Require reviewer approval before final PDF</label>
+              <label class="check"><input type="checkbox" checked disabled> Track report revisions and status changes</label>
+              <label class="check"><input type="checkbox" checked disabled> Track client acceptance</label>
+            </div></div></div>
+            <div class="card"><div class="panel-head"><h4>Demo Data & Licensing</h4></div><div class="panel-body">
+              <div class="demo-lock"><strong>This demonstration does not retain data.</strong><br>Inspection records, photos, settings, and tutorial progress reset when the page is closed or refreshed. Permanent storage, backups, activation, and company deployment are included only with a purchased version.
+                <div class="action-row"><button class="btn secondary" type="button" onclick="removeExampleRecords()">Remove Example Records This Session</button><button class="btn secondary" type="button" onclick="restoreDemoData()">Restore Demo Examples</button><button class="btn primary" type="button" onclick="openPurchaseModal()">Purchase Options</button></div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="reportView">
+        <div class="page-head report-actions"><div><h3>Report Preview</h3><p>Review the report before printing or sending it to the client.</p></div><div class="action-row"><button class="btn secondary" onclick="showView('reports')">← Reports</button><button class="btn secondary" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn primary" onclick="emailCurrentReport()">✉ Prepare Email</button></div></div>
+        <div id="reportSheet" class="report-sheet"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseModalTitle">
+  <div class="modal-card" style="width:min(900px,96vw)">
+    <div class="modal-head"><h3 id="purchaseModalTitle">Purchase API 653 IM</h3><button class="close" type="button" onclick="closeModal('purchaseModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="notice warn"><strong>Demo limitation:</strong> This copy is for evaluation and training. It does not retain inspection data after the page is closed or refreshed, and generated reports include a demo watermark.</div>
+      <div class="purchase-grid">
+        <section class="purchase-option">
+          <h4>Subscription — Multiuser Cloud</h4>
+          <p>Best for inspection teams working from multiple computers, tablets, or locations.</p>
+          <ul><li>Secure user accounts and roles</li><li>Shared inspections, reviews, and recommendations</li><li>Central photo and PDF storage</li><li>Backups, audit history, and remote access</li><li>Company branding and support</li></ul>
+          <button class="btn primary" type="button" onclick="requestPurchase('Subscription — Multiuser Cloud')">Request Subscription Pricing</button>
+        </section>
+        <section class="purchase-option">
+          <h4>One-Time License — Single Computer</h4>
+          <p>Best for one inspector or office using one designated computer.</p>
+          <ul><li>Permanent local data saving</li><li>Company branding and report templates</li><li>Backup export and restore</li><li>PDF printing and email preparation</li><li>No shared cloud or simultaneous users</li></ul>
+          <button class="btn primary" type="button" onclick="requestPurchase('One-Time License — Single Computer')">Request One-Time Pricing</button>
+        </section>
+      </div>
+      <div class="help" style="margin-top:14px">Purchase requests are prepared by email to <strong>support@shellkey.company</strong>. Payment processing, license activation, cloud hosting, and user accounts require the production version and are not performed by this standalone demo file.</div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="sessionUserModal" role="dialog" aria-modal="true" aria-labelledby="sessionUserTitle">
+  <div class="modal-card" style="width:min(560px,96vw)">
+    <div class="modal-head"><h3 id="sessionUserTitle">Who is using API 653 IM?</h3></div>
+    <div class="modal-body">
+      <div class="notice info"><strong>Required each time the app opens:</strong> Confirm or update your name and role before continuing. This identifies the current user and becomes the default assignment for new inspections.</div>
+      <div class="form-grid">
+        <div class="field full"><label>Your Name <span class="req">*</span></label><input id="sessionInspectorName" autocomplete="name" placeholder="Enter inspector or user name"></div>
+        <div class="field full"><label>Your Role <span class="req">*</span></label><select id="sessionInspectorRole"><option value="">Select role</option><option>Administrator</option><option>Inspection Manager</option><option>API 653 Inspector</option><option>Reviewer</option><option>Report Coordinator</option></select></div>
+        <div class="field"><label>Initials</label><input id="sessionInspectorInitials" maxlength="3" placeholder="KI"></div>
+        <div class="field"><label>API Certification Number</label><input id="sessionInspectorApi" placeholder="Example: 653-12345"></div>
+      </div>
+      <div class="help" style="margin-top:10px">Existing inspections and issued reports will keep their current assigned inspector. The confirmed name is used for the header and new inspections.</div>
+      <div class="action-row" style="margin-top:18px;justify-content:flex-end"><button class="btn primary" type="button" onclick="confirmSessionUser()">Continue to API 653 IM</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="recommendationModal" role="dialog" aria-modal="true" aria-labelledby="recommendationModalTitle">
+  <div class="modal-card" style="width:min(820px,96vw)">
+    <div class="modal-head"><h3 id="recommendationModalTitle">Edit Recommendation</h3><button class="close" onclick="closeModal('recommendationModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="notice info"><strong>Track the action:</strong> Update the assignment, target date, status, and acceptance as work progresses.</div>
+      <div class="form-grid three">
+        <div class="field"><label>Inspection <span class="req">*</span></label><select id="modalRecInspection"></select></div>
+        <div class="field"><label>Recommendation #</label><input id="modalRecId" readonly></div>
+        <div class="field"><label>Component</label><select id="modalRecComponent"><option>Floor</option><option>Shell</option><option>Roof</option><option>Nozzles</option><option>Welds</option><option>Internal Piping</option><option>Other</option></select></div>
+        <div class="field"><label>Priority</label><select id="modalRecPriority"><option>Immediate</option><option>Before return to service</option><option>Short term</option><option>Before next inspection</option><option>Monitor</option><option>Informational</option></select></div>
+        <div class="field"><label>Status</label><select id="modalRecStatus"><option>Open</option><option>Assigned</option><option>Engineering Review</option><option>Repair Planned</option><option>In Progress</option><option>Complete</option><option>Verified</option><option>Accepted</option><option>Closed</option></select></div>
+        <div class="field"><label>Acceptance</label><select id="modalRecAcceptance"><option>Pending</option><option>Accepted</option><option>Rejected</option></select></div>
+        <div class="field full"><label>Finding</label><textarea id="modalRecFinding"></textarea></div>
+        <div class="field full"><label>Recommended Action</label><textarea id="modalRecAction"></textarea></div>
+        <div class="field"><label>Assigned To</label><input id="modalRecAssignedTo"></div>
+        <div class="field"><label>Target Date</label><input id="modalRecTargetDate" type="date"></div>
+      </div>
+      <div class="action-row" style="margin-top:18px;justify-content:space-between">
+        <button class="btn bad" id="modalRecDeleteBtn" type="button" onclick="deleteRecommendationFromModal()">Delete Recommendation</button>
+        <div class="action-row"><button class="btn secondary" type="button" onclick="closeModal('recommendationModal')">Cancel</button><button class="btn primary" type="button" onclick="saveRecommendationFromModal()">Save Recommendation</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="tutorialModal"><div class="modal-card"><div class="modal-head"><h3 id="tutorialModalTitle">Tutorial</h3><button class="close" onclick="closeModal('tutorialModal')">✕</button></div><div class="modal-body" id="tutorialModalBody"></div></div></div>
+<div class="modal" id="onboardModal"><div class="modal-card"><div class="onboard"><div class="onboard-copy"><h2>Welcome to API 653 IM</h2><p>This demonstration guides inspectors through the same controlled reporting process every time. Data is temporary and resets when the page is closed or refreshed.</p><div class="onboard-list"><div class="onboard-item"><b>1</b><span>Review assigned inspections and due dates.</span></div><div class="onboard-item"><b>2</b><span>Complete the guided inspection one step at a time.</span></div><div class="onboard-item"><b>3</b><span>Upload photos and enter consistent captions.</span></div><div class="onboard-item"><b>4</b><span>Run the report readiness check before submission.</span></div><div class="onboard-item"><b>5</b><span>Open saved reports and click any numbered step to review or edit it.</span></div><div class="onboard-item"><b>6</b><span>Review purchase options for permanent saving, backups, company deployment, or multiuser access.</span></div></div><div class="action-row"><button class="btn primary" onclick="closeOnboarding();startNewInspection()">Start Practice Inspection</button><button class="btn secondary" onclick="closeOnboarding()">Go to Dashboard</button><button class="btn warn" onclick="closeOnboarding();openPurchaseModal()">Purchase Options</button></div></div><div class="onboard-art"><div class="big">API<br>653 IM</div><p>Consistent inspections.<br>Complete reports.<br>Faster client delivery.</p></div></div></div></div>
+
+<script>
+const stepDefinitions=[
+ {name:'Tank',title:'Step 1 — Tank Information',instructions:'Confirm the client, facility, tank identification, inspection date, and assignment before beginning the inspection.'},
+ {name:'Scope',title:'Step 2 — Inspection Scope',instructions:'Select the inspection type and all components included in the inspection. Your selections control which component sections appear.'},
+ {name:'Condition',title:'Step 3 — General Condition',instructions:'Document access, cleaning, limitations, and any condition requiring immediate attention.'},
+ {name:'Findings',title:'Step 4 — Component Findings',instructions:'Use the same inspection structure for every selected component: condition, damage, finding, location, repair, recommendation, and photo support.'},
+ {name:'Photos',title:'Step 5 — Photographs',instructions:'Upload clear photographs. Every photo included in the report requires a component, location, and caption.'},
+ {name:'Calculations',title:'Step 6 — Measurements and Calculations',instructions:'Enter applicable shell and floor data. Review all calculated or manually entered values before certification.'},
+ {name:'Recommendations',title:'Step 7 — Repairs and Recommendations',instructions:'Create one trackable record for each repair or recommendation. Assign priority, responsibility, target date, and supporting photos.'},
+ {name:'Quality Check',title:'Step 8 — Report Readiness Check',instructions:'Resolve missing required information before submitting the inspection for review.'},
+ {name:'Certification',title:'Step 9 — Inspector Certification',instructions:'Confirm the report is accurate, complete, and ready for technical review.'},
+ {name:'Report',title:'Step 10 — Review, PDF, and Client Delivery',instructions:'Assign the reviewer, record approval, generate the report, send it to the client, and track acceptance.'}
+];
+const tutorials=[
+ {id:'quickstart',icon:'①',title:'Quick Start',time:'5 minutes',desc:'Learn the complete inspection-to-report workflow.',steps:['Confirm your name and role each time the app opens.','Open My Inspections to see assigned work.','Select Continue Inspection or Start Inspection.','Complete each guided step in order.','Run the Report Readiness Check.','Submit for review and resolve comments.','Generate, print, or email the approved report.']},
+ {id:'dashboard',icon:'▦',title:'Using the Dashboard',time:'3 minutes',desc:'Understand outstanding, overdue, review, approval, and acceptance indicators.',steps:['Use KPI cards to understand workload.','Open an inspection from the tracking table.','Watch due dates and overdue indicators.','Use Recommendations to track follow-up work.','Destructive controls are intentionally kept off dashboard and list screens.']},
+ {id:'newinspection',icon:'＋',title:'Starting and Editing Inspections',time:'6 minutes',desc:'Create a consistent new inspection and navigate saved reports.',steps:['Select Start Inspection.','Confirm client, facility, tank, date, and assignment.','For a new unsaved inspection, use Save and Continue in order.','After the inspection has been saved, click any numbered step at the top to jump directly to that section.','Use Save Draft to keep work during the current demo session. Closing or refreshing the page resets it.','Open a saved inspection from My Inspections to review or edit it.','To permanently remove an inspection, open it, go to Step 10 — Report, and use Delete Inspection.']},
+ {id:'photos',icon:'▧',title:'Adding Report Photos',time:'4 minutes',desc:'Upload, classify, caption, and include inspection photographs.',steps:['Open the Photographs step.','Select images from the device.','Assign the component and location.','Enter a clear caption describing what is shown.','Confirm Include in Report.','Use Remove to delete an unwanted photo before final issue.']},
+ {id:'recommendations',icon:'⚑',title:'Managing Recommendations',time:'6 minutes',desc:'Create, edit, update, and close recommendations connected to findings.',steps:['Create one recommendation for each required action.','Open Recommendations from the menu.','Click any recommendation row or its Edit button.','Update the finding, action, assignee, target date, status, and acceptance.','Select Save Recommendation.','Use Delete Recommendation only when the record should be permanently removed.']},
+ {id:'review',icon:'✓',title:'Review and Approval',time:'5 minutes',desc:'Submit, review, correct, approve, and issue the report.',steps:['Run the readiness check.','Complete inspector certification.','Assign the technical reviewer.','Resolve returned comments.','Approve the report.','Generate and send the final report.']},
+ {id:'records',icon:'⌫',title:'Editing and Deleting Records',time:'4 minutes',desc:'Keep the workspace accurate without placing destructive buttons on working lists.',steps:['Use My Inspections or Reports to open the record with Edit.','Inside the saved inspection, click Step 10 — Report.','Select Delete Inspection only when the complete record should be permanently removed.','Deleting an inspection also deletes its report, photos, and connected recommendations.','Use the recommendation pop-up to delete one recommendation only.','This demo resets when closed; purchased versions provide permanent records and backup controls.']},
+ {id:'cleanstart',icon:'★',title:'Demo and Purchase Options',time:'3 minutes',desc:'Understand temporary demo data and choose the correct licensed version.',steps:['The demo keeps changes only while the page remains open.','Closing or refreshing the page restores the original demonstration data.','Generated reports include a demo watermark.','Choose Subscription for multiuser cloud access, shared reviews, central storage, and backups.','Choose a One-Time License for permanent saving on one designated computer.','Select Purchase / Activate at the top of the application to request pricing.']}
+];
+const infoTopics=[
+ ['Inspection Types','Use internal, external, follow-up, repair verification, or other company-approved inspection types. The selected type should match the authorized scope and owner-user requirements.'],
+ ['Tank Components','Common report sections include floor, shell, roof, nozzles, welds, internal piping, foundation, coatings, appurtenances, and other items defined by the inspection scope.'],
+ ['Damage Documentation','Record the observed condition, exact location, extent, measurement method, supporting photographs, and whether repair, monitoring, or engineering evaluation is recommended.'],
+ ['Corrosion Information','Clearly identify long-term, short-term, and controlling corrosion information where applicable. Calculations and inspection intervals must be reviewed by qualified personnel using current requirements and owner-user procedures.'],
+ ['Remaining Life','Document the inputs, method, assumptions, calculated result, manual overrides, and reviewer acceptance. Do not rely on the application alone for engineering decisions.'],
+ ['Photograph Quality','Each report photograph should show the condition clearly and include the component, location, direction or orientation, and a caption explaining why the image matters.'],
+ ['Recommendations','Write recommendations as clear actions with priority, assigned responsibility, target completion date, evidence, verification, and final acceptance.'],
+ ['Report Revisions','Final reports should retain the report number, revision, issue date, inspector, reviewer, approval record, and history of client delivery and acceptance.']
+];
+
+const defaultAdmin={company:'Demo Inspection Company',color:'#123b5d',prefix:'API653',footer:'Inspection report contents are confidential and intended for the named client. Unauthorized use, reproduction, or distribution is prohibited.',email:'Please find the attached API 653 inspection report for your review. Please contact us with any questions or requested revisions.',inspectorName:'Kirby Inspector',inspectorRole:'Administrator',inspectorInitials:'KI',inspectorApi:''};
+let admin={...defaultAdmin};
+let tutorialProgress={};
+let inspections=seedInspections();
+let demoOnboarded=false;
+let demoNextInspectionNumber=12;
+let currentInspection=null;
+let currentStep=0;
+let activeReportId=null;
+let currentInspectionSaved=false;
+let editingRecommendationKey=null;
+const demoInspectionIds=['API653-2026-0012','API653-2026-0011','API653-2026-0010','API653-2026-0009'];
+inspections.forEach(i=>{if(demoInspectionIds.includes(i.id)&&typeof i.isDemo==='undefined')i.isDemo=true});
+
+function seedInspections(){
+ return [
+  {id:'API653-2026-0012',isDemo:true,client:'Gulf Coast Chemicals',facility:'Bay Area Terminal',tank:'TK-101',description:'Carbon Steel Storage Tank',inspectionDate:'2026-07-15',dueDate:'2026-07-22',assignedTo:'J. Smith',reviewedBy:'M. Davis',status:'In Progress',completion:65,photos:6,reviewStatus:'Not Submitted',acceptance:'Pending',revision:'0',sentDate:'',priority:'High',summary:'Internal inspection in progress. Localized floor corrosion documented near the water draw-off nozzle.',repairs:'Evaluate localized floor corrosion and complete repairs before return to service.',futureRecommendations:'Monitor shell course readings during the next scheduled inspection.',scope:['Internal Inspection','Floor','Shell','Roof','Nozzles','Welds','Internal Piping'],general:{cleaned:'Yes',accessible:'Partially',limitations:'Standing water limited access near the sump.',immediate:'No'},components:defaultComponents(),measurements:{shellLt:'0.002',shellSt:'0.003',shellLife:'12.4',floorLt:'0.004',floorSt:'0.005',floorLife:'6.8',nextInterval:'5',nextDate:'2031-07-15'},recommendations:[{id:'REC-001',component:'Floor',finding:'Localized corrosion near water draw-off nozzle.',action:'Complete engineering evaluation and repair affected floor area before return to service.',priority:'Before return to service',assignedTo:'Maintenance',targetDate:'2026-07-30',status:'Assigned',acceptance:'Pending'}],photoItems:[],inspectorApi:'653-12345',certified:false,reviewApproved:false,clientEmail:'client@example.com'},
+  {id:'API653-2026-0011',isDemo:true,client:'River Bend Fuels',facility:'North Tank Farm',tank:'TK-204',description:'Diesel Storage Tank',inspectionDate:'2026-07-10',dueDate:'2026-07-18',assignedTo:'A. Brown',reviewedBy:'M. Davis',status:'Waiting Review',completion:100,photos:12,reviewStatus:'Submitted',acceptance:'Pending',revision:'0',sentDate:'',priority:'Normal',summary:'Internal inspection completed. Overall tank condition acceptable with monitoring recommendations.',repairs:'No immediate repairs identified.',futureRecommendations:'Monitor localized coating breakdown during the next inspection.',scope:['Internal Inspection','Floor','Shell','Roof','Nozzles','Welds'],general:{cleaned:'Yes',accessible:'Yes',limitations:'None noted.',immediate:'No'},components:defaultComponents(),measurements:{shellLt:'0.001',shellSt:'0.001',shellLife:'24.0',floorLt:'0.002',floorSt:'0.002',floorLife:'14.0',nextInterval:'10',nextDate:'2036-07-10'},recommendations:[{id:'REC-002',component:'Floor',finding:'Localized coating breakdown.',action:'Monitor affected coating area and repair during next planned outage.',priority:'Before next inspection',assignedTo:'Operations',targetDate:'2027-07-10',status:'Open',acceptance:'Pending'}],photoItems:[],inspectorApi:'653-45678',certified:true,reviewApproved:false,clientEmail:'operations@example.com'},
+  {id:'API653-2026-0010',isDemo:true,client:'Prairie Refining',facility:'West Process Area',tank:'TK-310',description:'Process Water Tank',inspectionDate:'2026-06-29',dueDate:'2026-07-08',assignedTo:'J. Smith',reviewedBy:'R. Cole',status:'Approved',completion:100,photos:9,reviewStatus:'Approved',acceptance:'Pending',revision:'1',sentDate:'',priority:'Normal',summary:'Inspection complete. Tank condition acceptable with minor recommendations.',repairs:'Repair minor nozzle coating damage.',futureRecommendations:'Continue routine monitoring.',scope:['Internal Inspection','Floor','Shell','Roof','Nozzles'],general:{cleaned:'Yes',accessible:'Yes',limitations:'None.',immediate:'No'},components:defaultComponents(),measurements:{shellLt:'0.001',shellSt:'0.001',shellLife:'30.0',floorLt:'0.001',floorSt:'0.002',floorLife:'18.0',nextInterval:'10',nextDate:'2036-06-29'},recommendations:[{id:'REC-003',component:'Nozzles',finding:'Minor coating damage at N2.',action:'Prepare and recoat affected area.',priority:'Short term',assignedTo:'Maintenance',targetDate:'2026-08-15',status:'In Progress',acceptance:'Pending'}],photoItems:[],inspectorApi:'653-12345',certified:true,reviewApproved:true,clientEmail:'inspection@example.com'},
+  {id:'API653-2026-0009',isDemo:true,client:'Delta Storage',facility:'South Terminal',tank:'TK-008',description:'Crude Storage Tank',inspectionDate:'2026-06-18',dueDate:'2026-06-28',assignedTo:'A. Brown',reviewedBy:'R. Cole',status:'Accepted',completion:100,photos:14,reviewStatus:'Approved',acceptance:'Accepted',revision:'0',sentDate:'2026-06-25',priority:'Normal',summary:'Inspection complete and accepted by client.',repairs:'Completed prior to return to service.',futureRecommendations:'Continue interval monitoring.',scope:['Internal Inspection','Floor','Shell','Roof','Nozzles','Welds','Internal Piping'],general:{cleaned:'Yes',accessible:'Yes',limitations:'None.',immediate:'No'},components:defaultComponents(),measurements:{shellLt:'0.001',shellSt:'0.002',shellLife:'20.0',floorLt:'0.002',floorSt:'0.002',floorLife:'15.0',nextInterval:'10',nextDate:'2036-06-18'},recommendations:[],photoItems:[],inspectorApi:'653-45678',certified:true,reviewApproved:true,clientEmail:'records@example.com'}
+ ];
+}
+function defaultComponents(){
+ const names=['Pre-Cleaning Condition','Floor','Shell','Roof','Nozzles','Welds','Internal Piping'];
+ const out={}; names.forEach(n=>out[n]={inspected:'Yes',condition:'Acceptable',damage:'None',finding:'',location:'',repair:'No',recommendation:'No'}); return out;
+}
+function nextInspectionId(){
+ const year=new Date().getFullYear();
+ const prefix=(admin.prefix||'API653').trim()||'API653';
+ const nums=inspections.map(i=>{const m=String(i.id||'').match(/(\d{4})$/);return m?Number(m[1]):0});
+ demoNextInspectionNumber=Math.max(demoNextInspectionNumber,...nums,0)+1;
+ return `${prefix}-${year}-${String(demoNextInspectionNumber).padStart(4,'0')}`;
+}
+function newInspection(){
+ return {id:nextInspectionId(),isDemo:false,client:'',facility:'',tank:'',description:'',unit:'',akz:'',legacy:'',nbic:'',sapEquipment:'',pid:'',serial:'',sapNotification:'',workOrder:'',yearBuilt:'',inspectionDate:new Date().toISOString().slice(0,10),dueDate:'',assignedTo:admin.inspectorName,reviewedBy:'',status:'Assigned',completion:0,photos:0,reviewStatus:'Not Submitted',acceptance:'Pending',revision:'0',sentDate:'',priority:'Normal',summary:'',repairs:'',futureRecommendations:'',scope:['Internal Inspection','Floor','Shell','Roof','Nozzles','Welds','Internal Piping'],general:{cleaned:'',accessible:'',limitations:'',immediate:''},components:defaultComponents(),measurements:{shellLt:'',shellSt:'',shellLife:'',floorLt:'',floorSt:'',floorLife:'',nextInterval:'',nextDate:''},recommendations:[],photoItems:[],inspectorApi:admin.inspectorApi||'',certified:false,reviewApproved:false,clientEmail:''};
+}
+
+function persist(){/* Demo mode: in-memory only. Nothing is written to browser storage. */}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function val(id){return document.getElementById(id)?.value||''}
+function checked(id){return !!document.getElementById(id)?.checked}
+function fmtDate(d){if(!d)return'—';const x=new Date(d+'T00:00:00');return x.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}
+function isOverdue(i){return i.dueDate&&new Date(i.dueDate+'T23:59:59')<new Date()&&!['Approved','Sent','Accepted','Closed'].includes(i.status)}
+function statusClass(s){if(isOverdue({status:s,dueDate:''}))return'overdue';return ({'Assigned':'assigned','In Progress':'progress','Waiting Review':'review','Corrections Required':'overdue','Approved':'approved','Sent':'approved','Accepted':'approved','Closed':'closed'})[s]||'assigned'}
+function showView(view){
+ document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+ document.getElementById(view+'View').classList.add('active');
+ document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+ document.getElementById('sidebar').classList.remove('open');
+ const map={dashboard:['Dashboard','Track inspections, reports, recommendations, and approvals.'],inspections:['My Inspections','Continue field work, draft reports, and reviews.'],wizard:['Guided Inspection','Complete each required inspection step consistently.'],recommendations:['Recommendations','Track corrective actions through acceptance and closure.'],reports:['Reports','Preview, print, email, revise, and issue inspection reports.'],tutorials:['Tutorials','Learn the application while completing the work.'],information:['API 653 Information','Plain-language inspection reporting reference.'],admin:['Administration','Configure temporary demo branding and review licensing options.'],report:['Report Preview','Review the generated inspection report.']};
+ const m=map[view]||map.dashboard;document.getElementById('topTitle').textContent=m[0];document.getElementById('topSub').textContent=m[1];
+ if(view==='dashboard')renderDashboard(); if(view==='inspections')renderInspections(); if(view==='recommendations')renderRecommendationRegister(); if(view==='reports')renderReports(); if(view==='tutorials')renderTutorials(); if(view==='information')renderInfo(); if(view==='admin')renderAdmin();
+ window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('nav').addEventListener('click',e=>{const b=e.target.closest('button[data-view]');if(!b)return;if(b.dataset.new==='true')startNewInspection();else showView(b.dataset.view)});
+
+function renderDashboard(){
+ const counts={outstanding:inspections.filter(i=>!['Accepted','Closed'].includes(i.status)).length,inprogress:inspections.filter(i=>i.status==='In Progress').length,review:inspections.filter(i=>i.status==='Waiting Review').length,approved:inspections.filter(i=>i.status==='Approved').length,overdue:inspections.filter(isOverdue).length,recs:inspections.flatMap(i=>i.recommendations||[]).filter(r=>!['Accepted','Closed'].includes(r.status)).length};
+ const cards=[['Outstanding',counts.outstanding,'Open inspection records',''],['In Progress',counts.inprogress,'Active field/report work','warn'],['Waiting Review',counts.review,'Submitted to reviewer',''],['Approved',counts.approved,'Ready to issue','good'],['Overdue',counts.overdue,'Past report due date','bad'],['Open Recommendations',counts.recs,'Require follow-up','warn']];
+ document.getElementById('kpiGrid').innerHTML=cards.map(c=>`<div class="card kpi ${c[3]}"><div class="label">${c[0]}</div><div class="value">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('');
+ const rows=inspections.filter(i=>!['Accepted','Closed'].includes(i.status)).slice(0,6);
+ document.getElementById('dashboardInspectionRows').innerHTML=rows.map(i=>inspectionRow(i,true)).join('')||'<tr><td colspan="8" class="empty">No outstanding inspections.</td></tr>';
+ const statuses=['Assigned','In Progress','Waiting Review','Approved','Accepted'];const max=Math.max(1,...statuses.map(s=>inspections.filter(i=>i.status===s).length));
+ document.getElementById('statusBars').innerHTML=statuses.map(s=>{const n=inspections.filter(i=>i.status===s).length;return`<div class="bar-row"><span>${s}</span><div class="bar"><span style="width:${n/max*100}%"></span></div><strong>${n}</strong></div>`}).join('');
+ document.getElementById('activityFeed').innerHTML=`<div class="feed-item"><div class="feed-icon">✓</div><div><p><strong>API653-2026-0010</strong> approved by R. Cole.</p><small>Today</small></div></div><div class="feed-item"><div class="feed-icon">↗</div><div><p><strong>API653-2026-0011</strong> submitted for review.</p><small>Yesterday</small></div></div><div class="feed-item"><div class="feed-icon">⚑</div><div><p>Recommendation <strong>REC-003</strong> moved to In Progress.</p><small>2 days ago</small></div></div>`;
+ document.getElementById('navInspectionCount').textContent=counts.outstanding;document.getElementById('navRecCount').textContent=counts.recs;
+}
+function inspectionRow(i,compact=false){
+ const overdue=isOverdue(i); const s=overdue?'Overdue':i.status;
+ if(compact)return`<tr><td><strong>${esc(i.id)}</strong></td><td>${esc(i.tank)}</td><td>${esc(i.client)}</td><td>${esc(i.assignedTo)}</td><td>${fmtDate(i.dueDate)}</td><td><div class="progress"><span style="width:${i.completion}%"></span></div><small>${i.completion}%</small></td><td><span class="status ${overdue?'overdue':statusClass(i.status)}">${s}</span></td><td><div class="action-row"><button class="btn small primary" onclick="openInspection('${i.id}')">Open</button></div></td></tr>`;
+ return`<tr><td><strong>${esc(i.id)}</strong></td><td>${esc(i.client)}<br><small>${esc(i.facility)}</small></td><td><strong>${esc(i.tank)}</strong><br><small>${esc(i.description)}</small></td><td>${fmtDate(i.inspectionDate)}</td><td>${fmtDate(i.dueDate)}</td><td>${esc(i.assignedTo)}</td><td>${esc(i.reviewedBy||'Unassigned')}</td><td>${i.photos||0}</td><td><div class="progress"><span style="width:${i.completion}%"></span></div><small>${i.completion}%</small></td><td><span class="status ${overdue?'overdue':statusClass(i.status)}">${s}</span></td><td><div class="action-row"><button class="btn small primary" onclick="openInspection('${i.id}')">${i.completion<100?'Continue':'Edit'}</button><button class="btn small secondary" onclick="previewReport('${i.id}')">Report</button></div></td></tr>`;
+}
+function renderInspections(){
+ const q=val('inspectionSearch').toLowerCase(),f=val('inspectionStatusFilter');
+ const filtered=inspections.filter(i=>(!f||i.status===f)&&(!q||[i.id,i.client,i.facility,i.tank,i.assignedTo].join(' ').toLowerCase().includes(q)));
+ document.getElementById('inspectionRows').innerHTML=filtered.map(i=>inspectionRow(i)).join('')||'<tr><td colspan="11" class="empty">No inspections match the selected filters.</td></tr>';
+}
+function startNewInspection(){currentInspection=newInspection();currentInspectionSaved=false;currentStep=0;showView('wizard');renderWizard()}
+function openInspection(id){const found=inspections.find(i=>i.id===id);if(!found)return;currentInspection=JSON.parse(JSON.stringify(found));currentInspectionSaved=true;currentStep=Math.min(9,Math.floor((currentInspection.completion||0)/10));showView('wizard');renderWizard()}
+function renderStepper(){const canJump=currentInspectionSaved;document.getElementById('stepper').innerHTML=stepDefinitions.map((s,idx)=>`<div class="step ${idx<currentStep?'done':idx===currentStep?'active':''} ${canJump?'clickable':'locked'}" data-step="${idx+1}" ${canJump?`onclick="goToStep(${idx})" title="Open ${s.name}"`:'title="Save the new inspection before jumping between steps"'}>${s.name}</div>`).join('')}
+function goToStep(idx){if(!currentInspectionSaved)return;saveStepData();saveCurrentInspection(false);currentStep=Math.max(0,Math.min(9,idx));renderWizard();window.scrollTo({top:0,behavior:'smooth'})}
+function renderWizard(){
+ if(!currentInspection)currentInspection=newInspection();renderStepper();
+ const d=stepDefinitions[currentStep];document.getElementById('stepTitle').textContent=d.title;document.getElementById('stepInstructions').textContent=d.instructions;document.getElementById('backBtn').disabled=currentStep===0;document.getElementById('nextBtn').textContent=currentStep===9?'Save Inspection':'Save and Continue →';document.getElementById('wizardPageTitle').textContent=currentInspection.id||'Guided Inspection';
+ const renderers=[stepTank,stepScope,stepCondition,stepFindings,stepPhotos,stepCalculations,stepRecommendations,stepQA,stepCertification,stepReport];document.getElementById('wizardBody').innerHTML=renderers[currentStep]();renderSideHelp();bindDynamic();
+}
+function renderSideHelp(){
+ const tips=[['Confirm identification','Use the tank owner’s current equipment records. Confirm the tank number, facility, work order, and inspection date before proceeding.'],['Define the scope','Select only the components and examination types included in the authorized inspection scope.'],['Record limitations','Identify any area that was inaccessible, unclean, covered, unsafe, or otherwise not fully inspected.'],['Use consistent findings','State what was observed, where it was located, its extent, and whether action is required.'],['Caption every photo','Describe what is visible, its location, and why the photo is important.'],['Verify calculations','Check inputs, units, assumptions, controlling values, and manual overrides before certification.'],['Make actions trackable','Use one recommendation per action and identify priority, owner, date, and evidence.'],['Resolve every warning','Click missing items and correct them before submission.'],['Certification is controlled','The inspector confirms completeness and accuracy before technical review.'],['Issue only approved reports','Final PDF and client delivery should occur after the required review and approval.']];
+ const t=tips[currentStep];document.getElementById('sideHelp').innerHTML=`<h4>Inspector Guidance</h4><p><strong>${t[0]}</strong></p><p>${t[1]}</p><ul><li>Required fields are marked with an asterisk.</li><li>Work is held only for the current demo session and resets when the page is closed or refreshed.</li><li>Select Help for the related tutorial.</li><li>${currentInspectionSaved?'This is a saved inspection: click any numbered step to jump directly to it.':'New inspections must be completed in sequence until the first save.'}</li></ul><button class="btn secondary" style="width:100%" onclick="openTutorial('${tutorialForStep()}')">Open Tutorial</button><div class="mini-progress"><small>Report progress</small><div class="progress" style="margin-top:6px"><span style="width:${Math.max(currentInspection.completion||0,currentStep*10)}%"></span></div></div>`;
+}
+function tutorialForStep(){return ['newinspection','newinspection','newinspection','newinspection','photos','recommendations','recommendations','review','review','review'][currentStep]}
+function stepTank(){const i=currentInspection;return`<div class="tip"><strong>Before you begin:</strong> Confirm the correct tank and inspection assignment. This information appears on the final report.</div><div class="form-grid four">
+ ${field('Client','client',i.client,true)}${field('Facility','facility',i.facility,true)}${field('Unit','unit',i.unit)}${field('Tank ID','tank',i.tank,true)}${field('Description','description',i.description,true)}${field('Inspection Date','inspectionDate',i.inspectionDate,true,'date')}${field('Report Due Date','dueDate',i.dueDate,true,'date')}${field('Assigned To','assignedTo',i.assignedTo,true)}${field('Reviewed By','reviewedBy',i.reviewedBy)}${field('AKZ #','akz',i.akz)}${field('Legacy #','legacy',i.legacy)}${field('NBIC #','nbic',i.nbic)}${field('SAP Equipment #','sapEquipment',i.sapEquipment)}${field('P&ID','pid',i.pid)}${field('Serial Number','serial',i.serial)}${field('SAP Notification #','sapNotification',i.sapNotification)}${field('Work Order #','workOrder',i.workOrder)}${field('Year Built','yearBuilt',i.yearBuilt)}${field('Client Email','clientEmail',i.clientEmail,false,'email')}
+ </div>`}
+function field(label,id,value,req=false,type='text'){return`<div class="field"><label>${label}${req?'<span class="req">*</span>':''}</label><input id="f_${id}" type="${type}" value="${esc(value)}"></div>`}
+function stepScope(){const opts=['Internal Inspection','External Inspection','Follow-Up Inspection','Repair Verification','Floor','Shell','Roof','Nozzles','Welds','Internal Piping','Foundation','Appurtenances','Coating','Thickness Measurements'];return`<div class="tip"><strong>How this works:</strong> The components selected here become required sections later in the inspection.</div><div class="check-grid">${opts.map(o=>`<label class="check"><input type="checkbox" class="scopeCheck" value="${o}" ${currentInspection.scope.includes(o)?'checked':''}><span><strong>${o}</strong><br><small>${scopeHelp(o)}</small></span></label>`).join('')}</div>`}
+function scopeHelp(o){return({Floor:'Tank bottom plates, annular plates, sump, and floor condition.',Shell:'Shell courses, seams, attachments, and visible condition.',Roof:'Roof plates, structure, supports, and appurtenances.',Nozzles:'Nozzle necks, reinforcing pads, flanges, and connections.',Welds:'Applicable floor, shell, roof, nozzle, and attachment welds.'})[o]||'Include this item when it is part of the authorized inspection scope.'}
+function stepCondition(){const g=currentInspection.general;return`<div class="form-grid">
+ <div class="field"><label>Was the tank adequately cleaned?<span class="req">*</span></label>${select('g_cleaned',['','Yes','No','Partially'],g.cleaned)}</div>
+ <div class="field"><label>Were required surfaces accessible?<span class="req">*</span></label>${select('g_accessible',['','Yes','No','Partially'],g.accessible)}</div>
+ <div class="field"><label>Immediate action required?<span class="req">*</span></label>${select('g_immediate',['','No','Yes — Before return to service','Yes — Engineering review'],g.immediate)}</div>
+ <div class="field"><label>Inspection Priority</label>${select('f_priority',['Normal','High','Urgent'],currentInspection.priority)}</div>
+ <div class="field full"><label>Inspection Limitations</label><textarea id="g_limitations">${esc(g.limitations)}</textarea><div class="help">Identify standing product, inaccessible surfaces, unsafe areas, coatings, attachments, or any condition that limited the examination.</div></div>
+ <div class="field full"><label>Preliminary Summary</label><textarea id="f_summary">${esc(currentInspection.summary)}</textarea><div class="help">Provide a brief overall condition statement. This can be refined before final certification.</div></div>
+ </div>`}
+function select(id,options,value){return`<select id="${id}">${options.map(o=>`<option ${o===value?'selected':''}>${esc(o)}</option>`).join('')}</select>`}
+function selectedComponents(){return currentInspection.scope.filter(x=>['Floor','Shell','Roof','Nozzles','Welds','Internal Piping'].includes(x))}
+function stepFindings(){const comps=['Pre-Cleaning Condition',...selectedComponents()];return`<div class="scroll-list"><div class="component-list">${comps.map((c,idx)=>{const x=currentInspection.components[c]||{};return`<div class="component-card"><h5>${idx+1}. ${c}<span class="status ${x.condition==='Acceptable'?'approved':x.condition==='Repair Required'?'overdue':'progress'}">${x.condition||'Not Rated'}</span></h5><div class="form-grid"><div class="field"><label>Inspected?</label>${select(`c_${slug(c)}_inspected`,['Yes','No','Partially'],x.inspected)}</div><div class="field"><label>Overall Condition</label>${select(`c_${slug(c)}_condition`,['Acceptable','Monitor','Repair Required','Engineering Review'],x.condition)}</div><div class="field"><label>Damage Observed</label>${select(`c_${slug(c)}_damage`,['None','General Corrosion','Localized Corrosion','Pitting','Cracking','Deformation','Coating Failure','Erosion','Other'],x.damage)}</div><div class="field full"><label>Finding Description</label><textarea id="c_${slug(c)}_finding">${esc(x.finding)}</textarea></div><div class="field"><label>Location</label><input id="c_${slug(c)}_location" value="${esc(x.location)}"></div><div class="field"><label>Repair Required?</label>${select(`c_${slug(c)}_repair`,['No','Yes'],x.repair)}</div><div class="field"><label>Recommendation Required?</label>${select(`c_${slug(c)}_recommendation`,['No','Yes'],x.recommendation)}</div></div></div>`}).join('')}</div></div>`}
+function slug(s){return s.toLowerCase().replace(/[^a-z0-9]+/g,'_')}
+function stepPhotos(){return`<div class="upload-zone"><strong>Add Inspection Photos</strong><p style="color:var(--muted)">Choose photos from a phone, tablet, or computer. Images are held temporarily for this demo session and reset when the page is closed or refreshed.</p><input type="file" id="photoUpload" accept="image/*" multiple></div><div class="scroll-list" style="margin-top:12px"><div class="photo-grid" id="photoGrid">${photoCards()}</div></div>`}
+function photoCards(){return (currentInspection.photoItems||[]).map((p,idx)=>`<div class="photo-card"><img src="${p.data}" alt="Inspection photo"><div class="photo-meta"><strong>Photo ${idx+1}</strong>${select(`p_${idx}_component`,['Floor','Shell','Roof','Nozzles','Welds','Internal Piping','Other'],p.component)}<input id="p_${idx}_location" placeholder="Location" value="${esc(p.location)}"><input id="p_${idx}_caption" placeholder="Required caption" value="${esc(p.caption)}"><label style="display:flex;gap:6px;margin-top:8px"><input id="p_${idx}_include" type="checkbox" ${p.include?'checked':''}> Include in report</label><button class="btn small bad" style="margin-top:8px" onclick="removePhoto(${idx})">Remove</button></div></div>`).join('')||'<div class="empty" style="grid-column:1/-1">No photos uploaded yet.</div>'}
+function stepCalculations(){const m=currentInspection.measurements;return`<div class="notice warn"><strong>Verification required:</strong> The application can organize and display values, but the authorized inspector and reviewer remain responsible for the calculation method, inputs, assumptions, units, and conclusions.</div><div class="card" style="box-shadow:none;margin-bottom:14px"><div class="panel-head"><h4>Shell</h4></div><div class="panel-body"><div class="form-grid three">${field('Long-Term Corrosion Rate','shellLt',m.shellLt)}${field('Short-Term Corrosion Rate','shellSt',m.shellSt)}${field('Remaining Life (Years)','shellLife',m.shellLife)}</div></div></div><div class="card" style="box-shadow:none;margin-bottom:14px"><div class="panel-head"><h4>Floor</h4></div><div class="panel-body"><div class="form-grid three">${field('Long-Term Corrosion Rate','floorLt',m.floorLt)}${field('Short-Term Corrosion Rate','floorSt',m.floorSt)}${field('Remaining Life (Years)','floorLife',m.floorLife)}</div></div></div><div class="form-grid">${field('Recommended Inspection Interval (Years)','nextInterval',m.nextInterval)}${field('Next Internal Inspection Date','nextDate',m.nextDate,false,'date')}</div>`}
+function stepRecommendations(){return`<div class="tip"><strong>Consistency rule:</strong> Create one record for each separate action. Avoid combining unrelated repairs or recommendations in one paragraph.</div><div class="scroll-list" id="recommendationCards">${recommendationCards()}</div><button class="btn secondary" onclick="addRecommendation()">＋ Add Recommendation</button><div class="form-grid" style="margin-top:16px"><div class="field full"><label>Repairs Summary</label><textarea id="f_repairs">${esc(currentInspection.repairs)}</textarea></div><div class="field full"><label>Future Recommendations Summary</label><textarea id="f_futureRecommendations">${esc(currentInspection.futureRecommendations)}</textarea></div></div>`}
+function recommendationCards(){return(currentInspection.recommendations||[]).map((r,idx)=>`<div class="rec-card"><h5>Recommendation ${idx+1}</h5><div class="form-grid three"><div class="field"><label>Component</label>${select(`r_${idx}_component`,['Floor','Shell','Roof','Nozzles','Welds','Internal Piping','Other'],r.component)}</div><div class="field"><label>Priority</label>${select(`r_${idx}_priority`,['Immediate','Before return to service','Short term','Before next inspection','Monitor','Informational'],r.priority)}</div><div class="field"><label>Status</label>${select(`r_${idx}_status`,['Open','Assigned','Engineering Review','Repair Planned','In Progress','Complete','Verified','Accepted','Closed'],r.status)}</div><div class="field full"><label>Finding</label><textarea id="r_${idx}_finding">${esc(r.finding)}</textarea></div><div class="field full"><label>Recommended Action</label><textarea id="r_${idx}_action">${esc(r.action)}</textarea></div><div class="field"><label>Assigned To</label><input id="r_${idx}_assignedTo" value="${esc(r.assignedTo)}"></div><div class="field"><label>Target Date</label><input type="date" id="r_${idx}_targetDate" value="${esc(r.targetDate)}"></div><div class="field"><label>Acceptance</label>${select(`r_${idx}_acceptance`,['Pending','Accepted','Rejected'],r.acceptance)}</div></div><button class="btn small bad" onclick="removeRecommendation(${idx})">Remove</button></div>`).join('')||'<div class="empty">No recommendations have been added.</div>'}
+function qaChecks(){
+ const i=currentInspection,photos=i.photoItems||[],recs=i.recommendations||[],checks=[];
+ checks.push(['Tank information complete',!!(i.client&&i.facility&&i.tank&&i.description&&i.inspectionDate&&i.dueDate),'Complete client, facility, tank, description, inspection date, and due date.']);
+ checks.push(['Inspection scope complete',i.scope.length>1,'Select the inspection type and inspected components.']);
+ checks.push(['General condition complete',!!(i.general.cleaned&&i.general.accessible&&i.general.immediate),'Answer the required condition questions.']);
+ const comps=['Pre-Cleaning Condition',...selectedComponents()];checks.push(['Selected components addressed',comps.every(c=>i.components[c]?.condition),'Rate every selected component.']);
+ checks.push(['Report photos captioned',photos.length>0&&photos.filter(p=>p.include).every(p=>p.component&&p.location&&p.caption),'Upload at least one report photo and complete its component, location, and caption.']);
+ checks.push(['Recommendations are trackable',recs.every(r=>r.component&&r.finding&&r.action&&r.priority&&r.assignedTo&&r.targetDate),'Complete the action, priority, assignee, and target date for every recommendation.']);
+ checks.push(['Inspector API number entered',!!i.inspectorApi,'Enter the inspector API certification number.']);
+ checks.push(['Inspector certification complete',!!i.certified,'Complete certification in Step 9.']);
+ return checks;
+}
+function stepQA(){const checks=qaChecks();const good=checks.filter(c=>c[1]).length,pct=Math.round(good/checks.length*100);return`<div class="notice ${pct===100?'good':pct>=75?'warn':'info'}"><strong>Report Readiness: ${pct}%</strong><br>${pct===100?'All mandatory prototype checks are complete.':'Resolve the incomplete items before technical review.'}</div><div class="qa-list">${checks.map(c=>`<div class="qa-item ${c[1]?'good':'bad'}"><div class="qa-icon">${c[1]?'✓':'!'}</div><div class="qa-text"><strong>${c[0]}</strong><br><small>${c[1]?'Complete':c[2]}</small></div></div>`).join('')}</div>`}
+function stepCertification(){return`<div class="notice info"><strong>Inspector certification:</strong> Review the summary, findings, calculations, photographs, repairs, and recommendations before submitting the report.</div><div class="form-grid"><div class="field"><label>Inspector Name<span class="req">*</span></label><input id="f_assignedTo" value="${esc(currentInspection.assignedTo)}"></div><div class="field"><label>API Certification Number<span class="req">*</span></label><input id="f_inspectorApi" value="${esc(currentInspection.inspectorApi)}"></div><div class="field full"><label>Final Inspection Summary<span class="req">*</span></label><textarea id="f_summary">${esc(currentInspection.summary)}</textarea></div><div class="field full"><label class="check"><input type="checkbox" id="f_certified" ${currentInspection.certified?'checked':''}><span><strong>I certify that I reviewed this inspection record.</strong><br><small>I confirm that the documented findings, photographs, calculations, repairs, and recommendations are complete and accurately represent the inspection to the best of my professional judgment.</small></span></label></div></div>`}
+function stepReport(){const ready=qaChecks().every(c=>c[1]);return`<div class="notice ${ready?'good':'warn'}"><strong>${ready?'Ready for controlled review':'Not ready for final issue'}</strong><br>${ready?'Assign the reviewer, record approval, and generate the report.':'Return to the Report Readiness Check and complete all mandatory items.'}</div><div class="form-grid"><div class="field"><label>Technical Reviewer</label><input id="f_reviewedBy" value="${esc(currentInspection.reviewedBy)}"></div><div class="field"><label>Workflow Status</label>${select('f_status',['Assigned','In Progress','Waiting Review','Corrections Required','Approved','Sent','Accepted'],currentInspection.status)}</div><div class="field"><label>Report Revision</label><input id="f_revision" value="${esc(currentInspection.revision)}"></div><div class="field"><label>Client Acceptance</label>${select('f_acceptance',['Pending','Accepted with comments','Accepted','Rejected','Revision Requested'],currentInspection.acceptance)}</div><div class="field full"><label class="check"><input type="checkbox" id="f_reviewApproved" ${currentInspection.reviewApproved?'checked':''}><span><strong>Reviewer approval recorded</strong><br><small>Final issue should occur only after the required company review and approval.</small></span></label></div></div><div class="action-row" style="margin-top:18px"><button class="btn secondary" onclick="saveCurrentInspection(true);previewReport('${currentInspection.id}')">Preview Report</button><button class="btn secondary" onclick="saveCurrentInspection(false);previewReport(currentInspection.id);setTimeout(()=>window.print(),250)">Print / Save PDF</button><button class="btn primary" onclick="saveCurrentInspection(true);emailCurrentInspection()">Prepare Email</button>${currentInspectionSaved?'<button class="btn bad" style="margin-left:auto" onclick="deleteCurrentInspectionFromEditor()">Delete Inspection</button>':''}</div><div class="help" style="margin-top:10px">Delete is available only inside the opened inspection so records cannot be removed accidentally from dashboard or list screens.</div>`}
+function bindDynamic(){
+ if(currentStep===4){document.getElementById('photoUpload').addEventListener('change',handlePhotos)}
+}
+function saveStepData(){const i=currentInspection;if(!i)return;
+ if(currentStep===0){['client','facility','unit','tank','description','inspectionDate','dueDate','assignedTo','reviewedBy','akz','legacy','nbic','sapEquipment','pid','serial','sapNotification','workOrder','yearBuilt','clientEmail'].forEach(k=>{const e=document.getElementById('f_'+k);if(e)i[k]=e.value.trim()})}
+ if(currentStep===1)i.scope=[...document.querySelectorAll('.scopeCheck:checked')].map(x=>x.value);
+ if(currentStep===2){i.general.cleaned=val('g_cleaned');i.general.accessible=val('g_accessible');i.general.immediate=val('g_immediate');i.general.limitations=val('g_limitations');i.priority=val('f_priority');i.summary=val('f_summary')}
+ if(currentStep===3){['Pre-Cleaning Condition',...selectedComponents()].forEach(c=>{const s=slug(c);i.components[c]={inspected:val(`c_${s}_inspected`),condition:val(`c_${s}_condition`),damage:val(`c_${s}_damage`),finding:val(`c_${s}_finding`),location:val(`c_${s}_location`),repair:val(`c_${s}_repair`),recommendation:val(`c_${s}_recommendation`)}})}
+ if(currentStep===4){(i.photoItems||[]).forEach((p,idx)=>{p.component=val(`p_${idx}_component`);p.location=val(`p_${idx}_location`);p.caption=val(`p_${idx}_caption`);p.include=checked(`p_${idx}_include`)});i.photos=i.photoItems.length}
+ if(currentStep===5){['shellLt','shellSt','shellLife','floorLt','floorSt','floorLife','nextInterval','nextDate'].forEach(k=>{const e=document.getElementById('f_'+k);if(e)i.measurements[k]=e.value})}
+ if(currentStep===6){(i.recommendations||[]).forEach((r,idx)=>{['component','priority','status','finding','action','assignedTo','targetDate','acceptance'].forEach(k=>{const e=document.getElementById(`r_${idx}_${k}`);if(e)r[k]=e.value})});i.repairs=val('f_repairs');i.futureRecommendations=val('f_futureRecommendations')}
+ if(currentStep===8){i.assignedTo=val('f_assignedTo');i.inspectorApi=val('f_inspectorApi');i.summary=val('f_summary');i.certified=checked('f_certified')}
+ if(currentStep===9){i.reviewedBy=val('f_reviewedBy');i.status=val('f_status');i.revision=val('f_revision');i.acceptance=val('f_acceptance');i.reviewApproved=checked('f_reviewApproved')}
+ i.completion=Math.max(i.completion||0,(currentStep+1)*10);if(i.completion>0&&i.status==='Assigned')i.status='In Progress';
+}
+function validateCurrent(){saveStepData();if(currentStep===0){const req=['client','facility','tank','description','inspectionDate','dueDate'];const miss=req.filter(k=>!currentInspection[k]);if(miss.length){alert('Complete the required Tank Information fields before continuing.');return false}}if(currentStep===1&&currentInspection.scope.length<2){alert('Select the inspection type and at least one component.');return false}return true}
+function nextStep(){if(!validateCurrent())return;saveCurrentInspection(false);if(currentStep<9){currentStep++;renderWizard();window.scrollTo({top:0,behavior:'smooth'})}else{saveCurrentInspection(true);renderDashboard();alert('Inspection saved for this demo session only. You can review, preview, print, or prepare the client email until the page is closed or refreshed.')}}
+function previousStep(){saveStepData();if(currentStep>0){currentStep--;renderWizard();window.scrollTo({top:0,behavior:'smooth'})}}
+function saveCurrentInspection(showMessage=false){saveStepData();const idx=inspections.findIndex(x=>x.id===currentInspection.id);if(idx>=0)inspections[idx]=JSON.parse(JSON.stringify(currentInspection));else inspections.unshift(JSON.parse(JSON.stringify(currentInspection)));currentInspectionSaved=true;persist();renderDashboard();renderStepper();if(showMessage)alert('Draft saved for this demo session only. Closing or refreshing the page will reset all demo changes. You can now click any numbered step to review or edit it.')}
+function addRecommendation(){saveStepData();currentInspection.recommendations.push({id:`REC-${String(inspections.flatMap(i=>i.recommendations||[]).length+1).padStart(3,'0')}`,component:'Floor',finding:'',action:'',priority:'Short term',assignedTo:'',targetDate:'',status:'Open',acceptance:'Pending'});renderWizard()}
+function removeRecommendation(idx){saveStepData();const r=currentInspection.recommendations[idx];if(!r)return;if(!confirm(`Delete ${r.id||'this recommendation'}? This cannot be undone.`))return;currentInspection.recommendations.splice(idx,1);renderWizard()}
+function handlePhotos(e){[...e.target.files].forEach(file=>compressImage(file,data=>{currentInspection.photoItems.push({data,component:'Floor',location:'',caption:'',include:true});currentInspection.photos=currentInspection.photoItems.length;document.getElementById('photoGrid').innerHTML=photoCards()}))}
+function compressImage(file,cb){const reader=new FileReader();reader.onload=ev=>{const img=new Image();img.onload=()=>{const max=1000,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);c.getContext('2d').drawImage(img,0,0,c.width,c.height);cb(c.toDataURL('image/jpeg',.78))};img.src=ev.target.result};reader.readAsDataURL(file)}
+function removePhoto(idx){saveStepData();currentInspection.photoItems.splice(idx,1);currentInspection.photos=currentInspection.photoItems.length;renderWizard()}
+
+function allRecommendations(){return inspections.flatMap(i=>(i.recommendations||[]).map(r=>({...r,inspection:i.id,tank:i.tank,client:i.client}))) }
+function nextRecommendationId(){const nums=allRecommendations().map(r=>{const m=String(r.id||'').match(/(\d+)$/);return m?Number(m[1]):0});return `REC-${String(Math.max(...nums,0)+1).padStart(3,'0')}`}
+function recommendationStatusClass(s){return ['Accepted','Closed','Complete','Verified'].includes(s)?'approved':s==='Engineering Review'?'review':s==='In Progress'?'progress':s==='Repair Planned'?'assigned':'progress'}
+function renderRecommendationRegister(){
+ const all=allRecommendations(),q=val('recSearch').toLowerCase(),f=val('recStatusFilter');
+ const filtered=all.filter(r=>(!f||r.status===f)&&(!q||[r.id,r.inspection,r.tank,r.component,r.finding,r.action,r.assignedTo].join(' ').toLowerCase().includes(q)));
+ document.getElementById('recRows').innerHTML=filtered.map(r=>`<tr class="clickable-row" onclick="openRecommendationModal('${r.inspection}','${r.id}')"><td><strong>${esc(r.id)}</strong></td><td>${esc(r.inspection)}</td><td>${esc(r.tank)}</td><td>${esc(r.component)}</td><td>${esc(r.priority)}</td><td>${esc(r.assignedTo||'Unassigned')}</td><td>${fmtDate(r.targetDate)}</td><td><span class="status ${recommendationStatusClass(r.status)}">${esc(r.status)}</span></td><td>${esc(r.acceptance)}</td><td><button class="btn small primary" onclick="event.stopPropagation();openRecommendationModal('${r.inspection}','${r.id}')">Edit</button></td></tr>`).join('')||'<tr><td colspan="10" class="empty">No recommendations match the selected filters.</td></tr>';
+ const open=all.filter(r=>!['Accepted','Closed'].includes(r.status)).length,urgent=all.filter(r=>['Immediate','Before return to service'].includes(r.priority)&&!['Accepted','Closed'].includes(r.status)).length,accepted=all.filter(r=>r.acceptance==='Accepted').length,overdue=all.filter(r=>r.targetDate&&new Date(r.targetDate)<new Date()&&!['Accepted','Closed'].includes(r.status)).length;
+ document.getElementById('recKpis').innerHTML=[['Open',open,'Active recommendations',''],['High Priority',urgent,'Immediate or pre-service','bad'],['Overdue',overdue,'Past target date','warn'],['Accepted',accepted,'Client/owner accepted','good']].map(c=>`<div class="card kpi ${c[3]}"><div class="label">${c[0]}</div><div class="value">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('')
+}
+function openRecommendationModal(inspectionId='',recId=''){
+ if(!inspections.length){alert('Create and save an inspection before adding a recommendation.');return}
+ const modal=document.getElementById('recommendationModal');
+ const selectEl=document.getElementById('modalRecInspection');
+ selectEl.innerHTML=inspections.map(i=>`<option value="${esc(i.id)}">${esc(i.id)} — ${esc(i.tank||'Tank not entered')} — ${esc(i.client||'Client not entered')}</option>`).join('');
+ const selectedInspection=inspectionId||inspections[0].id;
+ selectEl.value=selectedInspection;
+ const inspection=inspections.find(i=>i.id===selectedInspection);
+ const rec=recId?(inspection?.recommendations||[]).find(r=>r.id===recId):null;
+ editingRecommendationKey=rec?{inspectionId:selectedInspection,recId}:{inspectionId:selectedInspection,recId:null};
+ document.getElementById('recommendationModalTitle').textContent=rec?'Edit Recommendation':'Add Recommendation';
+ document.getElementById('modalRecId').value=rec?.id||nextRecommendationId();
+ document.getElementById('modalRecComponent').value=rec?.component||'Floor';
+ document.getElementById('modalRecPriority').value=rec?.priority||'Short term';
+ document.getElementById('modalRecStatus').value=rec?.status||'Open';
+ document.getElementById('modalRecAcceptance').value=rec?.acceptance||'Pending';
+ document.getElementById('modalRecFinding').value=rec?.finding||'';
+ document.getElementById('modalRecAction').value=rec?.action||'';
+ document.getElementById('modalRecAssignedTo').value=rec?.assignedTo||'';
+ document.getElementById('modalRecTargetDate').value=rec?.targetDate||'';
+ document.getElementById('modalRecDeleteBtn').style.display=rec?'inline-flex':'none';
+ selectEl.disabled=!!rec;
+ modal.classList.add('open');
+}
+function saveRecommendationFromModal(){
+ const inspectionId=val('modalRecInspection');
+ const inspection=inspections.find(i=>i.id===inspectionId);
+ if(!inspection){alert('Select a valid inspection.');return}
+ const data={id:val('modalRecId')||nextRecommendationId(),component:val('modalRecComponent'),priority:val('modalRecPriority'),status:val('modalRecStatus'),acceptance:val('modalRecAcceptance'),finding:val('modalRecFinding').trim(),action:val('modalRecAction').trim(),assignedTo:val('modalRecAssignedTo').trim(),targetDate:val('modalRecTargetDate')};
+ if(!data.finding||!data.action){alert('Enter both the finding and recommended action.');return}
+ inspection.recommendations=inspection.recommendations||[];
+ const idx=editingRecommendationKey?.recId?inspection.recommendations.findIndex(r=>r.id===editingRecommendationKey.recId):-1;
+ if(idx>=0)inspection.recommendations[idx]=data;else inspection.recommendations.push(data);
+ if(currentInspection&&currentInspection.id===inspection.id)currentInspection=JSON.parse(JSON.stringify(inspection));
+ persist();closeModal('recommendationModal');renderRecommendationRegister();renderDashboard();renderInspections();renderReports();
+}
+function deleteRecommendationFromModal(){
+ const key=editingRecommendationKey;if(!key?.recId)return;
+ const inspection=inspections.find(i=>i.id===key.inspectionId);const rec=(inspection?.recommendations||[]).find(r=>r.id===key.recId);if(!rec)return;
+ if(!confirm(`Delete ${rec.id}? This cannot be undone.`))return;
+ inspection.recommendations=inspection.recommendations.filter(r=>r.id!==key.recId);
+ if(currentInspection&&currentInspection.id===inspection.id)currentInspection=JSON.parse(JSON.stringify(inspection));
+ persist();closeModal('recommendationModal');renderRecommendationRegister();renderDashboard();renderInspections();renderReports();
+}
+function deleteInspection(id){
+ const i=inspections.find(x=>x.id===id);if(!i)return false;
+ if(!confirm(`Delete ${i.id} for ${i.tank||'this tank'}? This permanently deletes the inspection, report, photos, and ${i.recommendations?.length||0} recommendation(s).`))return false;
+ inspections=inspections.filter(x=>x.id!==id);persist();
+ if(currentInspection?.id===id){currentInspection=null;currentInspectionSaved=false}
+ if(activeReportId===id)activeReportId=null;
+ renderDashboard();renderInspections();renderRecommendationRegister();renderReports();
+ const active=document.querySelector('.view.active')?.id;if(active==='reportView')showView('reports');
+ return true;
+}
+function deleteCurrentInspectionFromEditor(){
+ const id=currentInspection?.id;
+ if(!id||!currentInspectionSaved)return;
+ if(deleteInspection(id))showView('inspections');
+}
+function renderReports(){document.getElementById('reportRows').innerHTML=inspections.filter(i=>i.completion>0).map(i=>`<tr><td><strong>${esc(i.id)}</strong></td><td>${esc(i.tank)}</td><td>${esc(i.client)}</td><td>${esc(i.assignedTo)}</td><td>${esc(i.reviewedBy||'Unassigned')}</td><td>${esc(i.revision)}</td><td><span class="status ${statusClass(i.status)}">${esc(i.status)}</span></td><td>${i.photos||0}</td><td>${i.sentDate?fmtDate(i.sentDate):'Not sent'}</td><td>${esc(i.acceptance)}</td><td><div class="action-row"><button class="btn small primary" onclick="openInspection('${i.id}')">Edit</button><button class="btn small secondary" onclick="previewReport('${i.id}')">Preview</button><button class="btn small secondary" onclick="previewReport('${i.id}');setTimeout(()=>window.print(),250)">Print</button><button class="btn small primary" onclick="emailInspection('${i.id}')">Email</button></div></td></tr>`).join('')||'<tr><td colspan="11" class="empty">No reports in this demo session. Start an inspection to create a temporary report record.</td></tr>'}
+function previewReport(id){const i=inspections.find(x=>x.id===id)||currentInspection;if(!i)return;activeReportId=i.id;document.getElementById('reportSheet').innerHTML=buildReport(i);showView('report')}
+function buildReport(i){const photos=(i.photoItems||[]).filter(p=>p.include);const compRows=['Pre-Cleaning Condition',...selectedComponentsFor(i)].map(c=>{const x=i.components[c]||{};return`<div class="report-section"><h4>${esc(c)}:</h4><p><strong>Condition:</strong> ${esc(x.condition||'Not entered')}  |  <strong>Damage:</strong> ${esc(x.damage||'Not entered')}  |  <strong>Location:</strong> ${esc(x.location||'Not entered')}\n${esc(x.finding||'No finding entered.')}</p></div>`}).join('');return`<div class="demo-watermark">DEMO — NOT FOR OFFICIAL USE</div><div class="report-top"><div><div class="report-title">${esc(admin.company)}</div><div class="report-sub">TANK INTERNAL INSPECTION FORM</div></div><div class="report-meta">MECHANICAL INTEGRITY FORM<br>REPORT: ${esc(i.id)}<br>REV: ${esc(i.revision)}<br>DATE: ${fmtDate(i.inspectionDate)}</div></div><table class="report-table"><tr><th>Unit</th><td>${esc(i.unit)}</td><th>Description</th><td>${esc(i.description)}</td></tr><tr><th>Tank ID</th><td>${esc(i.tank)}</td><th>Client</th><td>${esc(i.client)}</td></tr><tr><th>Facility</th><td>${esc(i.facility)}</td><th>Work Order</th><td>${esc(i.workOrder)}</td></tr><tr><th>SAP Equipment #</th><td>${esc(i.sapEquipment)}</td><th>P&amp;ID</th><td>${esc(i.pid)}</td></tr><tr><th>Serial #</th><td>${esc(i.serial)}</td><th>Year Built</th><td>${esc(i.yearBuilt)}</td></tr></table><div class="report-section"><h4>Summary:</h4><p>${esc(i.summary||'No summary entered.')}</p></div><div class="report-section"><h4>Repairs:</h4><p>${esc(i.repairs||'No repairs entered.')}</p></div><div class="report-section"><h4>Future Recommendations:</h4><p>${esc(i.futureRecommendations||'No future recommendations entered.')}</p></div><table class="report-table"><tr><th>Component</th><th>Long-Term Corrosion Rate</th><th>Short-Term Corrosion Rate</th><th>Remaining Life (Years)</th><th>Next Interval</th><th>Next Inspection</th></tr><tr><td>Shell</td><td>${esc(i.measurements.shellLt)}</td><td>${esc(i.measurements.shellSt)}</td><td>${esc(i.measurements.shellLife)}</td><td>${esc(i.measurements.nextInterval)}</td><td>${fmtDate(i.measurements.nextDate)}</td></tr><tr><td>Floor</td><td>${esc(i.measurements.floorLt)}</td><td>${esc(i.measurements.floorSt)}</td><td>${esc(i.measurements.floorLife)}</td><td>${esc(i.measurements.nextInterval)}</td><td>${fmtDate(i.measurements.nextDate)}</td></tr></table>${compRows}<div class="report-section"><h4>Recommendations:</h4>${(i.recommendations||[]).length?`<table class="report-table"><tr><th>#</th><th>Component</th><th>Finding</th><th>Recommended Action</th><th>Priority</th><th>Assigned To</th><th>Target</th></tr>${i.recommendations.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.component)}</td><td>${esc(r.finding)}</td><td>${esc(r.action)}</td><td>${esc(r.priority)}</td><td>${esc(r.assignedTo)}</td><td>${fmtDate(r.targetDate)}</td></tr>`).join('')}</table>`:'<p>No trackable recommendations entered.</p>'}</div><div class="report-section"><h4>Photos:</h4><div class="report-photos">${photos.length?photos.map((p,idx)=>`<div class="report-photo"><img src="${p.data}"><p><strong>Photo ${idx+1} — ${esc(p.component)}</strong><br>${esc(p.location)} — ${esc(p.caption)}</p></div>`).join(''):'<p>No report photographs included.</p>'}</div></div><table class="report-table"><tr><th>Inspector</th><th>API #</th><th>Date</th><th>Reviewed By</th></tr><tr><td>${esc(i.assignedTo)}</td><td>${esc(i.inspectorApi)}</td><td>${fmtDate(i.inspectionDate)}</td><td>${esc(i.reviewedBy)}</td></tr></table><div class="report-footer"><strong>DEMO VERSION — DATA IS NOT RETAINED — NOT FOR OFFICIAL ISSUE</strong><br>${esc(admin.footer)}<br>${esc(i.id)} | Revision ${esc(i.revision)}</div>`}
+function selectedComponentsFor(i){return(i.scope||[]).filter(x=>['Floor','Shell','Roof','Nozzles','Welds','Internal Piping'].includes(x))}
+function emailInspection(id){const i=inspections.find(x=>x.id===id);if(!i)return;const subject=encodeURIComponent(`${i.id} — ${i.tank} API 653 Inspection Report`);const body=encodeURIComponent(`${admin.email}\n\nReport: ${i.id}\nTank: ${i.tank}\nFacility: ${i.facility}\nInspection Date: ${fmtDate(i.inspectionDate)}\n\nRegards,\n${admin.company}`);window.location.href=`mailto:${encodeURIComponent(i.clientEmail||'')}?subject=${subject}&body=${body}`}
+function emailCurrentInspection(){saveCurrentInspection(false);emailInspection(currentInspection.id)}
+function emailCurrentReport(){if(activeReportId)emailInspection(activeReportId)}
+
+function renderTutorials(){document.getElementById('tutorialGrid').innerHTML=tutorials.map(t=>`<div class="card tutorial-card"><div class="tutorial-icon">${t.icon}</div><h4>${t.title}</h4><div class="meta">${t.time} • ${tutorialProgress[t.id]?'Completed':'Not completed'}</div><p>${t.desc}</p><button class="btn ${tutorialProgress[t.id]?'good':'primary'}" onclick="openTutorial('${t.id}')">${tutorialProgress[t.id]?'Review Tutorial':'Start Tutorial'}</button></div>`).join('')}
+function openTutorial(id){const t=tutorials.find(x=>x.id===id)||tutorials[0];document.getElementById('tutorialModalTitle').textContent=t.title;document.getElementById('tutorialModalBody').innerHTML=`<div class="notice info"><strong>Purpose:</strong> ${t.desc}</div><ol style="line-height:1.8">${t.steps.map(s=>`<li>${s}</li>`).join('')}</ol><div class="notice warn"><strong>Common mistake:</strong> Skipping required steps or leaving photos, findings, and recommendations disconnected from one another.</div><button class="btn primary" onclick="completeTutorial('${t.id}')">Mark Tutorial Complete</button>`;document.getElementById('tutorialModal').classList.add('open')}
+function completeTutorial(id){tutorialProgress[id]=true;closeModal('tutorialModal');renderTutorials()}
+function resetTutorials(){tutorialProgress={};renderTutorials()}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function closeOnboarding(){demoOnboarded=true;closeModal('onboardModal')}
+function renderInfo(){document.getElementById('infoAccordion').innerHTML=infoTopics.map((x,idx)=>`<div class="acc"><button onclick="this.parentElement.classList.toggle('open')">${x[0]} <span>＋</span></button><div class="acc-body">${x[1]}</div></div>`).join('')}
+function makeInitials(name){return String(name||'').trim().split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'U'}
+function showSessionUserPrompt(){
+ const modal=document.getElementById('sessionUserModal');
+ if(!modal)return;
+ document.getElementById('sessionInspectorName').value=admin.inspectorName||'';
+ document.getElementById('sessionInspectorRole').value=admin.inspectorRole||'';
+ document.getElementById('sessionInspectorInitials').value=admin.inspectorInitials||makeInitials(admin.inspectorName);
+ document.getElementById('sessionInspectorApi').value=admin.inspectorApi||'';
+ modal.classList.add('open');
+ setTimeout(()=>{const el=document.getElementById('sessionInspectorName');if(el){el.focus();el.select()}},50);
+}
+function confirmSessionUser(){
+ const name=val('sessionInspectorName').trim();
+ const role=val('sessionInspectorRole').trim();
+ if(!name){alert('Enter your name before continuing.');document.getElementById('sessionInspectorName').focus();return}
+ if(!role){alert('Select your role before continuing.');document.getElementById('sessionInspectorRole').focus();return}
+ const initials=(val('sessionInspectorInitials').trim()||makeInitials(name)).toUpperCase().slice(0,3);
+ const api=val('sessionInspectorApi').trim();
+ admin={...admin,inspectorName:name,inspectorRole:role,inspectorInitials:initials,inspectorApi:api};
+ applyAdmin();
+ renderAdmin();
+ closeModal('sessionUserModal');
+ if(!demoOnboarded)document.getElementById('onboardModal').classList.add('open');
+}
+function renderAdmin(){document.getElementById('adminCompany').value=admin.company;document.getElementById('adminColor').value=admin.color;document.getElementById('adminPrefix').value=admin.prefix;document.getElementById('adminFooter').value=admin.footer;document.getElementById('adminEmail').value=admin.email;document.getElementById('adminInspectorName').value=admin.inspectorName;document.getElementById('adminInspectorRole').value=admin.inspectorRole;document.getElementById('adminInspectorInitials').value=admin.inspectorInitials||makeInitials(admin.inspectorName);document.getElementById('adminInspectorApi').value=admin.inspectorApi||''}
+function saveAdmin(){const inspectorName=val('adminInspectorName').trim()||defaultAdmin.inspectorName;admin={company:val('adminCompany')||defaultAdmin.company,color:val('adminColor')||defaultAdmin.color,prefix:val('adminPrefix')||defaultAdmin.prefix,footer:val('adminFooter'),email:val('adminEmail'),inspectorName,inspectorRole:val('adminInspectorRole')||defaultAdmin.inspectorRole,inspectorInitials:(val('adminInspectorInitials').trim()||makeInitials(inspectorName)).toUpperCase().slice(0,3),inspectorApi:val('adminInspectorApi').trim()};applyAdmin();renderAdmin();alert('Settings applied for this demo session only. They reset when the page is closed or refreshed.')}
+function applyInspectorToOpenInspections(){const name=(val('adminInspectorName').trim()||admin.inspectorName||defaultAdmin.inspectorName);const api=val('adminInspectorApi').trim();const open=inspections.filter(i=>!['Approved','Sent','Accepted','Closed'].includes(i.status));if(!open.length){alert('There are no open inspections to update.');return}if(!confirm(`Apply ${name} as the inspector to ${open.length} open inspection(s)? Approved, sent, accepted, and closed reports will not be changed.`))return;open.forEach(i=>{i.assignedTo=name;if(api)i.inspectorApi=api});persist();renderDashboard();alert(`${open.length} open inspection(s) updated.`)}
+function exportDataBackup(){openPurchaseModal()}
+function importDataBackup(){openPurchaseModal()}
+function removeExampleRecords(){
+ const examples=inspections.filter(i=>i.isDemo||demoInspectionIds.includes(i.id));
+ if(!examples.length){alert('No example records were found in this demo session.');return}
+ if(!confirm(`Remove ${examples.length} example inspection(s) for this session? Refreshing the page restores them.`))return;
+ inspections=inspections.filter(i=>!(i.isDemo||demoInspectionIds.includes(i.id)));currentInspection=null;currentInspectionSaved=false;activeReportId=null;renderDashboard();renderInspections();renderRecommendationRegister();renderReports();alert('Example records removed for this demo session. Refresh the page to restore the original demo.');
+}
+function startCleanWorkspace(){resetDemoSession()}
+function restoreDemoData(){
+ const demos=seedInspections();const ids=new Set(inspections.map(i=>i.id));demos.forEach(i=>{if(!ids.has(i.id))inspections.push(i)});demoNextInspectionNumber=Math.max(12,demoNextInspectionNumber);renderDashboard();renderInspections();renderRecommendationRegister();renderReports();alert('Demo inspection records restored for this session.');
+}
+function openPurchaseModal(){document.getElementById('purchaseModal').classList.add('open')}
+function requestPurchase(plan){
+ const subject=encodeURIComponent(`API 653 IM Purchase Request — ${plan}`);
+ const body=encodeURIComponent(`I would like pricing and purchase details for API 653 IM.\n\nSelected option: ${plan}\nCompany: ${admin.company||''}\nName: ${admin.inspectorName||''}\nRole: ${admin.inspectorRole||''}\n\nPlease contact me with next steps.`);
+ window.location.href=`mailto:support@shellkey.company?subject=${subject}&body=${body}`;
+}
+function resetDemoSession(){
+ if(!confirm('Reset the demo now? All changes made during this session will be removed.'))return;
+ admin={...defaultAdmin};tutorialProgress={};inspections=seedInspections();currentInspection=null;currentStep=0;activeReportId=null;currentInspectionSaved=false;editingRecommendationKey=null;demoNextInspectionNumber=12;demoOnboarded=false;applyAdmin();renderDashboard();renderInspections();renderRecommendationRegister();renderReports();renderTutorials();renderAdmin();showView('dashboard');showSessionUserPrompt();
+}
+function applyAdmin(){document.documentElement.style.setProperty('--brand',admin.color);document.getElementById('licensedToSide').textContent='Licensed to: '+admin.company;document.getElementById('userName').textContent=admin.inspectorName;document.getElementById('userRole').textContent=admin.inspectorRole;document.getElementById('userInitials').textContent=admin.inspectorInitials||makeInitials(admin.inspectorName)}
+
+applyAdmin();renderDashboard();renderTutorials();renderInfo();
+showSessionUserPrompt();
+document.getElementById('sessionUserModal').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();confirmSessionUser()}});
+
+</script>
+</body>
+</html>

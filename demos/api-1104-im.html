@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>API 1104 IM — Pipeline Weld Inspection Demo</title>
+<style>
+
+  :root {
+    --brand:#263640;
+    --brand-2:#087e8b;
+    --accent:#f28c28;
+    --bg:#eef2f3;
+    --surface:#ffffff;
+    --text:#172126;
+    --muted:#64747b;
+    --line:#d5dde0;
+    --good:#1f7a55;
+    --warn:#b86612;
+    --bad:#b73a36;
+    --info:#16758a;
+    --shadow:0 8px 24px rgba(28,51,75,.10);
+    --radius:12px;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif;font-size:14px}
+  button,input,select,textarea{font:inherit}
+  button{cursor:pointer}
+  .app{display:grid;grid-template-columns:250px 1fr;min-height:100vh}
+  .sidebar{background:linear-gradient(180deg,var(--brand),#17262e);color:white;padding:22px 16px;position:sticky;top:0;height:100vh;overflow:auto}
+  .brand{display:flex;align-items:center;gap:12px;padding:0 8px 22px;border-bottom:1px solid rgba(255,255,255,.14)}
+  .brand-mark{width:42px;height:42px;border-radius:10px;background:var(--accent);color:white;display:grid;place-items:center;font-weight:900;font-size:18px;box-shadow:0 5px 15px rgba(0,0,0,.15)}
+  .brand h1{font-size:18px;margin:0;letter-spacing:.2px}
+  .brand p{font-size:11px;margin:4px 0 0;color:#d7e3ed}
+  .nav{margin-top:20px;display:grid;gap:6px}
+  .nav button{width:100%;border:0;background:transparent;color:#e4edf4;padding:11px 12px;border-radius:9px;text-align:left;display:flex;align-items:center;gap:10px}
+  .nav button:hover,.nav button.active{background:rgba(255,255,255,.13);color:white}
+  .nav .count{margin-left:auto;background:rgba(255,255,255,.16);padding:2px 7px;border-radius:20px;font-size:11px}
+  .sidebar-footer{margin-top:24px;padding:14px;border-radius:10px;background:rgba(255,255,255,.08);color:#d7e3ed;font-size:12px;line-height:1.5}
+  .main{min-width:0}
+  .topbar{background:white;height:68px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 26px;position:sticky;top:0;z-index:10}
+  .topbar .title h2{margin:0;font-size:20px}
+  .topbar .title p{margin:3px 0 0;color:var(--muted);font-size:12px}
+  .top-actions{display:flex;align-items:center;gap:10px}
+  .user-chip{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--brand);color:white;display:grid;place-items:center;font-weight:700}
+  .content{padding:24px;max-width:1650px;margin:0 auto}
+  .view{display:none}.view.active{display:block}
+  .btn{border:1px solid transparent;border-radius:9px;padding:9px 13px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+  .btn.primary{background:var(--brand);color:white}.btn.primary:hover{filter:brightness(1.06)}
+  .btn.secondary{background:white;border-color:var(--line);color:var(--text)}
+  .btn.good{background:var(--good);color:white}.btn.warn{background:var(--warn);color:white}.btn.bad{background:var(--bad);color:white}
+  .btn.small{padding:6px 9px;font-size:12px}.btn:disabled{opacity:.45;cursor:not-allowed}
+  .page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:20px}
+  .page-head h3{font-size:24px;margin:0}.page-head p{color:var(--muted);margin:6px 0 0;max-width:780px}
+  .grid{display:grid;gap:16px}.kpis{grid-template-columns:repeat(6,minmax(150px,1fr));margin-bottom:18px}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .kpi{padding:17px;position:relative;overflow:hidden}
+  .kpi:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--info)}
+  .kpi.good:before{background:var(--good)}.kpi.warn:before{background:var(--warn)}.kpi.bad:before{background:var(--bad)}
+  .kpi .label{font-size:12px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .kpi .value{font-size:27px;font-weight:800;margin-top:7px}.kpi .sub{font-size:11px;color:var(--muted);margin-top:4px}
+  .two-col{grid-template-columns:1.5fr 1fr}.three-col{grid-template-columns:1fr 1fr 1fr}
+  .panel-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px}
+  .panel-head h4{margin:0;font-size:16px}.panel-body{padding:17px 18px}
+  .table-wrap{overflow:auto}.table{width:100%;border-collapse:collapse;min-width:950px}
+  .table th{font-size:11px;text-transform:uppercase;letter-spacing:.45px;color:var(--muted);background:#f6f8fa;text-align:left;padding:11px;border-bottom:1px solid var(--line);white-space:nowrap}
+  .table td{padding:11px;border-bottom:1px solid #edf1f4;vertical-align:middle}.table tr:hover td{background:#fbfcfd}
+  .clickable-row{cursor:pointer}.clickable-row:hover td{background:#f4f8fb!important}
+  #inspectionsView .table-wrap,#recommendationsView .table-wrap,#reportsView .table-wrap{max-height:calc(100vh - 285px);overflow:auto}
+  .status{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border-radius:20px;font-size:11px;font-weight:800;white-space:nowrap}
+  .status:before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+  .status.assigned{color:#2869a4;background:#eaf3fb}.status.progress{color:#9a6813;background:#fff4dc}.status.review{color:#8c4b94;background:#f6eafa}.status.approved{color:#1e744f;background:#e8f6ef}.status.overdue{color:#a72f2f;background:#fdeaea}.status.closed{color:#4d5b67;background:#edf1f4}
+  .progress{height:8px;background:#e8edf1;border-radius:20px;overflow:hidden;min-width:90px}.progress span{display:block;height:100%;background:var(--brand-2);border-radius:inherit}
+  /* Keep status pills readable. The status 'progress' class must not inherit progress-bar sizing. */
+  .status.progress{height:auto;min-width:max-content;overflow:visible;background:#fff4dc;border-radius:20px}
+  .table td .status{min-width:max-content;max-width:none}
+  .action-row{display:flex;gap:6px;flex-wrap:wrap}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .filters input,.filters select{border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:white}
+  .empty{padding:36px;text-align:center;color:var(--muted)}
+  .chart-list{display:grid;gap:11px}.bar-row{display:grid;grid-template-columns:130px 1fr 40px;align-items:center;gap:10px}.bar{height:13px;background:#e8edf1;border-radius:20px;overflow:hidden}.bar span{display:block;height:100%;background:var(--brand-2);border-radius:20px}
+  .activity-feed{display:grid;gap:12px}.feed-item{display:grid;grid-template-columns:36px 1fr;gap:10px}.feed-icon{width:32px;height:32px;border-radius:9px;background:#eaf3fb;color:var(--brand);display:grid;place-items:center;font-weight:800}.feed-item p{margin:0;line-height:1.45}.feed-item small{color:var(--muted)}
+  .stepper{display:flex;gap:0;overflow:auto;padding-bottom:6px;margin-bottom:8px}
+  #wizardView .page-head{margin-bottom:10px}
+  .step{min-width:116px;position:relative;text-align:center;color:var(--muted);font-size:11px;padding-top:31px}
+  .step:before{content:attr(data-step);position:absolute;top:0;left:50%;transform:translateX(-50%);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#dfe6ec;color:#607180;font-weight:800;z-index:2}
+  .step:after{content:"";position:absolute;left:0;right:0;top:12px;height:2px;background:#dfe6ec;z-index:1}.step:first-child:after{left:50%}.step:last-child:after{right:50%}
+  .step.done:before,.step.active:before{background:var(--brand);color:white}.step.done:after,.step.active:after{background:var(--brand)}.step.active{color:var(--brand);font-weight:800}
+  .step.clickable{cursor:pointer}.step.clickable:hover{color:var(--brand);font-weight:800}.step.clickable:hover:before{transform:translateX(-50%) scale(1.08);box-shadow:0 0 0 4px rgba(18,59,93,.12)}
+  .step.locked{cursor:not-allowed}.step.locked:not(.active){opacity:.72}
+  .wizard-layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:14px;height:calc(100vh - 265px);min-height:480px}
+  .wizard-card{padding:0;height:100%;min-height:0;display:flex;flex-direction:column}.wizard-header{padding:12px 16px;border-bottom:1px solid var(--line)}.wizard-header h4{margin:0 0 4px;font-size:18px}.wizard-header p{margin:0;color:var(--muted);line-height:1.35;font-size:12px}
+  .wizard-body{padding:13px 16px;flex:1;min-height:0;overflow:auto}.wizard-footer{padding:10px 16px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px}.form-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.form-grid.four{grid-template-columns:repeat(4,minmax(0,1fr))}.field.full{grid-column:1/-1}
+  .scroll-list{max-height:calc(100vh - 390px);overflow:auto;padding-right:5px}
+  .field label{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:800;margin-bottom:6px}.req{color:var(--bad)}
+  .field input,.field select,.field textarea{width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:8px 9px;outline:none}.field textarea{min-height:72px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--brand-2);box-shadow:0 0 0 3px rgba(13,111,130,.12)}
+  .help{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.4}.tip{background:#eef7f8;border-left:4px solid var(--brand-2);border-radius:8px;padding:12px 13px;margin-bottom:16px;line-height:1.5}.tip strong{color:var(--brand)}
+  .check-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.check{display:flex;align-items:flex-start;gap:8px;border:1px solid var(--line);border-radius:9px;padding:10px;background:#fbfcfd}.check input{margin-top:2px}
+  .side-help{padding:17px;position:sticky;top:90px;height:max-content}.side-help h4{margin:0 0 10px}.side-help p,.side-help li{color:var(--muted);line-height:1.5;font-size:12px}.side-help ul{padding-left:18px}.side-help .mini-progress{margin-top:12px}
+  .component-list{display:grid;gap:10px}.component-card{border:1px solid var(--line);border-radius:10px;padding:14px;background:#fbfcfd}.component-card h5{margin:0 0 10px;font-size:15px;display:flex;justify-content:space-between}.component-card .form-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.photo-card{border:1px solid var(--line);border-radius:10px;overflow:hidden;background:white}.photo-card img{width:100%;height:160px;object-fit:cover;background:#e8edf1}.photo-meta{padding:10px}.photo-meta input,.photo-meta select{width:100%;margin-top:7px;border:1px solid var(--line);border-radius:7px;padding:7px}
+  .upload-zone{border:2px dashed #aab8c4;border-radius:10px;padding:24px;text-align:center;background:#f9fbfc}.upload-zone input{margin-top:10px}
+  .qa-list{display:grid;gap:9px}.qa-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--line);border-radius:9px}.qa-icon{width:23px;height:23px;border-radius:50%;display:grid;place-items:center;color:white;font-size:12px;font-weight:900}.qa-item.good .qa-icon{background:var(--good)}.qa-item.warn .qa-icon{background:var(--warn)}.qa-item.bad .qa-icon{background:var(--bad)}.qa-item .qa-text{flex:1}.qa-item small{color:var(--muted)}
+  .rec-card{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:11px;background:#fbfcfd}.rec-card h5{margin:0 0 10px}
+  .tutorial-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tutorial-card{padding:18px}.tutorial-icon{width:44px;height:44px;border-radius:11px;background:#eaf3fb;color:var(--brand);display:grid;place-items:center;font-size:20px;font-weight:900}.tutorial-card h4{margin:13px 0 6px}.tutorial-card p{color:var(--muted);line-height:1.5;min-height:42px}.tutorial-card .meta{font-size:11px;color:var(--muted);margin-bottom:12px}
+  .accordion{display:grid;gap:10px}.acc{border:1px solid var(--line);border-radius:10px;background:white;overflow:hidden}.acc button{width:100%;border:0;background:white;padding:14px 16px;text-align:left;font-weight:800;display:flex;justify-content:space-between}.acc .acc-body{display:none;padding:0 16px 16px;color:var(--muted);line-height:1.6}.acc.open .acc-body{display:block}
+  .report-sheet{background:white;color:#111;padding:34px;max-width:950px;margin:auto;border:1px solid #cfd6dc;box-shadow:var(--shadow)}
+  .report-top{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;border-bottom:3px solid #111;padding-bottom:12px}.report-title{font-size:24px;font-weight:900}.report-sub{font-size:15px;font-weight:800;margin-top:10px}.report-meta{text-align:right;font-size:12px;font-weight:700;line-height:1.45}
+  .report-table{width:100%;border-collapse:collapse;margin:14px 0}.report-table th,.report-table td{border:1px solid #777;padding:8px;font-size:12px}.report-table th{background:#e6e6e6;text-transform:uppercase}.report-section{margin-top:17px}.report-section h4{font-size:13px;margin:0 0 6px;text-transform:uppercase;text-decoration:underline}.report-section p{font-size:12px;line-height:1.5;white-space:pre-wrap}.report-photos{display:grid;grid-template-columns:1fr 1fr;gap:12px}.report-photo{border:1px solid #777;padding:6px}.report-photo img{width:100%;height:220px;object-fit:contain;background:#f1f1f1}.report-photo p{font-size:11px;margin:6px 0 0}.report-footer{margin-top:28px;border-top:1px solid #aaa;padding-top:8px;font-size:10px;text-align:center;color:#555}
+  .modal{position:fixed;inset:0;background:rgba(6,19,31,.65);display:none;align-items:center;justify-content:center;padding:20px;z-index:100}.modal.open{display:flex}.modal-card{width:min(920px,96vw);max-height:92vh;overflow:auto;background:white;border-radius:14px;box-shadow:0 22px 60px rgba(0,0,0,.28)}.modal-head{padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h3{margin:0}.modal-body{padding:18px}.close{border:0;background:#edf1f4;width:32px;height:32px;border-radius:8px}
+  .onboard{display:grid;grid-template-columns:1.1fr .9fr;min-height:450px}.onboard-copy{padding:32px}.onboard-copy h2{font-size:30px;margin:0 0 10px;color:var(--brand)}.onboard-copy p{color:var(--muted);line-height:1.65}.onboard-list{display:grid;gap:10px;margin:22px 0}.onboard-item{display:flex;gap:10px;align-items:flex-start}.onboard-item b{width:25px;height:25px;border-radius:50%;background:var(--brand);color:white;display:grid;place-items:center;flex:0 0 auto}.onboard-art{background:linear-gradient(145deg,var(--brand),var(--brand-2));color:white;padding:32px;display:flex;flex-direction:column;justify-content:center}.onboard-art .big{font-size:62px;font-weight:900;line-height:.95}.onboard-art p{line-height:1.6;color:#e2f0f4}
+  .notice{padding:12px 14px;border-radius:9px;margin-bottom:14px}.notice.info{background:#eaf3fb;color:#245d91}.notice.warn{background:#fff3da;color:#8b5c0c}.notice.good{background:#e8f6ef;color:#1d6b49}
+  .hidden{display:none!important}
+  .demo-banner{background:#fff4dc;border-bottom:1px solid #e4c36d;color:#744d08;padding:9px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:12px;position:sticky;top:68px;z-index:9}
+  .demo-banner strong{font-size:12px}.demo-banner .demo-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .demo-chip{display:inline-flex;align-items:center;gap:6px;background:#ffe8a6;color:#744d08;border-radius:999px;padding:4px 9px;font-weight:800;white-space:nowrap}
+  .purchase-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.purchase-option{border:1px solid var(--line);border-radius:12px;padding:18px;background:#fbfcfd}.purchase-option h4{margin:0 0 7px;font-size:18px}.purchase-option p,.purchase-option li{color:var(--muted);line-height:1.5}.purchase-option ul{padding-left:18px}.purchase-option .btn{width:100%;margin-top:10px}
+  .report-sheet{position:relative;overflow:hidden}.demo-watermark{position:absolute;inset:38% -20% auto -20%;transform:rotate(-27deg);text-align:center;font-size:56px;font-weight:900;letter-spacing:8px;color:rgba(181,59,59,.11);pointer-events:none;z-index:0}.report-sheet>*:not(.demo-watermark){position:relative;z-index:1}
+  .demo-lock{border:1px dashed #d6b253;border-radius:10px;padding:14px;background:#fffaf0;color:#744d08}.demo-lock .action-row{margin-top:10px}
+  @media(max-width:1250px){.kpis{grid-template-columns:repeat(3,1fr)}.tutorial-grid{grid-template-columns:repeat(2,1fr)}.photo-grid{grid-template-columns:repeat(2,1fr)}.form-grid.four{grid-template-columns:repeat(3,minmax(0,1fr))}}
+  @media(max-width:900px){.demo-banner{position:static;padding:9px 14px;align-items:flex-start;flex-direction:column}.purchase-grid{grid-template-columns:1fr}.app{grid-template-columns:1fr}.sidebar{position:fixed;z-index:50;transform:translateX(-100%);transition:.2s;width:250px}.sidebar.open{transform:none}.topbar{padding:0 14px}.content{padding:14px}.two-col,.three-col,.wizard-layout,.onboard{grid-template-columns:1fr}.wizard-layout{height:auto;min-height:0}.wizard-card{height:auto}.wizard-body{overflow:visible}.form-grid,.form-grid.three,.form-grid.four,.component-card .form-grid{grid-template-columns:1fr}.side-help{position:static}.kpis{grid-template-columns:repeat(2,1fr)}.mobile-menu{display:inline-flex!important}.tutorial-grid,.photo-grid{grid-template-columns:1fr}}
+  .mobile-menu{display:none}
+  @media print{body{background:white}.sidebar,.topbar,.page-head,.report-actions{display:none!important}.app{display:block}.content{padding:0}.view{display:none!important}#reportView{display:block!important}.report-sheet{border:0;box-shadow:none;max-width:none;padding:18px}.report-photo img{height:240px}}
+
+  .pipeline-strip{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin:10px 0 2px}
+  .pipeline-strip span{height:8px;background:#cfd8dc;border-radius:2px}
+  .pipeline-strip span.active{background:var(--accent)}
+  .weld-id{display:inline-flex;align-items:center;gap:7px;font-weight:900}
+  .weld-id:before{content:"";width:12px;height:12px;border:3px solid var(--accent);border-radius:50%;box-shadow:inset 0 0 0 2px white;background:var(--brand)}
+  .disposition{display:inline-flex;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:900;white-space:nowrap;text-transform:uppercase;letter-spacing:.35px}
+  .disposition.accept{background:#e6f5ed;color:#1d6b49}.disposition.reject{background:#fde9e7;color:#a42c28}.disposition.hold{background:#fff0dc;color:#92520b}.disposition.pending{background:#e8f1f4;color:#45606a}
+  .weld-card{border-left:5px solid var(--accent)}
+  .nde-chip{display:inline-flex;align-items:center;padding:4px 7px;border-radius:5px;background:#e5f2f4;color:#176777;font-size:11px;font-weight:800;white-space:nowrap}
+  .trace-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px 12px}
+  .code-note{border:1px solid #e5c79c;background:#fff7ec;color:#71460e;border-radius:9px;padding:11px 13px;margin-bottom:14px;font-size:12px;line-height:1.5}
+  @media(max-width:1100px){.trace-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media(max-width:700px){.trace-grid{grid-template-columns:1fr}.pipeline-strip{grid-template-columns:repeat(5,1fr)}}
+
+</style>
+</head>
+
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">1104</div>
+      <div><h1>API 1104 IM</h1><p>Pipeline Weld Inspection</p></div>
+    </div>
+    <nav class="nav" id="nav">
+      <button class="active" data-view="dashboard">▦ Weld Dashboard</button>
+      <button data-view="inspections">☷ Weld Inspections <span class="count" id="navInspectionCount">0</span></button>
+      <button data-view="wizard" data-new="true">＋ Start Weld Inspection</button>
+      <button data-view="recommendations">⚠ Indications & Repairs <span class="count" id="navRecCount">0</span></button>
+      <button data-view="reports">▤ Weld Reports</button>
+      <button data-view="tutorials">▶ Field Tutorials</button>
+      <button data-view="information">ⓘ API 1104 Information</button>
+      <button data-view="admin">⚙ Administration</button>
+    </nav>
+    <div class="sidebar-footer">
+      <strong id="licensedToSide">Licensed to: Demo Pipeline Inspection Co.</strong><br>
+      Weld traceability • NDE control • Repair closure
+      <div class="pipeline-strip" aria-hidden="true"><span></span><span class="active"></span><span></span><span class="active"></span><span></span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn secondary mobile-menu" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <div class="title"><h2 id="topTitle">Weld Dashboard</h2><p id="topSub">Track weld traceability, visual inspection, NDE, repairs, and release.</p></div>
+      </div>
+      <div class="top-actions">
+        <button class="btn warn" type="button" onclick="openPurchaseModal()">Purchase / Activate</button>
+        <button class="btn secondary" onclick="openTutorial('quickstart')">? Help</button>
+        <button class="user-chip" type="button" onclick="showSessionUserPrompt()" title="Change current user" style="cursor:pointer;text-align:left">
+          <div class="avatar" id="userInitials">KI</div>
+          <div><strong id="userName">Kirby Inspector</strong><br><small id="userRole" style="color:var(--muted)">Welding Inspector</small></div>
+        </button>
+      </div>
+    </header>
+
+    <div class="demo-banner">
+      <div><span class="demo-chip">PIPELINE DEMO</span> <strong>Temporary session:</strong> weld records, indications, photos, and settings reset when the page is closed or refreshed.</div>
+      <div class="demo-actions"><button class="btn small secondary" type="button" onclick="resetDemoSession()">Reset Demo</button><button class="btn small primary" type="button" onclick="openPurchaseModal()">View Purchase Options</button></div>
+    </div>
+
+    <div class="content">
+      <section class="view active" id="dashboardView">
+        <div class="page-head">
+          <div><h3>Pipeline Weld Inspection Dashboard</h3><p>See which welds are awaiting NDE, rejected, under repair, waiting for review, or released for coating and lowering-in.</p></div>
+          <button class="btn primary" onclick="startNewInspection()">＋ Start Weld Inspection</button>
+        </div>
+        <div class="grid kpis" id="kpiGrid"></div>
+        <div class="grid two-col">
+          <div class="card weld-card">
+            <div class="panel-head"><h4>Active Weld Inspection Tracking</h4><button class="btn small secondary" onclick="showView('inspections')">View All</button></div>
+            <div class="table-wrap">
+              <table class="table"><thead><tr><th>Report</th><th>Weld ID</th><th>Line / Spread</th><th>NDE</th><th>Due</th><th>Disposition</th><th>Status</th><th>Actions</th></tr></thead><tbody id="dashboardInspectionRows"></tbody></table>
+            </div>
+          </div>
+          <div class="grid" style="align-content:start">
+            <div class="card">
+              <div class="panel-head"><h4>Welds by Workflow Status</h4></div>
+              <div class="panel-body"><div class="chart-list" id="statusBars"></div></div>
+            </div>
+            <div class="card">
+              <div class="panel-head"><h4>Recent Field Activity</h4></div>
+              <div class="panel-body"><div class="activity-feed" id="activityFeed"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="inspectionsView">
+        <div class="page-head">
+          <div><h3>Weld Inspection Register</h3><p>Open a weld record, continue field inspection, review NDE disposition, or prepare the controlled report.</p></div>
+          <button class="btn primary" onclick="startNewInspection()">＋ Start Weld Inspection</button>
+        </div>
+        <div class="card">
+          <div class="filters">
+            <input id="inspectionSearch" placeholder="Search project, line, weld ID, WPS, welder..." oninput="renderInspections()">
+            <select id="inspectionStatusFilter" onchange="renderInspections()"><option value="">All statuses</option><option>Assigned</option><option>In Progress</option><option>Awaiting NDE</option><option>Repair Required</option><option>Waiting Review</option><option>Corrections Required</option><option>Approved</option><option>Released</option></select>
+            <select id="inspectionDispositionFilter" onchange="renderInspections()"><option value="">All dispositions</option><option>Pending</option><option>Accept</option><option>Reject</option><option>Hold</option></select>
+          </div>
+          <div class="table-wrap">
+            <table class="table"><thead><tr><th>Report</th><th>Project / Spread</th><th>Line / Weld</th><th>Weld Date</th><th>Due Date</th><th>WPS / Welder</th><th>NDE</th><th>Repairs</th><th>Completion</th><th>Disposition</th><th>Status</th><th>Actions</th></tr></thead><tbody id="inspectionRows"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="wizardView">
+        <div class="page-head">
+          <div><h3 id="wizardPageTitle">Guided Weld Inspection</h3><p>Capture weld traceability first, then visual inspection, NDE, indications, repair verification, and final release.</p></div>
+          <div><button class="btn secondary" onclick="saveCurrentInspection(true)">Save Draft</button></div>
+        </div>
+        <div class="stepper" id="stepper"></div>
+        <div class="wizard-layout">
+          <div class="card wizard-card weld-card">
+            <div class="wizard-header"><h4 id="stepTitle"></h4><p id="stepInstructions"></p></div>
+            <div class="wizard-body" id="wizardBody"></div>
+            <div class="wizard-footer">
+              <div><button class="btn secondary" id="backBtn" onclick="previousStep()">← Back</button></div>
+              <div style="display:flex;gap:8px"><button class="btn secondary" onclick="saveCurrentInspection(true)">Save Draft</button><button class="btn primary" id="nextBtn" onclick="nextStep()">Save and Continue →</button></div>
+            </div>
+          </div>
+          <aside class="card side-help" id="sideHelp"></aside>
+        </div>
+      </section>
+
+      <section class="view" id="recommendationsView">
+        <div class="page-head">
+          <div><h3>Indication, Repair & Reinspection Register</h3><p>Track evaluated indications from discovery through excavation or repair, reinspection, acceptance, and closure.</p></div>
+          <button class="btn primary" onclick="openRecommendationModal()">＋ Add Indication</button>
+        </div>
+        <div class="grid kpis" id="recKpis"></div>
+        <div class="card">
+          <div class="filters">
+            <input id="recSearch" placeholder="Search weld, indication, repair weld, assignee..." oninput="renderRecommendationRegister()">
+            <select id="recStatusFilter" onchange="renderRecommendationRegister()"><option value="">All statuses</option><option>Open</option><option>Evaluation Required</option><option>Repair Planned</option><option>In Repair</option><option>Reinspection Required</option><option>Accepted</option><option>Closed</option></select>
+          </div>
+          <div class="table-wrap">
+            <table class="table"><thead><tr><th>Indication</th><th>Report</th><th>Weld ID</th><th>Type / Location</th><th>Evaluation</th><th>Repair Weld</th><th>Assigned To</th><th>Target</th><th>Status</th><th>Reinspection</th><th>Actions</th></tr></thead><tbody id="recRows"></tbody></table>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="reportsView">
+        <div class="page-head"><div><h3>Pipeline Weld Reports</h3><p>Preview, print, email, revise, and track approval or release of weld inspection reports.</p></div></div>
+        <div class="card"><div class="table-wrap">
+          <table class="table"><thead><tr><th>Report</th><th>Weld ID</th><th>Line / Project</th><th>Inspector</th><th>Reviewer</th><th>Revision</th><th>Disposition</th><th>NDE</th><th>Sent</th><th>Acceptance</th><th>Actions</th></tr></thead><tbody id="reportRows"></tbody></table>
+        </div></div>
+      </section>
+
+      <section class="view" id="tutorialsView">
+        <div class="page-head"><div><h3>Pipeline Inspection Tutorials</h3><p>Use short field-focused tutorials covering weld traceability, visual inspection, NDE records, indication evaluation, repair control, and report release.</p></div><button class="btn secondary" onclick="resetTutorials()">Reset Progress</button></div>
+        <div class="grid tutorial-grid" id="tutorialGrid"></div>
+      </section>
+
+      <section class="view" id="informationView">
+        <div class="page-head"><div><h3>API 1104 Workflow Information</h3><p>Plain-language workflow guidance for pipeline welding inspection records. The applicable code edition, contract documents, operator specifications, approved procedures, and qualified personnel remain controlling.</p></div></div>
+        <div class="notice warn"><strong>Important:</strong> This prototype organizes inspection records. It does not reproduce API 1104 acceptance criteria, replace the purchased standard, determine code acceptance automatically, or replace qualified inspector, NDE, engineering, or operator judgment.</div>
+        <div class="accordion" id="infoAccordion"></div>
+      </section>
+
+      <section class="view" id="adminView">
+        <div class="page-head"><div><h3>Administration</h3><p>Configure company branding, report numbering, inspector identity, pipeline workflow controls, and demo data.</p></div><button class="btn primary" onclick="saveAdmin()">Save Settings</button></div>
+        <div class="grid two-col">
+          <div class="card"><div class="panel-head"><h4>Company Branding & Report Defaults</h4></div><div class="panel-body"><div class="form-grid">
+            <div class="field full"><label>Licensed Company Name</label><input id="adminCompany"></div>
+            <div class="field"><label>Primary Color</label><input id="adminColor" type="color"></div>
+            <div class="field"><label>Default Report Prefix</label><input id="adminPrefix" placeholder="API1104"></div>
+            <div class="field full"><label>Report Footer / Confidentiality Statement</label><textarea id="adminFooter"></textarea></div>
+            <div class="field full"><label>Default Email Message</label><textarea id="adminEmail"></textarea></div>
+          </div></div></div>
+          <div class="grid" style="align-content:start">
+            <div class="card"><div class="panel-head"><h4>Current User & Qualification Profile</h4></div><div class="panel-body">
+              <div class="notice info"><strong>Profile use:</strong> The current user becomes the default inspector for new weld records. Existing issued reports retain their assigned inspector.</div>
+              <div class="form-grid">
+                <div class="field full"><label>Inspector / User Name</label><input id="adminInspectorName"></div>
+                <div class="field"><label>Role</label><select id="adminInspectorRole"><option>Administrator</option><option>Welding Inspector</option><option>QA/QC Manager</option><option>NDE Level II</option><option>NDE Level III</option><option>Technical Reviewer</option><option>Report Coordinator</option></select></div>
+                <div class="field"><label>Initials</label><input id="adminInspectorInitials" maxlength="3"></div>
+                <div class="field full"><label>Qualification / Certification ID</label><input id="adminInspectorApi" placeholder="CWI, API 1169, company qualification, or other ID"></div>
+              </div>
+              <div class="action-row" style="margin-top:12px"><button class="btn secondary" type="button" onclick="applyInspectorToOpenInspections()">Apply to Open Weld Records</button></div>
+            </div></div>
+            <div class="card"><div class="panel-head"><h4>Workflow Controls</h4></div><div class="panel-body"><div class="check-grid" style="grid-template-columns:1fr">
+              <label class="check"><input type="checkbox" checked disabled> Require weld ID, line, joint, WPS, and welder traceability</label>
+              <label class="check"><input type="checkbox" checked disabled> Require VT disposition before final NDE disposition</label>
+              <label class="check"><input type="checkbox" checked disabled> Require every rejected indication to have a repair or engineering disposition</label>
+              <label class="check"><input type="checkbox" checked disabled> Require reinspection results before repair closure</label>
+              <label class="check"><input type="checkbox" checked disabled> Require reviewer approval before final release</label>
+              <label class="check"><input type="checkbox" checked disabled> Track report revisions and release status</label>
+            </div></div></div>
+            <div class="card"><div class="panel-head"><h4>Demo Data & Licensing</h4></div><div class="panel-body">
+              <div class="demo-lock"><strong>This demonstration does not retain pipeline records.</strong><br>Weld records, NDE results, indications, repairs, photos, settings, and tutorials reset when the page is closed or refreshed.
+                <div class="action-row"><button class="btn secondary" type="button" onclick="removeExampleRecords()">Remove Example Records This Session</button><button class="btn secondary" type="button" onclick="restoreDemoData()">Restore Pipeline Examples</button><button class="btn primary" type="button" onclick="openPurchaseModal()">Purchase Options</button></div>
+              </div>
+            </div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="reportView">
+        <div class="page-head report-actions">
+          <div><h3>Weld Report Preview</h3><p>Review traceability, inspection results, indications, repairs, NDE disposition, and approvals before issue.</p></div>
+          <div class="action-row"><button class="btn secondary" onclick="showView('reports')">← Reports</button><button class="btn secondary" onclick="window.print()">🖨 Print / Save PDF</button><button class="btn primary" onclick="emailCurrentReport()">✉ Prepare Email</button></div>
+        </div>
+        <div id="reportSheet" class="report-sheet"></div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="modal" id="purchaseModal" role="dialog" aria-modal="true" aria-labelledby="purchaseModalTitle">
+  <div class="modal-card" style="width:min(900px,96vw)">
+    <div class="modal-head"><h3 id="purchaseModalTitle">Purchase API 1104 IM</h3><button class="close" type="button" onclick="closeModal('purchaseModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="notice warn"><strong>Demo limitation:</strong> This copy is for evaluation and training. It does not retain pipeline inspection data after closing or refreshing, and generated reports include a demo watermark.</div>
+      <div class="purchase-grid">
+        <section class="purchase-option"><h4>Subscription — Multiuser Cloud</h4><p>Best for pipeline contractors, owner inspection teams, and NDE groups working across spreads or facilities.</p><ul><li>Secure roles for inspectors, NDE, QA/QC, and reviewers</li><li>Shared weld, repair, and reinspection records</li><li>Central photo, weld map, NDE, and PDF storage</li><li>Backups, audit history, and remote access</li><li>Company branding and support</li></ul><button class="btn primary" type="button" onclick="requestPurchase('Subscription — Multiuser Cloud')">Request Subscription Pricing</button></section>
+        <section class="purchase-option"><h4>One-Time License — Single Computer</h4><p>Best for one inspector or small office managing records on one designated computer.</p><ul><li>Permanent local data saving</li><li>Pipeline weld and repair report templates</li><li>Backup export and restore</li><li>PDF printing and email preparation</li><li>No shared cloud or simultaneous users</li></ul><button class="btn primary" type="button" onclick="requestPurchase('One-Time License — Single Computer')">Request One-Time Pricing</button></section>
+      </div>
+      <div class="help" style="margin-top:14px">Purchase requests are prepared by email to <strong>support@shellkey.company</strong>. Payment, activation, hosting, and user accounts require the production version.</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="sessionUserModal" role="dialog" aria-modal="true" aria-labelledby="sessionUserTitle">
+  <div class="modal-card" style="width:min(560px,96vw)">
+    <div class="modal-head"><h3 id="sessionUserTitle">Who is using API 1104 IM?</h3></div>
+    <div class="modal-body">
+      <div class="notice info"><strong>Confirm the current user:</strong> This name becomes the default inspector for new weld records created during this demo session.</div>
+      <div class="form-grid">
+        <div class="field full"><label>Your Name <span class="req">*</span></label><input id="sessionInspectorName" autocomplete="name"></div>
+        <div class="field full"><label>Your Role <span class="req">*</span></label><select id="sessionInspectorRole"><option value="">Select role</option><option>Administrator</option><option>Welding Inspector</option><option>QA/QC Manager</option><option>NDE Level II</option><option>NDE Level III</option><option>Technical Reviewer</option><option>Report Coordinator</option></select></div>
+        <div class="field"><label>Initials</label><input id="sessionInspectorInitials" maxlength="3"></div>
+        <div class="field"><label>Qualification / Certification ID</label><input id="sessionInspectorApi"></div>
+      </div>
+      <div class="action-row" style="margin-top:18px;justify-content:flex-end"><button class="btn primary" type="button" onclick="confirmSessionUser()">Continue to API 1104 IM</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="recommendationModal" role="dialog" aria-modal="true" aria-labelledby="recommendationModalTitle">
+  <div class="modal-card" style="width:min(920px,96vw)">
+    <div class="modal-head"><h3 id="recommendationModalTitle">Edit Indication / Repair</h3><button class="close" onclick="closeModal('recommendationModal')">✕</button></div>
+    <div class="modal-body">
+      <div class="notice info"><strong>Maintain traceability:</strong> Record the original indication, evaluation, repair weld ID, reinspection method, result, and final closure.</div>
+      <div class="form-grid three">
+        <div class="field"><label>Weld Inspection <span class="req">*</span></label><select id="modalRecInspection"></select></div>
+        <div class="field"><label>Indication #</label><input id="modalRecId" readonly></div>
+        <div class="field"><label>Indication Type</label><select id="modalRecComponent"><option>Crack-like indication</option><option>Incomplete fusion</option><option>Incomplete penetration</option><option>Porosity</option><option>Slag inclusion</option><option>Undercut</option><option>Burn-through</option><option>Arc burn</option><option>Misalignment</option><option>Other</option></select></div>
+        <div class="field"><label>Evaluation</label><select id="modalRecPriority"><option>Pending evaluation</option><option>Accept</option><option>Reject — repair required</option><option>Engineering disposition</option><option>Monitor / document</option></select></div>
+        <div class="field"><label>Status</label><select id="modalRecStatus"><option>Open</option><option>Evaluation Required</option><option>Repair Planned</option><option>In Repair</option><option>Reinspection Required</option><option>Accepted</option><option>Closed</option></select></div>
+        <div class="field"><label>Reinspection Result</label><select id="modalRecAcceptance"><option>Pending</option><option>Accept</option><option>Reject</option><option>Not Applicable</option></select></div>
+        <div class="field"><label>Location / Clock Position</label><input id="modalRecLocation"></div>
+        <div class="field"><label>Length</label><input id="modalRecLength" placeholder="Measured length and unit"></div>
+        <div class="field"><label>Depth / Through-wall</label><input id="modalRecDepth" placeholder="When applicable"></div>
+        <div class="field full"><label>Finding / NDE Description</label><textarea id="modalRecFinding"></textarea></div>
+        <div class="field full"><label>Required Action / Disposition</label><textarea id="modalRecAction"></textarea></div>
+        <div class="field"><label>Repair Weld ID</label><input id="modalRecRepairWeld"></div>
+        <div class="field"><label>Reinspection Method</label><select id="modalRecReinspectionMethod"><option></option><option>VT</option><option>RT</option><option>UT</option><option>AUT / PAUT</option><option>MT</option><option>PT</option></select></div>
+        <div class="field"><label>Assigned To</label><input id="modalRecAssignedTo"></div>
+        <div class="field"><label>Target Date</label><input id="modalRecTargetDate" type="date"></div>
+      </div>
+      <div class="action-row" style="margin-top:18px;justify-content:space-between">
+        <button class="btn bad" id="modalRecDeleteBtn" type="button" onclick="deleteRecommendationFromModal()">Delete Indication</button>
+        <div class="action-row"><button class="btn secondary" type="button" onclick="closeModal('recommendationModal')">Cancel</button><button class="btn primary" type="button" onclick="saveRecommendationFromModal()">Save Indication</button></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="tutorialModal"><div class="modal-card"><div class="modal-head"><h3 id="tutorialModalTitle">Tutorial</h3><button class="close" onclick="closeModal('tutorialModal')">✕</button></div><div class="modal-body" id="tutorialModalBody"></div></div></div>
+
+<div class="modal" id="onboardModal">
+  <div class="modal-card"><div class="onboard">
+    <div class="onboard-copy"><h2>Welcome to API 1104 IM</h2><p>This pipeline-focused demonstration manages weld traceability, VT and NDE results, indication disposition, repairs, reinspection, and controlled report release.</p>
+      <div class="onboard-list">
+        <div class="onboard-item"><b>1</b><span>Identify the project, spread, line, station, and weld.</span></div>
+        <div class="onboard-item"><b>2</b><span>Capture WPS, process, welder, material, heat, and joint traceability.</span></div>
+        <div class="onboard-item"><b>3</b><span>Document visual inspection and NDE results separately.</span></div>
+        <div class="onboard-item"><b>4</b><span>Track every rejectable indication through repair and reinspection.</span></div>
+        <div class="onboard-item"><b>5</b><span>Record final weld disposition and release status.</span></div>
+        <div class="onboard-item"><b>6</b><span>Preview the controlled weld inspection report.</span></div>
+      </div>
+      <div class="action-row"><button class="btn primary" onclick="closeOnboarding();startNewInspection()">Start Practice Weld</button><button class="btn secondary" onclick="closeOnboarding()">Go to Dashboard</button><button class="btn warn" onclick="closeOnboarding();openPurchaseModal()">Purchase Options</button></div>
+    </div>
+    <div class="onboard-art"><div class="big">API<br>1104</div><p>Trace the weld.<br>Control the repair.<br>Release with confidence.</p></div>
+  </div></div>
+</div>
+
+
+<script>
+const stepDefinitions=[
+  {name:'Project',title:'Step 1 — Project, Line & Weld Identification',instructions:'Confirm the project, spread, line, station, weld ID, joint number, dates, and assignment.'},
+  {name:'Traceability',title:'Step 2 — Weld & Material Traceability',instructions:'Record WPS, welding process, welder, pipe size, wall thickness, material grade, heat numbers, and pipe joint traceability.'},
+  {name:'Scope',title:'Step 3 — Inspection Scope & Conditions',instructions:'Select VT and NDE methods, identify the governing documents, and document access or examination limitations.'},
+  {name:'Visual',title:'Step 4 — Visual Welding Inspection',instructions:'Document fit-up and finished-weld observations, dimensions, surface condition, and the VT disposition.'},
+  {name:'NDE',title:'Step 5 — NDE Results',instructions:'Record the NDE method, procedure, report, technician, coverage, examination quality, results, and disposition.'},
+  {name:'Indications',title:'Step 6 — Indications & Evaluation',instructions:'Create one traceable record for each relevant indication or discontinuity and record its evaluation.'},
+  {name:'Repair',title:'Step 7 — Repair & Reinspection Control',instructions:'Track repair weld IDs, assigned responsibility, dates, reinspection methods, results, and closure.'},
+  {name:'Records',title:'Step 8 — Photos & Supporting Records',instructions:'Attach photographs and reference the weld map, NDE report, daily report, and other controlled records.'},
+  {name:'QA',title:'Step 9 — QA Check & Inspector Certification',instructions:'Resolve missing traceability and inspection data, then certify the completed weld record.'},
+  {name:'Report',title:'Step 10 — Review, Release & Client Delivery',instructions:'Assign the reviewer, record approval, set final disposition and release status, then issue the report.'}
+];
+
+const tutorials=[
+  {id:'quickstart',icon:'①',title:'Pipeline Quick Start',time:'5 minutes',desc:'Learn the weld-to-release workflow.',steps:['Confirm the current user and qualification ID.','Open the Weld Inspection Register.','Identify the project, line, station, and weld ID.','Capture WPS, welder, material, and pipe-joint traceability.','Complete VT and applicable NDE results.','Track rejected indications through repair and reinspection.','Run the QA check and issue the controlled report.']},
+  {id:'traceability',icon:'◎',title:'Weld Traceability',time:'6 minutes',desc:'Keep every weld connected to the correct material, WPS, welder, and location.',steps:['Use the project weld number exactly as shown on the approved weld map.','Record the line number, station or chainage, joint number, and weld type.','Record pipe size, wall thickness, material grade, heat numbers, and pipe joint IDs.','Record the WPS, welding process, welder or operator ID, crew, and machine when applicable.','Resolve conflicts before accepting the record.']},
+  {id:'visual',icon:'◉',title:'Visual Inspection',time:'5 minutes',desc:'Document fit-up and final weld observations consistently.',steps:['Confirm the weld surface is suitable for examination.','Record alignment, profile, undercut, arc burns, surface porosity, and visible crack-like conditions.','State the location and measured extent of any relevant condition.','Set the VT result to Accept, Reject, or Hold.','Do not use the application as an automatic code-acceptance calculator.']},
+  {id:'nde',icon:'⌁',title:'NDE Results',time:'6 minutes',desc:'Control RT, UT, AUT/PAUT, MT, and PT records.',steps:['Select the method required by the approved inspection plan.','Record the procedure, report number, technician, qualification level, date, and coverage.','Document film or data quality where applicable.','Enter the examination result and disposition.','Reference the controlled NDE report or attachment.']},
+  {id:'repair',icon:'⚠',title:'Indications & Repairs',time:'7 minutes',desc:'Track rejects through repair and successful reinspection.',steps:['Create one indication record for each separate location or condition.','Record type, clock position or location, measured length, and evaluation.','For rejected conditions, identify the repair weld and assigned party.','Record the reinspection method and result.','Close the indication only after required acceptance and record review.']},
+  {id:'photos',icon:'▧',title:'Photos & Records',time:'4 minutes',desc:'Connect field evidence to the weld record.',steps:['Add clear photos with the weld ID visible when practical.','Assign the subject and location.','Enter a caption explaining what is shown.','Reference the weld map, NDE report, daily report, and other supporting records.','Confirm each included photo belongs to the correct weld.']},
+  {id:'review',icon:'✓',title:'QA, Review & Release',time:'5 minutes',desc:'Complete the readiness check and control final release.',steps:['Run the QA check.','Resolve missing weld traceability, VT, NDE, repair, and record references.','Complete inspector certification.','Assign the technical reviewer.','Set final weld disposition and release status.','Issue only after required approval.']},
+  {id:'demo',icon:'★',title:'Demo & Purchase Options',time:'3 minutes',desc:'Understand temporary data and licensing choices.',steps:['The demo stores data only in memory while the page is open.','Refreshing or closing restores the original pipeline examples.','Reports include a demo watermark.','Subscription supports shared users, spreads, reviews, and central records.','One-Time License provides permanent local saving on one designated computer.']}
+];
+
+const infoTopics=[
+  ['Standard Scope','API Standard 1104 addresses welding of pipelines and related facilities, including requirements associated with qualified welding practices and inspection methods. Apply the edition and requirements identified by the contract, operator, and jurisdiction.'],
+  ['Weld Traceability','A controlled weld record should connect the weld ID and location to the line, pipe joints, material and heat numbers, WPS, welding process, welder or operator, inspection results, repairs, and final release.'],
+  ['Visual Examination','Record fit-up and finished-weld observations, exact location, measured extent, and disposition. Visual inspection should be performed by qualified personnel using approved procedures and project requirements.'],
+  ['NDE Records','For RT, UT, AUT/PAUT, MT, or PT, retain the method, procedure, technician qualification, equipment or report reference, coverage, data quality, indications, and final disposition.'],
+  ['Indications and Evaluation','Use consistent terminology. Record what was detected before labeling it unacceptable. Final acceptance or rejection must follow the applicable code edition, project specification, operator requirements, and qualified interpretation.'],
+  ['Repair and Reinspection','A rejected condition should remain open until repair disposition, repair weld traceability, required reinspection, result, reviewer acceptance, and closure are documented.'],
+  ['Supporting Evidence','Connect photos, weld maps, NDE reports, daily welding reports, repair records, and release records to the correct weld ID and revision.'],
+  ['Report Control','Final reports should retain the report number, revision, issue date, inspector, qualification, reviewer, approval, weld disposition, release status, and delivery or acceptance history.']
+];
+
+const defaultAdmin={
+  company:'Demo Pipeline Inspection Co.',
+  color:'#263640',
+  prefix:'API1104',
+  footer:'Pipeline weld inspection records are confidential and intended for the named client. Acceptance is controlled by the applicable code edition, contract documents, operator specifications, approved procedures, and qualified personnel.',
+  email:'Please find the attached pipeline weld inspection report for your review. Please contact us with any questions or requested revisions.',
+  inspectorName:'Kirby Inspector',
+  inspectorRole:'Welding Inspector',
+  inspectorInitials:'KI',
+  inspectorApi:''
+};
+
+function defaultVT(){
+  return {fitup:'Acceptable',alignment:'Acceptable',profile:'Acceptable',undercut:'None observed',arcBurn:'None observed',surfacePorosity:'None observed',crackLike:'None observed',cleanliness:'Acceptable',result:'Pending',notes:''};
+}
+function defaultNDE(){
+  return {method:'RT',procedure:'',reportNo:'',technician:'',level:'',coverage:'100%',date:'',filmQuality:'Acceptable',result:'Pending',disposition:'Pending',notes:''};
+}
+function defaultRecords(){
+  return {weldMap:'',ndeAttachment:'',dailyReport:'',repairRecord:'',photoRef:''};
+}
+function baseInspection(overrides={}){
+  const base={
+    id:'',isDemo:false,client:'',project:'',spread:'',lineNumber:'',segment:'',station:'',weldId:'',jointNumber:'',weldType:'Girth Weld',
+    weldDate:'',inspectionDate:new Date().toISOString().slice(0,10),dueDate:'',assignedTo:defaultAdmin.inspectorName,reviewedBy:'',
+    diameter:'',wallThickness:'',materialGrade:'',heatA:'',heatB:'',pipeJointA:'',pipeJointB:'',wps:'',weldingProcess:'SMAW',welderId:'',crew:'',filler:'',preheat:'',machineId:'',
+    codeEdition:'API 1104 — edition per contract',operatorSpec:'',acceptanceBasis:'Applicable code / project specification',
+    scope:['Visual Inspection','Radiographic Testing'],
+    general:{access:'Yes',surface:'Acceptable',weather:'Acceptable',limitations:'None noted.',immediate:'No'},
+    vt:defaultVT(),nde:defaultNDE(),indications:[],repairs:'',futureRecommendations:'',records:defaultRecords(),photoItems:[],
+    status:'Assigned',completion:0,photos:0,reviewStatus:'Not Submitted',acceptance:'Pending',revision:'0',sentDate:'',priority:'Normal',
+    summary:'',disposition:'Pending',releaseStatus:'Hold',inspectorQualification:'',certified:false,reviewApproved:false,clientEmail:''
+  };
+  return {
+    ...base,...overrides,
+    general:{...base.general,...(overrides.general||{})},
+    vt:{...base.vt,...(overrides.vt||{})},
+    nde:{...base.nde,...(overrides.nde||{})},
+    records:{...base.records,...(overrides.records||{})},
+    scope:[...(overrides.scope||base.scope)],
+    indications:(overrides.indications||[]).map(x=>({...x})),
+    photoItems:[...(overrides.photoItems||[])]
+  };
+}
+
+function seedInspections(){
+  return [
+    baseInspection({
+      id:'API1104-2026-0042',isDemo:true,client:'Frontier Gas Transmission',project:'Mountain Connector Expansion',spread:'Spread 3',lineNumber:'MC-24',segment:'MP 18.2–26.4',station:'STA 1187+40',weldId:'GW-24-1876',jointNumber:'J-1876',weldType:'Girth Weld',
+      weldDate:'2026-07-15',inspectionDate:'2026-07-16',dueDate:'2026-07-18',assignedTo:'J. Smith',reviewedBy:'L. Chen',
+      diameter:'24 in',wallThickness:'0.500 in',materialGrade:'API 5L X70',heatA:'H7A211',heatB:'H7A225',pipeJointA:'PJ-8831',pipeJointB:'PJ-8832',wps:'WPS-MC-SMAW-07',weldingProcess:'SMAW',welderId:'W-214 / W-317',crew:'Crew 6',filler:'E8010 / E9018',preheat:'Per WPS',
+      scope:['Visual Inspection','Radiographic Testing'],general:{access:'Yes',surface:'Acceptable',weather:'Light wind',limitations:'None noted.',immediate:'Yes — Repair control'},
+      vt:{result:'Accept',notes:'Finished weld profile visually acceptable. No surface-breaking rejectable condition noted.'},
+      nde:{method:'RT',procedure:'NDE-RT-04',reportNo:'RT-260716-188',technician:'A. Patel',level:'Level II',coverage:'100%',date:'2026-07-16',filmQuality:'Acceptable',result:'Reject',disposition:'Reject',notes:'Linear indication evaluated as incomplete fusion at approximately 7 o’clock.'},
+      indications:[{id:'IND-021',type:'Incomplete fusion',location:'7 o’clock',length:'1.3 in',depth:'Not reported',finding:'Linear indication identified on RT record RT-260716-188.',evaluation:'Reject — repair required',action:'Excavate affected location, complete repair weld, and re-examine by RT.',repairWeldId:'RW-GW-24-1876-01',reinspectionMethod:'RT',reinspectionResult:'Pending',assignedTo:'Welding Crew 6',targetDate:'2026-07-18',status:'In Repair'}],
+      repairs:'Repair excavation initiated; repair weld pending completion.',records:{weldMap:'WM-MC-SP3-1187',ndeAttachment:'RT-260716-188',dailyReport:'DWR-SP3-0716',repairRecord:'RWR-0042'},
+      status:'Repair Required',completion:70,photos:4,priority:'High',summary:'VT accepted. RT rejected due to incomplete fusion at 7 o’clock. Weld remains on hold pending repair and accepted reinspection.',disposition:'Reject',releaseStatus:'Hold',inspectorQualification:'CWI-123456',clientEmail:'qa@example.com'
+    }),
+    baseInspection({
+      id:'API1104-2026-0041',isDemo:true,client:'Central Products Pipeline',project:'River Crossing Replacement',spread:'HDD / Tie-In',lineNumber:'RC-30',segment:'East Tie-In',station:'STA 204+15',weldId:'TI-30-0048',jointNumber:'TI-48',weldType:'Tie-In Weld',
+      weldDate:'2026-07-14',inspectionDate:'2026-07-15',dueDate:'2026-07-17',assignedTo:'A. Brown',reviewedBy:'L. Chen',
+      diameter:'30 in',wallThickness:'0.625 in',materialGrade:'API 5L X65',heatA:'HC5518',heatB:'HC5520',pipeJointA:'HDD-OUT-01',pipeJointB:'ML-2045',wps:'WPS-TI-GTAW-SMAW-03',weldingProcess:'GTAW / SMAW',welderId:'W-104 / W-227',crew:'Tie-In Crew 2',
+      scope:['Visual Inspection','Automated / Phased Array UT'],general:{access:'Yes',surface:'Acceptable',weather:'Dry',limitations:'Limited access on lower quadrant after backfill preparation.',immediate:'No'},
+      vt:{result:'Accept',notes:'VT acceptable prior to NDE.'},
+      nde:{method:'AUT / PAUT',procedure:'AUT-PAUT-11',reportNo:'AUT-77104',technician:'M. Ruiz',level:'Level II',coverage:'100%',date:'2026-07-15',filmQuality:'Data quality acceptable',result:'Accept',disposition:'Accept',notes:'No rejectable indications reported.'},
+      records:{weldMap:'WM-RC-TI-204',ndeAttachment:'AUT-77104',dailyReport:'DWR-TI-0715',photoRef:'PH-TI-0048'},
+      status:'Waiting Review',completion:100,photos:7,priority:'Normal',summary:'Tie-in weld completed. VT and AUT/PAUT accepted. Awaiting technical review and release.',disposition:'Accept',releaseStatus:'Hold',inspectorQualification:'CWI-345667',certified:true,clientEmail:'records@example.com'
+    }),
+    baseInspection({
+      id:'API1104-2026-0040',isDemo:true,client:'Prairie Liquid Systems',project:'Valve Station 12 Upgrade',spread:'Station Work',lineNumber:'PL-16',segment:'Valve Station 12',station:'VS-12 / B-03',weldId:'BW-16-012',jointNumber:'B-012',weldType:'Branch / Set-On Weld',
+      weldDate:'2026-07-10',inspectionDate:'2026-07-11',dueDate:'2026-07-14',assignedTo:'J. Smith',reviewedBy:'R. Cole',
+      diameter:'16 in x 4 in',wallThickness:'0.375 in / 0.237 in',materialGrade:'API 5L X52',heatA:'PX1120',heatB:'BR4412',pipeJointA:'HDR-16-09',pipeJointB:'BR-4-22',wps:'WPS-BR-SMAW-02',weldingProcess:'SMAW',welderId:'W-311',crew:'Station Crew',
+      scope:['Visual Inspection','Magnetic Particle Testing','Ultrasonic Testing'],general:{access:'Yes',surface:'Acceptable',weather:'Shop controlled',limitations:'None.',immediate:'No'},
+      vt:{result:'Accept',notes:'Branch profile and surface condition acceptable.'},
+      nde:{method:'MT + UT',procedure:'NDE-MTUT-06',reportNo:'MTUT-12040',technician:'S. Lee',level:'Level II',coverage:'Required areas',date:'2026-07-11',filmQuality:'Acceptable',result:'Accept',disposition:'Accept',notes:'MT and UT results accepted.'},
+      records:{weldMap:'ISO-VS12-16-BR',ndeAttachment:'MTUT-12040',dailyReport:'DWR-VS12-0711'},
+      status:'Released',completion:100,photos:5,priority:'Normal',summary:'Branch weld accepted by VT, MT, and UT. Reviewer approval complete.',disposition:'Accept',releaseStatus:'Released for coating',inspectorQualification:'CWI-123456',certified:true,reviewApproved:true,clientEmail:'inspection@example.com'
+    }),
+    baseInspection({
+      id:'API1104-2026-0039',isDemo:true,client:'South Loop Gas',project:'South Loop Integrity Replacement',spread:'Spread 1',lineNumber:'SL-20',segment:'MP 4.0–9.8',station:'STA 422+80',weldId:'GW-20-0944',jointNumber:'J-944',weldType:'Girth Weld',
+      weldDate:'2026-07-06',inspectionDate:'2026-07-07',dueDate:'2026-07-09',assignedTo:'A. Brown',reviewedBy:'R. Cole',
+      diameter:'20 in',wallThickness:'0.438 in',materialGrade:'API 5L X60',heatA:'SLA900',heatB:'SLA914',pipeJointA:'PJ-5012',pipeJointB:'PJ-5013',wps:'WPS-SL-SMAW-04',weldingProcess:'SMAW',welderId:'W-118 / W-205',crew:'Crew 2',
+      scope:['Visual Inspection','Radiographic Testing'],general:{access:'Yes',surface:'Acceptable',weather:'Dry',limitations:'None.',immediate:'No'},
+      vt:{result:'Accept',notes:'VT accepted.'},
+      nde:{method:'RT',procedure:'NDE-RT-04',reportNo:'RT-260707-094',technician:'D. Wilson',level:'Level II',coverage:'100%',date:'2026-07-07',filmQuality:'Acceptable',result:'Accept',disposition:'Accept',notes:'RT accepted.'},
+      records:{weldMap:'WM-SL-SP1-422',ndeAttachment:'RT-260707-094',dailyReport:'DWR-SP1-0707'},
+      status:'Released',completion:100,photos:6,priority:'Normal',summary:'Girth weld accepted by VT and RT. Record approved and released.',disposition:'Accept',releaseStatus:'Released for lowering-in',inspectorQualification:'CWI-345667',certified:true,reviewApproved:true,acceptance:'Accepted',sentDate:'2026-07-08',clientEmail:'archive@example.com'
+    })
+  ];
+}
+
+let admin={...defaultAdmin};
+let tutorialProgress={};
+let inspections=seedInspections();
+let currentInspection=null;
+let currentStep=0;
+let currentInspectionSaved=false;
+let activeReportId=null;
+let editingRecommendationKey=null;
+let demoOnboarded=false;
+let demoNextInspectionNumber=42;
+
+function persist(){/* Demo mode: in-memory only. */}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function val(id){return document.getElementById(id)?.value||'';}
+function checked(id){return !!document.getElementById(id)?.checked;}
+function fmtDate(d){if(!d)return'—';const x=new Date(d+'T00:00:00');return Number.isNaN(x.getTime())?esc(d):x.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'});}
+function makeInitials(name){return String(name||'').trim().split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase()||'U';}
+function statusClass(s){return ({'Assigned':'assigned','In Progress':'progress','Awaiting NDE':'assigned','Repair Required':'overdue','Waiting Review':'review','Corrections Required':'overdue','Approved':'approved','Released':'approved','Closed':'closed'})[s]||'assigned';}
+function dispositionClass(s){return s==='Accept'?'accept':s==='Reject'?'reject':s==='Hold'?'hold':'pending';}
+function isOverdue(i){return i.dueDate&&new Date(i.dueDate+'T23:59:59')<new Date()&&!['Approved','Released','Closed'].includes(i.status);}
+function nextInspectionId(){
+  const year=new Date().getFullYear();
+  const prefix=(admin.prefix||'API1104').trim()||'API1104';
+  const nums=inspections.map(i=>{const m=String(i.id||'').match(/(\d{4})$/);return m?Number(m[1]):0;});
+  demoNextInspectionNumber=Math.max(demoNextInspectionNumber,...nums,0)+1;
+  return `${prefix}-${year}-${String(demoNextInspectionNumber).padStart(4,'0')}`;
+}
+function newInspection(){
+  return baseInspection({
+    id:nextInspectionId(),assignedTo:admin.inspectorName,inspectorQualification:admin.inspectorApi||'',
+    weldDate:new Date().toISOString().slice(0,10),inspectionDate:new Date().toISOString().slice(0,10)
+  });
+}
+function showView(view){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById(view+'View')?.classList.add('active');
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  document.getElementById('sidebar').classList.remove('open');
+  const map={
+    dashboard:['Weld Dashboard','Track weld traceability, visual inspection, NDE, repairs, and release.'],
+    inspections:['Weld Inspections','Continue field work, NDE review, repair control, and report preparation.'],
+    wizard:['Guided Weld Inspection','Complete each pipeline weld inspection step consistently.'],
+    recommendations:['Indications & Repairs','Track indication evaluation, repair welds, reinspection, and closure.'],
+    reports:['Weld Reports','Preview, print, email, revise, approve, and release reports.'],
+    tutorials:['Field Tutorials','Learn the pipeline inspection workflow while using the demo.'],
+    information:['API 1104 Information','Plain-language pipeline welding inspection workflow reference.'],
+    admin:['Administration','Configure temporary demo branding and pipeline workflow defaults.'],
+    report:['Weld Report Preview','Review the generated pipeline weld inspection report.']
+  };
+  const m=map[view]||map.dashboard;
+  document.getElementById('topTitle').textContent=m[0];
+  document.getElementById('topSub').textContent=m[1];
+  if(view==='dashboard')renderDashboard();
+  if(view==='inspections')renderInspections();
+  if(view==='recommendations')renderRecommendationRegister();
+  if(view==='reports')renderReports();
+  if(view==='tutorials')renderTutorials();
+  if(view==='information')renderInfo();
+  if(view==='admin')renderAdmin();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('nav').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-view]');
+  if(!b)return;
+  if(b.dataset.new==='true')startNewInspection(); else showView(b.dataset.view);
+});
+
+function renderDashboard(){
+  const open=inspections.filter(i=>!['Released','Closed'].includes(i.status)).length;
+  const awaiting=inspections.filter(i=>i.status==='Awaiting NDE'||i.nde.result==='Pending').length;
+  const rejected=inspections.filter(i=>i.disposition==='Reject').length;
+  const repairOpen=inspections.flatMap(i=>i.indications||[]).filter(r=>!['Accepted','Closed'].includes(r.status)).length;
+  const review=inspections.filter(i=>i.status==='Waiting Review').length;
+  const released=inspections.filter(i=>i.status==='Released'||i.releaseStatus.toLowerCase().startsWith('released')).length;
+  const evaluated=Math.max(1,inspections.filter(i=>i.nde.result!=='Pending').length);
+  const repairWelds=inspections.filter(i=>(i.indications||[]).some(r=>String(r.evaluation).includes('Reject'))).length;
+  const repairRate=Math.round(repairWelds/evaluated*100);
+  const cards=[
+    ['Open Weld Records',open,'Not finally released',''],
+    ['Awaiting NDE',awaiting,'Pending examination result','warn'],
+    ['Rejected Welds',rejected,'Repair or disposition required','bad'],
+    ['Open Repairs',repairOpen,`${repairRate}% repair rate`,'warn'],
+    ['Waiting Review',review,'Inspector certification complete',''],
+    ['Released',released,'Approved for next operation','good']
+  ];
+  document.getElementById('kpiGrid').innerHTML=cards.map(c=>`<div class="card kpi ${c[3]}"><div class="label">${c[0]}</div><div class="value">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('');
+  const rows=inspections.filter(i=>!['Released','Closed'].includes(i.status)).slice(0,6);
+  document.getElementById('dashboardInspectionRows').innerHTML=rows.map(i=>inspectionRow(i,true)).join('')||'<tr><td colspan="8" class="empty">No active weld records.</td></tr>';
+  const statuses=['Assigned','In Progress','Awaiting NDE','Repair Required','Waiting Review','Approved','Released'];
+  const max=Math.max(1,...statuses.map(s=>inspections.filter(i=>i.status===s).length));
+  document.getElementById('statusBars').innerHTML=statuses.map(s=>{const n=inspections.filter(i=>i.status===s).length;return`<div class="bar-row"><span>${s}</span><div class="bar"><span style="width:${n/max*100}%"></span></div><strong>${n}</strong></div>`;}).join('');
+  document.getElementById('activityFeed').innerHTML=`
+    <div class="feed-item"><div class="feed-icon">⚠</div><div><p><strong>GW-24-1876</strong> moved to repair control after RT rejection.</p><small>Today</small></div></div>
+    <div class="feed-item"><div class="feed-icon">✓</div><div><p><strong>TI-30-0048</strong> AUT/PAUT result accepted and submitted for review.</p><small>Yesterday</small></div></div>
+    <div class="feed-item"><div class="feed-icon">↗</div><div><p><strong>BW-16-012</strong> released for coating after approval.</p><small>2 days ago</small></div></div>`;
+  document.getElementById('navInspectionCount').textContent=open;
+  document.getElementById('navRecCount').textContent=repairOpen;
+}
+
+function ndeLabel(i){return `${i.nde.method||'NDE'}: ${i.nde.result||'Pending'}`;}
+function inspectionRow(i,compact=false){
+  const overdue=isOverdue(i);
+  const s=overdue?'Overdue':i.status;
+  const repairs=(i.indications||[]).filter(r=>String(r.evaluation).includes('Reject')).length;
+  if(compact){
+    return `<tr>
+      <td><strong>${esc(i.id)}</strong></td>
+      <td><span class="weld-id">${esc(i.weldId||'Not entered')}</span></td>
+      <td>${esc(i.lineNumber||'—')}<br><small>${esc(i.spread||i.project||'—')}</small></td>
+      <td><span class="nde-chip">${esc(ndeLabel(i))}</span></td>
+      <td>${fmtDate(i.dueDate)}</td>
+      <td><span class="disposition ${dispositionClass(i.disposition)}">${esc(i.disposition)}</span></td>
+      <td><span class="status ${overdue?'overdue':statusClass(i.status)}">${esc(s)}</span></td>
+      <td><button class="btn small primary" onclick="openInspection('${i.id}')">Open</button></td>
+    </tr>`;
+  }
+  return `<tr>
+    <td><strong>${esc(i.id)}</strong></td>
+    <td>${esc(i.project)}<br><small>${esc(i.spread)}</small></td>
+    <td><span class="weld-id">${esc(i.weldId||'Not entered')}</span><br><small>${esc(i.lineNumber)} • ${esc(i.station)}</small></td>
+    <td>${fmtDate(i.weldDate)}</td>
+    <td>${fmtDate(i.dueDate)}</td>
+    <td>${esc(i.wps||'—')}<br><small>${esc(i.welderId||'—')}</small></td>
+    <td><span class="nde-chip">${esc(ndeLabel(i))}</span></td>
+    <td>${repairs}</td>
+    <td><div class="progress"><span style="width:${i.completion}%"></span></div><small>${i.completion}%</small></td>
+    <td><span class="disposition ${dispositionClass(i.disposition)}">${esc(i.disposition)}</span></td>
+    <td><span class="status ${overdue?'overdue':statusClass(i.status)}">${esc(s)}</span></td>
+    <td><div class="action-row"><button class="btn small primary" onclick="openInspection('${i.id}')">${i.completion<100?'Continue':'Edit'}</button><button class="btn small secondary" onclick="previewReport('${i.id}')">Report</button></div></td>
+  </tr>`;
+}
+function renderInspections(){
+  const q=val('inspectionSearch').toLowerCase(),f=val('inspectionStatusFilter'),d=val('inspectionDispositionFilter');
+  const filtered=inspections.filter(i=>(!f||i.status===f)&&(!d||i.disposition===d)&&(!q||[i.id,i.client,i.project,i.spread,i.lineNumber,i.station,i.weldId,i.wps,i.welderId].join(' ').toLowerCase().includes(q)));
+  document.getElementById('inspectionRows').innerHTML=filtered.map(i=>inspectionRow(i)).join('')||'<tr><td colspan="12" class="empty">No weld inspections match the selected filters.</td></tr>';
+}
+
+function startNewInspection(){currentInspection=newInspection();currentInspectionSaved=false;currentStep=0;showView('wizard');renderWizard();}
+function openInspection(id){
+  const found=inspections.find(i=>i.id===id);if(!found)return;
+  currentInspection=JSON.parse(JSON.stringify(found));currentInspectionSaved=true;
+  currentStep=Math.min(9,Math.floor((currentInspection.completion||0)/10));
+  showView('wizard');renderWizard();
+}
+function renderStepper(){
+  const canJump=currentInspectionSaved;
+  document.getElementById('stepper').innerHTML=stepDefinitions.map((s,idx)=>`<div class="step ${idx<currentStep?'done':idx===currentStep?'active':''} ${canJump?'clickable':'locked'}" data-step="${idx+1}" ${canJump?`onclick="goToStep(${idx})" title="Open ${s.name}"`:'title="Save the new weld record before jumping between steps"'}>${s.name}</div>`).join('');
+}
+function goToStep(idx){if(!currentInspectionSaved)return;saveStepData();saveCurrentInspection(false);currentStep=Math.max(0,Math.min(9,idx));renderWizard();window.scrollTo({top:0,behavior:'smooth'});}
+function renderWizard(){
+  if(!currentInspection)currentInspection=newInspection();
+  renderStepper();
+  const d=stepDefinitions[currentStep];
+  document.getElementById('stepTitle').textContent=d.title;
+  document.getElementById('stepInstructions').textContent=d.instructions;
+  document.getElementById('backBtn').disabled=currentStep===0;
+  document.getElementById('nextBtn').textContent=currentStep===9?'Save Weld Record':'Save and Continue →';
+  document.getElementById('wizardPageTitle').textContent=currentInspection.weldId?`${currentInspection.id} — ${currentInspection.weldId}`:currentInspection.id;
+  const renderers=[stepProject,stepTraceability,stepScope,stepVisual,stepNDE,stepIndications,stepRepair,stepRecords,stepCertification,stepReport];
+  document.getElementById('wizardBody').innerHTML=renderers[currentStep]();
+  renderSideHelp();bindDynamic();
+}
+function renderSideHelp(){
+  const tips=[
+    ['Identify the exact weld','Use the approved weld map and field records. Line, station, weld ID, and joint number must point to one physical weld.'],
+    ['Protect traceability','Confirm WPS, process, welder, material, heat, and pipe joint IDs before the weld record is released.'],
+    ['Use the governing documents','Select only authorized methods and record the code edition, operator specification, and inspection plan that control acceptance.'],
+    ['Separate observation from acceptance','Describe what is visible and measured, then record the VT disposition based on the applicable requirements.'],
+    ['Control the NDE record','Link the NDE method, procedure, report, technician, coverage, data quality, result, and disposition.'],
+    ['One indication per record','Use the exact location and measured extent. Evaluation and final disposition must remain traceable.'],
+    ['Do not close repairs early','A rejected condition remains open until repair traceability and accepted reinspection are complete.'],
+    ['Connect the evidence','Reference the weld map, NDE report, daily report, repair record, and photos to the same weld ID.'],
+    ['Resolve every QA warning','Traceability and inspection records should be complete before inspector certification.'],
+    ['Release is controlled','Final issue and release should occur only after required review, approval, and disposition.']
+  ];
+  const t=tips[currentStep];
+  document.getElementById('sideHelp').innerHTML=`<h4>Pipeline Inspector Guidance</h4><p><strong>${t[0]}</strong></p><p>${t[1]}</p>
+    <ul><li>Required fields are marked with an asterisk.</li><li>This demo resets when the page is closed or refreshed.</li><li>Acceptance criteria are not calculated by the app.</li><li>${currentInspectionSaved?'This record is saved for the current session; click any numbered step to jump.':'Save the new weld record before jumping between steps.'}</li></ul>
+    <button class="btn secondary" style="width:100%" onclick="openTutorial('${tutorialForStep()}')">Open Related Tutorial</button>
+    <div class="mini-progress"><small>Record progress</small><div class="progress" style="margin-top:6px"><span style="width:${Math.max(currentInspection.completion||0,currentStep*10)}%"></span></div></div>`;
+}
+function tutorialForStep(){return ['traceability','traceability','traceability','visual','nde','repair','repair','photos','review','review'][currentStep];}
+function field(label,id,value,req=false,type='text',placeholder=''){
+  return `<div class="field"><label>${label}${req?'<span class="req">*</span>':''}</label><input id="f_${id}" type="${type}" value="${esc(value)}" placeholder="${esc(placeholder)}"></div>`;
+}
+function select(id,options,value){
+  return `<select id="${id}">${options.map(o=>`<option ${o===value?'selected':''}>${esc(o)}</option>`).join('')}</select>`;
+}
+function stepProject(){
+  const i=currentInspection;
+  return `<div class="tip"><strong>Field identification first:</strong> The report must point to one physical weld on the approved weld map.</div>
+    <div class="trace-grid">
+      ${field('Client / Operator','client',i.client,true)}
+      ${field('Project','project',i.project,true)}
+      ${field('Spread / Facility','spread',i.spread,true)}
+      ${field('Pipeline / Line Number','lineNumber',i.lineNumber,true)}
+      ${field('Segment / Location','segment',i.segment)}
+      ${field('Station / Chainage','station',i.station,true)}
+      ${field('Weld ID','weldId',i.weldId,true)}
+      ${field('Joint Number','jointNumber',i.jointNumber,true)}
+      <div class="field"><label>Weld Type<span class="req">*</span></label>${select('f_weldType',['Girth Weld','Tie-In Weld','Branch / Set-On Weld','Fillet Weld','Repair Weld','In-Service Weld','Other'],i.weldType)}</div>
+      ${field('Weld Date','weldDate',i.weldDate,true,'date')}
+      ${field('Inspection Date','inspectionDate',i.inspectionDate,true,'date')}
+      ${field('Report Due Date','dueDate',i.dueDate,true,'date')}
+      ${field('Assigned Inspector','assignedTo',i.assignedTo,true)}
+      ${field('Technical Reviewer','reviewedBy',i.reviewedBy)}
+      ${field('Client Email','clientEmail',i.clientEmail,false,'email')}
+    </div>`;
+}
+function stepTraceability(){
+  const i=currentInspection;
+  return `<div class="code-note"><strong>Traceability checkpoint:</strong> Verify these values against the approved WPS, material records, weld map, welder records, and daily welding report.</div>
+    <div class="trace-grid">
+      ${field('Nominal Diameter','diameter',i.diameter,true,'text','Example: 24 in')}
+      ${field('Wall Thickness','wallThickness',i.wallThickness,true,'text','Example: 0.500 in')}
+      ${field('Material Grade','materialGrade',i.materialGrade,true)}
+      ${field('WPS Number','wps',i.wps,true)}
+      <div class="field"><label>Welding Process<span class="req">*</span></label>${select('f_weldingProcess',['SMAW','GTAW / SMAW','GMAW','FCAW','Mechanized GMAW','SAW','Other'],i.weldingProcess)}</div>
+      ${field('Welder / Operator ID','welderId',i.welderId,true)}
+      ${field('Welding Crew','crew',i.crew)}
+      ${field('Filler / Electrode','filler',i.filler)}
+      ${field('Pipe Joint A','pipeJointA',i.pipeJointA,true)}
+      ${field('Heat Number A','heatA',i.heatA,true)}
+      ${field('Pipe Joint B','pipeJointB',i.pipeJointB,true)}
+      ${field('Heat Number B','heatB',i.heatB,true)}
+      ${field('Preheat / Interpass Record','preheat',i.preheat)}
+      ${field('Machine / Bug ID','machineId',i.machineId)}
+    </div>`;
+}
+function scopeHelp(o){
+  return ({
+    'Visual Inspection':'Fit-up and completed-weld visual examination.',
+    'Radiographic Testing':'RT examination and controlled report reference.',
+    'Ultrasonic Testing':'Manual UT examination and controlled report reference.',
+    'Automated / Phased Array UT':'AUT or PAUT data and interpretation record.',
+    'Magnetic Particle Testing':'Surface or near-surface examination where authorized.',
+    'Liquid Penetrant Testing':'Surface-breaking examination where authorized.',
+    'Repair Weld Verification':'Repair excavation, reweld, and reinspection control.',
+    'In-Service Welding Controls':'Additional controls for authorized in-service welding.'
+  })[o]||'Include only when required by the approved inspection plan.';
+}
+function stepScope(){
+  const i=currentInspection;
+  const opts=['Visual Inspection','Radiographic Testing','Ultrasonic Testing','Automated / Phased Array UT','Magnetic Particle Testing','Liquid Penetrant Testing','Repair Weld Verification','In-Service Welding Controls'];
+  return `<div class="tip"><strong>Inspection plan:</strong> Selected methods become required record sections. Do not select methods that were not performed.</div>
+    <div class="check-grid">${opts.map(o=>`<label class="check"><input type="checkbox" class="scopeCheck" value="${o}" ${i.scope.includes(o)?'checked':''}><span><strong>${o}</strong><br><small>${scopeHelp(o)}</small></span></label>`).join('')}</div>
+    <div class="form-grid" style="margin-top:16px">
+      ${field('Applicable Code / Edition','codeEdition',i.codeEdition,true)}
+      ${field('Operator / Project Specification','operatorSpec',i.operatorSpec)}
+      <div class="field full"><label>Acceptance Basis<span class="req">*</span></label><textarea id="f_acceptanceBasis">${esc(i.acceptanceBasis)}</textarea><div class="help">Reference the governing code clause, project specification, engineering disposition, or approved procedure. The app does not determine acceptance automatically.</div></div>
+      <div class="field"><label>Weld accessible for examination?<span class="req">*</span></label>${select('g_access',['','Yes','No','Partially'],i.general.access)}</div>
+      <div class="field"><label>Surface condition suitable?<span class="req">*</span></label>${select('g_surface',['','Acceptable','Cleaning required','Obstructed','Not acceptable'],i.general.surface)}</div>
+      <div class="field"><label>Weather / Environment</label><input id="g_weather" value="${esc(i.general.weather)}"></div>
+      <div class="field"><label>Immediate control required?<span class="req">*</span></label>${select('g_immediate',['','No','Yes — Hold weld','Yes — Repair control','Yes — Engineering review'],i.general.immediate)}</div>
+      <div class="field full"><label>Inspection Limitations</label><textarea id="g_limitations">${esc(i.general.limitations)}</textarea></div>
+    </div>`;
+}
+function stepVisual(){
+  const v=currentInspection.vt;
+  const acceptOpts=['','Acceptable','Not acceptable','Not examined'];
+  return `<div class="notice info"><strong>Record observations and measurements:</strong> Set the VT result only after comparing the documented condition to the applicable requirements.</div>
+    <div class="form-grid three">
+      <div class="field"><label>Fit-Up / Root Alignment</label>${select('vt_fitup',acceptOpts,v.fitup)}</div>
+      <div class="field"><label>Final Alignment</label>${select('vt_alignment',acceptOpts,v.alignment)}</div>
+      <div class="field"><label>Weld Profile</label>${select('vt_profile',acceptOpts,v.profile)}</div>
+      <div class="field"><label>Undercut</label>${select('vt_undercut',['','None observed','Observed — evaluated acceptable','Observed — reject','Not examined'],v.undercut)}</div>
+      <div class="field"><label>Arc Burns</label>${select('vt_arcBurn',['','None observed','Observed — evaluated acceptable','Observed — reject','Not examined'],v.arcBurn)}</div>
+      <div class="field"><label>Surface Porosity</label>${select('vt_surfacePorosity',['','None observed','Observed — evaluated acceptable','Observed — reject','Not examined'],v.surfacePorosity)}</div>
+      <div class="field"><label>Visible Crack-Like Condition</label>${select('vt_crackLike',['','None observed','Observed — hold / reject','Not examined'],v.crackLike)}</div>
+      <div class="field"><label>Surface Cleanliness</label>${select('vt_cleanliness',acceptOpts,v.cleanliness)}</div>
+      <div class="field"><label>VT Result<span class="req">*</span></label>${select('vt_result',['Pending','Accept','Reject','Hold'],v.result)}</div>
+      <div class="field full"><label>Visual Inspection Notes / Measurements</label><textarea id="vt_notes">${esc(v.notes)}</textarea><div class="help">Include clock position, distance from reference point, measured extent, and any required sketch or photo reference.</div></div>
+    </div>`;
+}
+function stepNDE(){
+  const n=currentInspection.nde;
+  return `<div class="code-note"><strong>NDE record control:</strong> Preserve the original NDE report and interpretation. This screen summarizes the controlled result; it does not replace the NDE report.</div>
+    <div class="form-grid three">
+      <div class="field"><label>NDE Method<span class="req">*</span></label>${select('nde_method',['Not Required','RT','UT','AUT / PAUT','MT','PT','RT + UT','MT + UT','Other'],n.method)}</div>
+      ${field('Procedure Number','nde_procedure',n.procedure,true)}
+      ${field('NDE Report Number','nde_reportNo',n.reportNo,true)}
+      ${field('NDE Technician','nde_technician',n.technician,true)}
+      ${field('Qualification Level / ID','nde_level',n.level)}
+      ${field('Coverage','nde_coverage',n.coverage,true)}
+      ${field('Examination Date','nde_date',n.date,true,'date')}
+      ${field('Film / Data Quality','nde_filmQuality',n.filmQuality)}
+      <div class="field"><label>NDE Result<span class="req">*</span></label>${select('nde_result',['Pending','Accept','Reject','Hold','Not Required'],n.result)}</div>
+      <div class="field"><label>NDE Disposition<span class="req">*</span></label>${select('nde_disposition',['Pending','Accept','Reject','Hold','Engineering Review'],n.disposition)}</div>
+      <div class="field full"><label>NDE Summary / Interpreter Notes</label><textarea id="nde_notes">${esc(n.notes)}</textarea></div>
+    </div>`;
+}
+function nextIndicationId(){
+  const nums=inspections.flatMap(i=>i.indications||[]).concat(currentInspection?.indications||[]).map(r=>{const m=String(r.id||'').match(/(\d+)$/);return m?Number(m[1]):0;});
+  return `IND-${String(Math.max(...nums,0)+1).padStart(3,'0')}`;
+}
+function indicationCards(){
+  const rows=currentInspection.indications||[];
+  return rows.map((r,idx)=>`<div class="rec-card">
+    <h5>${esc(r.id||`Indication ${idx+1}`)} <span class="disposition ${String(r.evaluation).startsWith('Accept')?'accept':String(r.evaluation).startsWith('Reject')?'reject':'pending'}">${esc(r.evaluation||'Pending')}</span></h5>
+    <div class="form-grid three">
+      <div class="field"><label>Indication Type</label>${select(`ind_${idx}_type`,['Crack-like indication','Incomplete fusion','Incomplete penetration','Porosity','Slag inclusion','Undercut','Burn-through','Arc burn','Misalignment','Other'],r.type)}</div>
+      <div class="field"><label>Location / Clock Position</label><input id="ind_${idx}_location" value="${esc(r.location)}"></div>
+      <div class="field"><label>Length</label><input id="ind_${idx}_length" value="${esc(r.length)}"></div>
+      <div class="field"><label>Depth / Through-Wall</label><input id="ind_${idx}_depth" value="${esc(r.depth)}"></div>
+      <div class="field"><label>Evaluation</label>${select(`ind_${idx}_evaluation`,['Pending evaluation','Accept','Reject — repair required','Engineering disposition','Monitor / document'],r.evaluation)}</div>
+      <div class="field"><label>Status</label>${select(`ind_${idx}_status`,['Open','Evaluation Required','Repair Planned','In Repair','Reinspection Required','Accepted','Closed'],r.status)}</div>
+      <div class="field full"><label>NDE / Visual Description</label><textarea id="ind_${idx}_finding">${esc(r.finding)}</textarea></div>
+      <div class="field full"><label>Required Action / Disposition</label><textarea id="ind_${idx}_action">${esc(r.action)}</textarea></div>
+    </div>
+    <button class="btn small bad" onclick="removeIndication(${idx})">Remove Indication</button>
+  </div>`).join('')||'<div class="empty">No reportable indications entered. Add a record only when a condition requires separate evaluation or tracking.</div>';
+}
+function stepIndications(){
+  return `<div class="tip"><strong>Use neutral terminology first:</strong> Record the detected condition and location, then document the qualified evaluation and disposition.</div>
+    <div class="scroll-list" id="indicationCards">${indicationCards()}</div>
+    <button class="btn secondary" onclick="addIndication()">＋ Add Indication</button>`;
+}
+function repairCards(){
+  const rows=currentInspection.indications||[];
+  return rows.map((r,idx)=>`<div class="rec-card">
+    <h5>${esc(r.id)} — ${esc(r.type)} <span class="status ${['Accepted','Closed'].includes(r.status)?'approved':r.status==='In Repair'?'progress':'assigned'}">${esc(r.status)}</span></h5>
+    <div class="form-grid three">
+      <div class="field"><label>Repair Weld ID</label><input id="rep_${idx}_repairWeldId" value="${esc(r.repairWeldId||'')}"></div>
+      <div class="field"><label>Assigned To</label><input id="rep_${idx}_assignedTo" value="${esc(r.assignedTo||'')}"></div>
+      <div class="field"><label>Target Date</label><input type="date" id="rep_${idx}_targetDate" value="${esc(r.targetDate||'')}"></div>
+      <div class="field"><label>Repair Status</label>${select(`rep_${idx}_status`,['Open','Evaluation Required','Repair Planned','In Repair','Reinspection Required','Accepted','Closed'],r.status)}</div>
+      <div class="field"><label>Reinspection Method</label>${select(`rep_${idx}_reinspectionMethod`,['','VT','RT','UT','AUT / PAUT','MT','PT'],r.reinspectionMethod||'')}</div>
+      <div class="field"><label>Reinspection Result</label>${select(`rep_${idx}_reinspectionResult`,['Pending','Accept','Reject','Not Applicable'],r.reinspectionResult||'Pending')}</div>
+      <div class="field full"><label>Repair / Closure Action</label><textarea id="rep_${idx}_action">${esc(r.action||'')}</textarea></div>
+    </div>
+  </div>`).join('')||'<div class="notice good"><strong>No tracked indications:</strong> No repair-control records are required unless an indication or other condition is entered.</div>';
+}
+function stepRepair(){
+  return `<div class="tip"><strong>Closure rule:</strong> Rejected conditions should not be closed until repair traceability and required accepted reinspection are recorded.</div>
+    <div class="scroll-list">${repairCards()}</div>
+    <div class="form-grid" style="margin-top:16px"><div class="field full"><label>Overall Repair Summary</label><textarea id="f_repairs">${esc(currentInspection.repairs)}</textarea></div><div class="field full"><label>Additional Follow-Up / Engineering Notes</label><textarea id="f_futureRecommendations">${esc(currentInspection.futureRecommendations)}</textarea></div></div>`;
+}
+function stepRecords(){
+  const r=currentInspection.records;
+  return `<div class="upload-zone"><strong>Add Weld Inspection Photos</strong><p style="color:var(--muted)">Choose photos from a phone, tablet, or computer. Images are temporary in this demo.</p><input type="file" id="photoUpload" accept="image/*" multiple></div>
+    <div class="scroll-list" style="margin-top:12px"><div class="photo-grid" id="photoGrid">${photoCards()}</div></div>
+    <div class="card" style="box-shadow:none;margin-top:14px"><div class="panel-head"><h4>Supporting Record References</h4></div><div class="panel-body"><div class="form-grid">
+      ${field('Weld Map / Isometric Reference','record_weldMap',r.weldMap)}
+      ${field('NDE Attachment / Report','record_ndeAttachment',r.ndeAttachment)}
+      ${field('Daily Welding Report','record_dailyReport',r.dailyReport)}
+      ${field('Repair Record','record_repairRecord',r.repairRecord)}
+      ${field('Photo Log / Folder Reference','record_photoRef',r.photoRef)}
+    </div></div></div>`;
+}
+function photoCards(){
+  return (currentInspection.photoItems||[]).map((p,idx)=>`<div class="photo-card"><img src="${p.data}" alt="Pipeline weld inspection photo"><div class="photo-meta"><strong>Photo ${idx+1}</strong>
+    ${select(`p_${idx}_subject`,['Weld Identification','Fit-Up','Completed Weld','NDE Setup','Indication Location','Repair Excavation','Repair Weld','Reinspection','Other'],p.subject)}
+    <input id="p_${idx}_location" placeholder="Station / clock position / location" value="${esc(p.location)}">
+    <input id="p_${idx}_caption" placeholder="Required caption" value="${esc(p.caption)}">
+    <label style="display:flex;gap:6px;margin-top:8px"><input id="p_${idx}_include" type="checkbox" ${p.include?'checked':''}> Include in report</label>
+    <button class="btn small bad" style="margin-top:8px" onclick="removePhoto(${idx})">Remove</button>
+  </div></div>`).join('')||'<div class="empty" style="grid-column:1/-1">No photos uploaded yet. Record references may still be entered below.</div>';
+}
+function qaChecks(i=currentInspection){
+  const photos=i.photoItems||[],inds=i.indications||[],checks=[];
+  checks.push(['Project and weld identification complete',!!(i.client&&i.project&&i.spread&&i.lineNumber&&i.station&&i.weldId&&i.jointNumber&&i.weldDate&&i.inspectionDate&&i.dueDate),'Complete the project, spread, line, station, weld ID, joint number, and dates.']);
+  checks.push(['Weld and material traceability complete',!!(i.diameter&&i.wallThickness&&i.materialGrade&&i.pipeJointA&&i.pipeJointB&&i.heatA&&i.heatB&&i.wps&&i.weldingProcess&&i.welderId),'Complete pipe size, material, heat, pipe joint, WPS, process, and welder traceability.']);
+  checks.push(['Inspection scope and governing basis recorded',i.scope.length>0&&!!(i.codeEdition&&i.acceptanceBasis&&i.general.access&&i.general.surface&&i.general.immediate),'Select methods and record the governing basis and examination conditions.']);
+  checks.push(['Visual inspection disposition complete',!!(i.vt.result&&i.vt.result!=='Pending'),'Complete the VT result.']);
+  const ndeRequired=i.scope.some(x=>x!=='Visual Inspection'&&!['Repair Weld Verification','In-Service Welding Controls'].includes(x));
+  checks.push(['NDE record complete',!ndeRequired||(i.nde.method&&i.nde.procedure&&i.nde.reportNo&&i.nde.technician&&i.nde.coverage&&i.nde.date&&i.nde.result!=='Pending'&&i.nde.disposition!=='Pending'),'Complete method, procedure, report, technician, coverage, date, result, and disposition.']);
+  checks.push(['Indications evaluated',inds.every(r=>r.type&&r.location&&r.finding&&r.evaluation&&r.evaluation!=='Pending evaluation'),'Complete the type, location, description, and evaluation for every indication.']);
+  const rejects=inds.filter(r=>String(r.evaluation).startsWith('Reject'));
+  checks.push(['Rejected conditions controlled',rejects.every(r=>r.action&&r.repairWeldId&&r.assignedTo&&r.targetDate&&r.reinspectionMethod&&r.reinspectionResult==='Accept'&&['Accepted','Closed'].includes(r.status)),'For each rejected condition, complete the repair weld, responsibility, date, accepted reinspection, and closure status.']);
+  const refs=i.records||{};
+  checks.push(['Supporting record reference entered',!!(refs.weldMap&&refs.ndeAttachment&&refs.dailyReport)||(photos.length>0&&photos.filter(p=>p.include).every(p=>p.subject&&p.location&&p.caption)),'Enter weld map, NDE, and daily report references or complete included photo records.']);
+  checks.push(['Inspector qualification entered',!!i.inspectorQualification,'Enter the inspector qualification or certification ID.']);
+  checks.push(['Inspector certification complete',!!i.certified,'Complete certification in Step 9.']);
+  return checks;
+}
+function stepCertification(){
+  const checks=qaChecks();
+  const good=checks.filter(c=>c[1]).length,pct=Math.round(good/checks.length*100);
+  return `<div class="notice ${pct===100?'good':pct>=70?'warn':'info'}"><strong>Weld Record Readiness: ${pct}%</strong><br>${pct===100?'All prototype checks are complete.':'Resolve incomplete traceability, inspection, repair, or record items before release.'}</div>
+    <div class="qa-list">${checks.map(c=>`<div class="qa-item ${c[1]?'good':'bad'}"><div class="qa-icon">${c[1]?'✓':'!'}</div><div class="qa-text"><strong>${c[0]}</strong><br><small>${c[1]?'Complete':c[2]}</small></div></div>`).join('')}</div>
+    <div class="card" style="box-shadow:none;margin-top:14px"><div class="panel-head"><h4>Inspector Certification</h4></div><div class="panel-body"><div class="form-grid">
+      ${field('Inspector Name','assignedTo',currentInspection.assignedTo,true)}
+      ${field('Qualification / Certification ID','inspectorQualification',currentInspection.inspectorQualification,true)}
+      <div class="field full"><label>Final Inspection Summary<span class="req">*</span></label><textarea id="f_summary">${esc(currentInspection.summary)}</textarea></div>
+      <div class="field full"><label class="check"><input type="checkbox" id="f_certified" ${currentInspection.certified?'checked':''}><span><strong>I certify that I reviewed this weld inspection record.</strong><br><small>I confirm the documented traceability, VT, NDE, indications, repairs, reinspection, records, and summary accurately represent the inspection to the best of my professional judgment.</small></span></label></div>
+    </div></div></div>`;
+}
+function stepReport(){
+  const ready=qaChecks().every(c=>c[1]);
+  return `<div class="notice ${ready?'good':'warn'}"><strong>${ready?'Ready for controlled technical review':'Not ready for final release'}</strong><br>${ready?'Assign the reviewer, record approval, set final weld disposition, and release the report.':'Return to Step 9 and resolve all mandatory items.'}</div>
+    <div class="form-grid three">
+      ${field('Technical Reviewer','reviewedBy',currentInspection.reviewedBy)}
+      <div class="field"><label>Workflow Status</label>${select('f_status',['Assigned','In Progress','Awaiting NDE','Repair Required','Waiting Review','Corrections Required','Approved','Released'],currentInspection.status)}</div>
+      <div class="field"><label>Final Weld Disposition</label>${select('f_disposition',['Pending','Accept','Reject','Hold'],currentInspection.disposition)}</div>
+      <div class="field"><label>Release Status</label>${select('f_releaseStatus',['Hold','Released for coating','Released for lowering-in','Released for hydrotest','Released for service','Not Applicable'],currentInspection.releaseStatus)}</div>
+      ${field('Report Revision','revision',currentInspection.revision)}
+      <div class="field"><label>Client / Owner Acceptance</label>${select('f_acceptance',['Pending','Accepted with comments','Accepted','Rejected','Revision Requested'],currentInspection.acceptance)}</div>
+      <div class="field full"><label class="check"><input type="checkbox" id="f_reviewApproved" ${currentInspection.reviewApproved?'checked':''}><span><strong>Reviewer approval recorded</strong><br><small>Final issue and release should occur only after the required company, operator, and project approvals.</small></span></label></div>
+    </div>
+    <div class="action-row" style="margin-top:18px">
+      <button class="btn secondary" onclick="saveCurrentInspection(true);previewReport('${currentInspection.id}')">Preview Weld Report</button>
+      <button class="btn secondary" onclick="saveCurrentInspection(false);previewReport(currentInspection.id);setTimeout(()=>window.print(),250)">Print / Save PDF</button>
+      <button class="btn primary" onclick="saveCurrentInspection(true);emailCurrentInspection()">Prepare Email</button>
+      ${currentInspectionSaved?'<button class="btn bad" style="margin-left:auto" onclick="deleteCurrentInspectionFromEditor()">Delete Weld Record</button>':''}
+    </div>
+    <div class="help" style="margin-top:10px">Delete is available only inside the opened weld record to avoid accidental removal from dashboard or register screens.</div>`;
+}
+function bindDynamic(){
+  if(currentStep===7){
+    const upload=document.getElementById('photoUpload');
+    if(upload)upload.addEventListener('change',handlePhotos);
+  }
+}
+function saveStepData(){
+  const i=currentInspection;if(!i)return;
+  if(currentStep===0){
+    ['client','project','spread','lineNumber','segment','station','weldId','jointNumber','weldType','weldDate','inspectionDate','dueDate','assignedTo','reviewedBy','clientEmail'].forEach(k=>{const e=document.getElementById('f_'+k);if(e)i[k]=e.value.trim();});
+  }
+  if(currentStep===1){
+    ['diameter','wallThickness','materialGrade','wps','weldingProcess','welderId','crew','filler','pipeJointA','heatA','pipeJointB','heatB','preheat','machineId'].forEach(k=>{const e=document.getElementById('f_'+k);if(e)i[k]=e.value.trim();});
+  }
+  if(currentStep===2){
+    i.scope=[...document.querySelectorAll('.scopeCheck:checked')].map(x=>x.value);
+    i.codeEdition=val('f_codeEdition');i.operatorSpec=val('f_operatorSpec');i.acceptanceBasis=val('f_acceptanceBasis');
+    i.general.access=val('g_access');i.general.surface=val('g_surface');i.general.weather=val('g_weather');i.general.immediate=val('g_immediate');i.general.limitations=val('g_limitations');
+  }
+  if(currentStep===3){
+    ['fitup','alignment','profile','undercut','arcBurn','surfacePorosity','crackLike','cleanliness','result','notes'].forEach(k=>i.vt[k]=val('vt_'+k));
+  }
+  if(currentStep===4){
+    i.nde.method=val('nde_method');
+    ['procedure','reportNo','technician','level','coverage','date','filmQuality'].forEach(k=>i.nde[k]=val('f_nde_'+k));
+    i.nde.result=val('nde_result');i.nde.disposition=val('nde_disposition');i.nde.notes=val('nde_notes');
+    if(i.nde.disposition==='Reject'){i.disposition='Reject';i.status='Repair Required';}
+    else if(i.nde.disposition==='Accept'&&i.vt.result==='Accept'){i.disposition='Accept';if(i.status==='Awaiting NDE')i.status='In Progress';}
+  }
+  if(currentStep===5){
+    (i.indications||[]).forEach((r,idx)=>{
+      ['type','location','length','depth','evaluation','status','finding','action'].forEach(k=>{const e=document.getElementById(`ind_${idx}_${k}`);if(e)r[k]=e.value;});
+    });
+  }
+  if(currentStep===6){
+    (i.indications||[]).forEach((r,idx)=>{
+      ['repairWeldId','assignedTo','targetDate','status','reinspectionMethod','reinspectionResult','action'].forEach(k=>{const e=document.getElementById(`rep_${idx}_${k}`);if(e)r[k]=e.value;});
+    });
+    i.repairs=val('f_repairs');i.futureRecommendations=val('f_futureRecommendations');
+  }
+  if(currentStep===7){
+    (i.photoItems||[]).forEach((p,idx)=>{p.subject=val(`p_${idx}_subject`);p.location=val(`p_${idx}_location`);p.caption=val(`p_${idx}_caption`);p.include=checked(`p_${idx}_include`);});
+    i.photos=i.photoItems.length;
+    ['weldMap','ndeAttachment','dailyReport','repairRecord','photoRef'].forEach(k=>i.records[k]=val('f_record_'+k));
+  }
+  if(currentStep===8){
+    i.assignedTo=val('f_assignedTo');i.inspectorQualification=val('f_inspectorQualification');i.summary=val('f_summary');i.certified=checked('f_certified');
+  }
+  if(currentStep===9){
+    i.reviewedBy=val('f_reviewedBy');i.status=val('f_status');i.disposition=val('f_disposition');i.releaseStatus=val('f_releaseStatus');i.revision=val('f_revision');i.acceptance=val('f_acceptance');i.reviewApproved=checked('f_reviewApproved');
+  }
+  i.completion=Math.max(i.completion||0,(currentStep+1)*10);
+  if(i.completion>0&&i.status==='Assigned')i.status='In Progress';
+  if(currentStep>=3&&i.vt.result==='Accept'&&i.nde.result==='Pending'&&i.status==='In Progress')i.status='Awaiting NDE';
+}
+function validateCurrent(){
+  saveStepData();
+  if(currentStep===0){
+    const req=['client','project','spread','lineNumber','station','weldId','jointNumber','weldType','weldDate','inspectionDate','dueDate'];
+    if(req.some(k=>!currentInspection[k])){alert('Complete the required Project, Line, and Weld Identification fields before continuing.');return false;}
+  }
+  if(currentStep===1){
+    const req=['diameter','wallThickness','materialGrade','pipeJointA','pipeJointB','heatA','heatB','wps','weldingProcess','welderId'];
+    if(req.some(k=>!currentInspection[k])){alert('Complete the required weld, material, WPS, and welder traceability fields before continuing.');return false;}
+  }
+  if(currentStep===2&&currentInspection.scope.length<1){alert('Select at least one inspection method.');return false;}
+  return true;
+}
+function nextStep(){
+  if(!validateCurrent())return;
+  saveCurrentInspection(false);
+  if(currentStep<9){currentStep++;renderWizard();window.scrollTo({top:0,behavior:'smooth'});}
+  else{saveCurrentInspection(true);renderDashboard();alert('Weld record saved for this demo session only. You can preview, print, or prepare the report email until the page is closed or refreshed.');}
+}
+function previousStep(){saveStepData();if(currentStep>0){currentStep--;renderWizard();window.scrollTo({top:0,behavior:'smooth'});}}
+function saveCurrentInspection(showMessage=false){
+  saveStepData();
+  const idx=inspections.findIndex(x=>x.id===currentInspection.id);
+  if(idx>=0)inspections[idx]=JSON.parse(JSON.stringify(currentInspection));else inspections.unshift(JSON.parse(JSON.stringify(currentInspection)));
+  currentInspectionSaved=true;persist();renderDashboard();renderStepper();
+  if(showMessage)alert('Draft saved for this demo session only. Closing or refreshing resets all changes. You can now click any numbered step to review or edit it.');
+}
+function addIndication(){
+  saveStepData();
+  currentInspection.indications.push({id:nextIndicationId(),type:'Other',location:'',length:'',depth:'',finding:'',evaluation:'Pending evaluation',action:'',repairWeldId:'',reinspectionMethod:'',reinspectionResult:'Pending',assignedTo:'',targetDate:'',status:'Open'});
+  renderWizard();
+}
+function removeIndication(idx){
+  saveStepData();const r=currentInspection.indications[idx];if(!r)return;
+  if(!confirm(`Delete ${r.id||'this indication'}? This cannot be undone.`))return;
+  currentInspection.indications.splice(idx,1);renderWizard();
+}
+function handlePhotos(e){
+  [...e.target.files].forEach(file=>compressImage(file,data=>{
+    currentInspection.photoItems.push({data,subject:'Completed Weld',location:currentInspection.station||'',caption:'',include:true});
+    currentInspection.photos=currentInspection.photoItems.length;
+    document.getElementById('photoGrid').innerHTML=photoCards();
+  }));
+}
+function compressImage(file,cb){
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const max=1000,scale=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement('canvas');
+      c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      cb(c.toDataURL('image/jpeg',.78));
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removePhoto(idx){saveStepData();currentInspection.photoItems.splice(idx,1);currentInspection.photos=currentInspection.photoItems.length;renderWizard();}
+
+function allRecommendations(){
+  return inspections.flatMap(i=>(i.indications||[]).map(r=>({...r,inspection:i.id,weldId:i.weldId,lineNumber:i.lineNumber,project:i.project})));
+}
+function recommendationStatusClass(s){return ['Accepted','Closed'].includes(s)?'approved':s==='In Repair'?'progress':s==='Evaluation Required'?'review':'assigned';}
+function renderRecommendationRegister(){
+  const all=allRecommendations(),q=val('recSearch').toLowerCase(),f=val('recStatusFilter');
+  const filtered=all.filter(r=>(!f||r.status===f)&&(!q||[r.id,r.inspection,r.weldId,r.lineNumber,r.type,r.location,r.finding,r.action,r.repairWeldId,r.assignedTo].join(' ').toLowerCase().includes(q)));
+  document.getElementById('recRows').innerHTML=filtered.map(r=>`<tr class="clickable-row" onclick="openRecommendationModal('${r.inspection}','${r.id}')">
+    <td><strong>${esc(r.id)}</strong></td><td>${esc(r.inspection)}</td><td><span class="weld-id">${esc(r.weldId)}</span></td>
+    <td>${esc(r.type)}<br><small>${esc(r.location)}</small></td>
+    <td><span class="disposition ${String(r.evaluation).startsWith('Accept')?'accept':String(r.evaluation).startsWith('Reject')?'reject':'pending'}">${esc(r.evaluation)}</span></td>
+    <td>${esc(r.repairWeldId||'—')}</td><td>${esc(r.assignedTo||'Unassigned')}</td><td>${fmtDate(r.targetDate)}</td>
+    <td><span class="status ${recommendationStatusClass(r.status)}">${esc(r.status)}</span></td><td>${esc(r.reinspectionResult||'Pending')}</td>
+    <td><button class="btn small primary" onclick="event.stopPropagation();openRecommendationModal('${r.inspection}','${r.id}')">Edit</button></td>
+  </tr>`).join('')||'<tr><td colspan="11" class="empty">No indications or repair records match the selected filters.</td></tr>';
+  const open=all.filter(r=>!['Accepted','Closed'].includes(r.status)).length;
+  const rejects=all.filter(r=>String(r.evaluation).startsWith('Reject')&&!['Accepted','Closed'].includes(r.status)).length;
+  const reinspect=all.filter(r=>r.status==='Reinspection Required'||(r.reinspectionResult==='Pending'&&String(r.evaluation).startsWith('Reject'))).length;
+  const accepted=all.filter(r=>r.reinspectionResult==='Accept'||r.status==='Accepted'||r.status==='Closed').length;
+  document.getElementById('recKpis').innerHTML=[
+    ['Open Indications',open,'Require evaluation or closure',''],
+    ['Rejected / Repair',rejects,'Repair controls active','bad'],
+    ['Awaiting Reinspection',reinspect,'Verification not complete','warn'],
+    ['Accepted / Closed',accepted,'Repair record completed','good']
+  ].map(c=>`<div class="card kpi ${c[3]}"><div class="label">${c[0]}</div><div class="value">${c[1]}</div><div class="sub">${c[2]}</div></div>`).join('');
+}
+function openRecommendationModal(inspectionId='',recId=''){
+  if(!inspections.length){alert('Create and save a weld inspection before adding an indication.');return;}
+  const selectEl=document.getElementById('modalRecInspection');
+  selectEl.innerHTML=inspections.map(i=>`<option value="${esc(i.id)}">${esc(i.id)} — ${esc(i.weldId||'Weld not entered')} — ${esc(i.lineNumber||'Line not entered')}</option>`).join('');
+  const selectedInspection=inspectionId||inspections[0].id;selectEl.value=selectedInspection;
+  const inspection=inspections.find(i=>i.id===selectedInspection);
+  const rec=recId?(inspection?.indications||[]).find(r=>r.id===recId):null;
+  editingRecommendationKey=rec?{inspectionId:selectedInspection,recId}:{inspectionId:selectedInspection,recId:null};
+  document.getElementById('recommendationModalTitle').textContent=rec?'Edit Indication / Repair':'Add Indication / Repair';
+  document.getElementById('modalRecId').value=rec?.id||nextIndicationId();
+  document.getElementById('modalRecComponent').value=rec?.type||'Other';
+  document.getElementById('modalRecPriority').value=rec?.evaluation||'Pending evaluation';
+  document.getElementById('modalRecStatus').value=rec?.status||'Open';
+  document.getElementById('modalRecAcceptance').value=rec?.reinspectionResult||'Pending';
+  document.getElementById('modalRecLocation').value=rec?.location||'';
+  document.getElementById('modalRecLength').value=rec?.length||'';
+  document.getElementById('modalRecDepth').value=rec?.depth||'';
+  document.getElementById('modalRecFinding').value=rec?.finding||'';
+  document.getElementById('modalRecAction').value=rec?.action||'';
+  document.getElementById('modalRecRepairWeld').value=rec?.repairWeldId||'';
+  document.getElementById('modalRecReinspectionMethod').value=rec?.reinspectionMethod||'';
+  document.getElementById('modalRecAssignedTo').value=rec?.assignedTo||'';
+  document.getElementById('modalRecTargetDate').value=rec?.targetDate||'';
+  document.getElementById('modalRecDeleteBtn').style.visibility=rec?'visible':'hidden';
+  document.getElementById('recommendationModal').classList.add('open');
+}
+function saveRecommendationFromModal(){
+  const inspectionId=val('modalRecInspection');
+  const i=inspections.find(x=>x.id===inspectionId);if(!i)return;
+  const data={id:val('modalRecId'),type:val('modalRecComponent'),evaluation:val('modalRecPriority'),status:val('modalRecStatus'),reinspectionResult:val('modalRecAcceptance'),location:val('modalRecLocation'),length:val('modalRecLength'),depth:val('modalRecDepth'),finding:val('modalRecFinding'),action:val('modalRecAction'),repairWeldId:val('modalRecRepairWeld'),reinspectionMethod:val('modalRecReinspectionMethod'),assignedTo:val('modalRecAssignedTo'),targetDate:val('modalRecTargetDate')};
+  if(!data.finding.trim()){alert('Enter the finding or NDE description before saving.');return;}
+  const existing=(i.indications||[]).findIndex(r=>r.id===editingRecommendationKey?.recId);
+  if(existing>=0)i.indications[existing]=data;else{i.indications=i.indications||[];i.indications.push(data);}
+  if(String(data.evaluation).startsWith('Reject')){i.disposition='Reject';i.status='Repair Required';i.releaseStatus='Hold';}
+  persist();closeModal('recommendationModal');renderRecommendationRegister();renderDashboard();
+}
+function deleteRecommendationFromModal(){
+  const key=editingRecommendationKey;if(!key?.recId)return;
+  const i=inspections.find(x=>x.id===key.inspectionId);if(!i)return;
+  const idx=(i.indications||[]).findIndex(r=>r.id===key.recId);if(idx<0)return;
+  if(!confirm(`Delete ${key.recId}? This cannot be undone.`))return;
+  i.indications.splice(idx,1);persist();closeModal('recommendationModal');renderRecommendationRegister();renderDashboard();
+}
+function deleteCurrentInspectionFromEditor(){
+  if(!currentInspectionSaved)return;
+  if(!confirm(`Delete weld record ${currentInspection.id} and all connected indications, photos, and report data?`))return;
+  inspections=inspections.filter(i=>i.id!==currentInspection.id);currentInspection=null;currentInspectionSaved=false;showView('inspections');renderDashboard();
+}
+
+function renderReports(){
+  document.getElementById('reportRows').innerHTML=inspections.map(i=>`<tr>
+    <td><strong>${esc(i.id)}</strong></td><td><span class="weld-id">${esc(i.weldId)}</span></td><td>${esc(i.lineNumber)}<br><small>${esc(i.project)}</small></td>
+    <td>${esc(i.assignedTo)}</td><td>${esc(i.reviewedBy||'Unassigned')}</td><td>${esc(i.revision)}</td>
+    <td><span class="disposition ${dispositionClass(i.disposition)}">${esc(i.disposition)}</span></td><td>${esc(ndeLabel(i))}</td>
+    <td>${fmtDate(i.sentDate)}</td><td>${esc(i.acceptance)}</td>
+    <td><div class="action-row"><button class="btn small primary" onclick="openInspection('${i.id}')">Edit</button><button class="btn small secondary" onclick="previewReport('${i.id}')">Preview</button><button class="btn small secondary" onclick="previewReport('${i.id}');setTimeout(()=>window.print(),250)">Print</button><button class="btn small primary" onclick="emailInspection('${i.id}')">Email</button></div></td>
+  </tr>`).join('')||'<tr><td colspan="11" class="empty">No weld reports in this demo session.</td></tr>';
+}
+function previewReport(id){
+  const i=inspections.find(x=>x.id===id)||currentInspection;if(!i)return;
+  activeReportId=i.id;document.getElementById('reportSheet').innerHTML=buildReport(i);showView('report');
+}
+function buildReport(i){
+  const photos=(i.photoItems||[]).filter(p=>p.include);
+  const indications=(i.indications||[]);
+  const indicationTable=indications.length?`<table class="report-table"><tr><th>ID</th><th>Type</th><th>Location</th><th>Length</th><th>Evaluation</th><th>Repair Weld</th><th>Reinspection</th><th>Status</th></tr>${indications.map(r=>`<tr><td>${esc(r.id)}</td><td>${esc(r.type)}</td><td>${esc(r.location)}</td><td>${esc(r.length)}</td><td>${esc(r.evaluation)}</td><td>${esc(r.repairWeldId||'—')}</td><td>${esc((r.reinspectionMethod||'—')+' / '+(r.reinspectionResult||'Pending'))}</td><td>${esc(r.status)}</td></tr>`).join('')}</table>`:'<p>No separately tracked indications.</p>';
+  return `<div class="demo-watermark">DEMO — NOT FOR OFFICIAL USE</div>
+    <div class="report-top"><div><div class="report-title">${esc(admin.company)}</div><div class="report-sub">PIPELINE WELD INSPECTION & NDE CONTROL REPORT</div></div><div class="report-meta">API 1104 WORKFLOW RECORD<br>REPORT: ${esc(i.id)}<br>REV: ${esc(i.revision)}<br>INSPECTION: ${fmtDate(i.inspectionDate)}</div></div>
+    <table class="report-table">
+      <tr><th>Client / Operator</th><td>${esc(i.client)}</td><th>Project</th><td>${esc(i.project)}</td></tr>
+      <tr><th>Spread / Facility</th><td>${esc(i.spread)}</td><th>Pipeline / Line</th><td>${esc(i.lineNumber)}</td></tr>
+      <tr><th>Station / Chainage</th><td>${esc(i.station)}</td><th>Segment</th><td>${esc(i.segment)}</td></tr>
+      <tr><th>Weld ID</th><td><strong>${esc(i.weldId)}</strong></td><th>Joint / Type</th><td>${esc(i.jointNumber)} / ${esc(i.weldType)}</td></tr>
+      <tr><th>Weld Date</th><td>${fmtDate(i.weldDate)}</td><th>Report Due</th><td>${fmtDate(i.dueDate)}</td></tr>
+    </table>
+    <div class="report-section"><h4>Weld and Material Traceability</h4></div>
+    <table class="report-table">
+      <tr><th>Diameter</th><td>${esc(i.diameter)}</td><th>Wall Thickness</th><td>${esc(i.wallThickness)}</td><th>Material Grade</th><td>${esc(i.materialGrade)}</td></tr>
+      <tr><th>Pipe Joint A</th><td>${esc(i.pipeJointA)}</td><th>Heat A</th><td>${esc(i.heatA)}</td><th>Pipe Joint B / Heat B</th><td>${esc(i.pipeJointB)} / ${esc(i.heatB)}</td></tr>
+      <tr><th>WPS</th><td>${esc(i.wps)}</td><th>Process</th><td>${esc(i.weldingProcess)}</td><th>Welder / Operator</th><td>${esc(i.welderId)}</td></tr>
+      <tr><th>Crew</th><td>${esc(i.crew)}</td><th>Filler / Electrode</th><td>${esc(i.filler)}</td><th>Preheat / Machine</th><td>${esc(i.preheat)} / ${esc(i.machineId)}</td></tr>
+    </table>
+    <div class="report-section"><h4>Governing Documents and Scope</h4><p><strong>Code / Edition:</strong> ${esc(i.codeEdition)}\n<strong>Operator / Project Specification:</strong> ${esc(i.operatorSpec||'Not entered')}\n<strong>Acceptance Basis:</strong> ${esc(i.acceptanceBasis)}\n<strong>Methods:</strong> ${esc((i.scope||[]).join(', '))}\n<strong>Limitations:</strong> ${esc(i.general.limitations||'None noted.')}</p></div>
+    <div class="report-section"><h4>Visual Inspection</h4></div>
+    <table class="report-table"><tr><th>Fit-Up</th><th>Alignment</th><th>Profile</th><th>Undercut</th><th>Arc Burns</th><th>Surface Porosity</th><th>Crack-Like</th><th>VT Result</th></tr>
+      <tr><td>${esc(i.vt.fitup)}</td><td>${esc(i.vt.alignment)}</td><td>${esc(i.vt.profile)}</td><td>${esc(i.vt.undercut)}</td><td>${esc(i.vt.arcBurn)}</td><td>${esc(i.vt.surfacePorosity)}</td><td>${esc(i.vt.crackLike)}</td><td><strong>${esc(i.vt.result)}</strong></td></tr>
+    </table><p style="font-size:12px">${esc(i.vt.notes||'No additional VT notes.')}</p>
+    <div class="report-section"><h4>NDE Results</h4></div>
+    <table class="report-table"><tr><th>Method</th><th>Procedure</th><th>Report</th><th>Technician / Level</th><th>Coverage</th><th>Date</th><th>Quality</th><th>Result / Disposition</th></tr>
+      <tr><td>${esc(i.nde.method)}</td><td>${esc(i.nde.procedure)}</td><td>${esc(i.nde.reportNo)}</td><td>${esc(i.nde.technician)} / ${esc(i.nde.level)}</td><td>${esc(i.nde.coverage)}</td><td>${fmtDate(i.nde.date)}</td><td>${esc(i.nde.filmQuality)}</td><td><strong>${esc(i.nde.result)} / ${esc(i.nde.disposition)}</strong></td></tr>
+    </table><p style="font-size:12px">${esc(i.nde.notes||'No additional NDE notes.')}</p>
+    <div class="report-section"><h4>Indications, Repairs and Reinspection</h4>${indicationTable}<p><strong>Repair Summary:</strong> ${esc(i.repairs||'No repair summary entered.')}\n<strong>Additional Follow-Up:</strong> ${esc(i.futureRecommendations||'None entered.')}</p></div>
+    <div class="report-section"><h4>Supporting Records</h4><p><strong>Weld Map:</strong> ${esc(i.records.weldMap||'—')} | <strong>NDE Attachment:</strong> ${esc(i.records.ndeAttachment||'—')} | <strong>Daily Report:</strong> ${esc(i.records.dailyReport||'—')} | <strong>Repair Record:</strong> ${esc(i.records.repairRecord||'—')} | <strong>Photo Reference:</strong> ${esc(i.records.photoRef||'—')}</p></div>
+    <div class="report-section"><h4>Inspection Summary and Final Disposition</h4><p>${esc(i.summary||'No summary entered.')}</p></div>
+    <table class="report-table"><tr><th>Final Disposition</th><th>Release Status</th><th>Workflow Status</th><th>Client / Owner Acceptance</th></tr><tr><td><strong>${esc(i.disposition)}</strong></td><td>${esc(i.releaseStatus)}</td><td>${esc(i.status)}</td><td>${esc(i.acceptance)}</td></tr></table>
+    <div class="report-section"><h4>Photos</h4><div class="report-photos">${photos.length?photos.map((p,idx)=>`<div class="report-photo"><img src="${p.data}" alt="Weld report photo"><p><strong>Photo ${idx+1} — ${esc(p.subject)}</strong><br>${esc(p.location)} — ${esc(p.caption)}</p></div>`).join(''):'<p>No embedded photographs. See controlled photo references above.</p>'}</div></div>
+    <table class="report-table"><tr><th>Inspector</th><th>Qualification / Certification</th><th>Certified</th><th>Reviewed By</th><th>Reviewer Approval</th></tr><tr><td>${esc(i.assignedTo)}</td><td>${esc(i.inspectorQualification)}</td><td>${i.certified?'Yes':'No'}</td><td>${esc(i.reviewedBy||'—')}</td><td>${i.reviewApproved?'Yes':'No'}</td></tr></table>
+    <div class="report-footer"><strong>DEMO VERSION — DATA IS NOT RETAINED — NOT FOR OFFICIAL ISSUE</strong><br>${esc(admin.footer)}<br>${esc(i.id)} | Weld ${esc(i.weldId)} | Revision ${esc(i.revision)}</div>`;
+}
+function emailInspection(id){
+  const i=inspections.find(x=>x.id===id);if(!i)return;
+  const subject=encodeURIComponent(`${i.id} — ${i.weldId} Pipeline Weld Inspection Report`);
+  const body=encodeURIComponent(`${admin.email}\n\nReport: ${i.id}\nProject: ${i.project}\nLine: ${i.lineNumber}\nWeld ID: ${i.weldId}\nFinal Disposition: ${i.disposition}\nRelease Status: ${i.releaseStatus}\nInspection Date: ${fmtDate(i.inspectionDate)}\n\nRegards,\n${admin.company}`);
+  window.location.href=`mailto:${encodeURIComponent(i.clientEmail||'')}?subject=${subject}&body=${body}`;
+}
+function emailCurrentInspection(){saveCurrentInspection(false);emailInspection(currentInspection.id);}
+function emailCurrentReport(){if(activeReportId)emailInspection(activeReportId);}
+
+function renderTutorials(){
+  document.getElementById('tutorialGrid').innerHTML=tutorials.map(t=>`<div class="card tutorial-card"><div class="tutorial-icon">${t.icon}</div><h4>${t.title}</h4><div class="meta">${t.time} • ${tutorialProgress[t.id]?'Completed':'Not completed'}</div><p>${t.desc}</p><button class="btn ${tutorialProgress[t.id]?'good':'primary'}" onclick="openTutorial('${t.id}')">${tutorialProgress[t.id]?'Review Tutorial':'Start Tutorial'}</button></div>`).join('');
+}
+function openTutorial(id){
+  const t=tutorials.find(x=>x.id===id)||tutorials[0];
+  document.getElementById('tutorialModalTitle').textContent=t.title;
+  document.getElementById('tutorialModalBody').innerHTML=`<div class="notice info"><strong>Purpose:</strong> ${t.desc}</div><ol style="line-height:1.8">${t.steps.map(s=>`<li>${s}</li>`).join('')}</ol><div class="notice warn"><strong>Field rule:</strong> Keep weld identity, NDE, indication, repair, and reinspection records connected to the same weld and controlled revision.</div><button class="btn primary" onclick="completeTutorial('${t.id}')">Mark Tutorial Complete</button>`;
+  document.getElementById('tutorialModal').classList.add('open');
+}
+function completeTutorial(id){tutorialProgress[id]=true;closeModal('tutorialModal');renderTutorials();}
+function resetTutorials(){tutorialProgress={};renderTutorials();}
+function renderInfo(){document.getElementById('infoAccordion').innerHTML=infoTopics.map(x=>`<div class="acc"><button onclick="this.parentElement.classList.toggle('open')">${x[0]} <span>＋</span></button><div class="acc-body">${x[1]}</div></div>`).join('');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeOnboarding(){demoOnboarded=true;closeModal('onboardModal');}
+function showSessionUserPrompt(){
+  document.getElementById('sessionInspectorName').value=admin.inspectorName;
+  document.getElementById('sessionInspectorRole').value=admin.inspectorRole;
+  document.getElementById('sessionInspectorInitials').value=admin.inspectorInitials||makeInitials(admin.inspectorName);
+  document.getElementById('sessionInspectorApi').value=admin.inspectorApi||'';
+  document.getElementById('sessionUserModal').classList.add('open');
+}
+function confirmSessionUser(){
+  const name=val('sessionInspectorName').trim(),role=val('sessionInspectorRole');
+  if(!name||!role){alert('Enter your name and select your role.');return;}
+  admin.inspectorName=name;admin.inspectorRole=role;admin.inspectorInitials=(val('sessionInspectorInitials').trim()||makeInitials(name)).toUpperCase().slice(0,3);admin.inspectorApi=val('sessionInspectorApi').trim();
+  applyAdmin();closeModal('sessionUserModal');
+  if(!demoOnboarded)document.getElementById('onboardModal').classList.add('open');
+}
+function renderAdmin(){
+  document.getElementById('adminCompany').value=admin.company;
+  document.getElementById('adminColor').value=admin.color;
+  document.getElementById('adminPrefix').value=admin.prefix;
+  document.getElementById('adminFooter').value=admin.footer;
+  document.getElementById('adminEmail').value=admin.email;
+  document.getElementById('adminInspectorName').value=admin.inspectorName;
+  document.getElementById('adminInspectorRole').value=admin.inspectorRole;
+  document.getElementById('adminInspectorInitials').value=admin.inspectorInitials||makeInitials(admin.inspectorName);
+  document.getElementById('adminInspectorApi').value=admin.inspectorApi||'';
+}
+function saveAdmin(){
+  const inspectorName=val('adminInspectorName').trim()||defaultAdmin.inspectorName;
+  admin={company:val('adminCompany')||defaultAdmin.company,color:val('adminColor')||defaultAdmin.color,prefix:val('adminPrefix')||defaultAdmin.prefix,footer:val('adminFooter'),email:val('adminEmail'),inspectorName,inspectorRole:val('adminInspectorRole')||defaultAdmin.inspectorRole,inspectorInitials:(val('adminInspectorInitials').trim()||makeInitials(inspectorName)).toUpperCase().slice(0,3),inspectorApi:val('adminInspectorApi').trim()};
+  applyAdmin();renderAdmin();alert('Settings applied for this demo session only.');
+}
+function applyInspectorToOpenInspections(){
+  const name=val('adminInspectorName').trim()||admin.inspectorName,qual=val('adminInspectorApi').trim();
+  const open=inspections.filter(i=>!['Approved','Released','Closed'].includes(i.status));
+  if(!open.length){alert('There are no open weld records to update.');return;}
+  if(!confirm(`Apply ${name} to ${open.length} open weld record(s)?`))return;
+  open.forEach(i=>{i.assignedTo=name;if(qual)i.inspectorQualification=qual;});renderDashboard();alert(`${open.length} open weld record(s) updated.`);
+}
+function removeExampleRecords(){
+  if(!confirm('Remove all example pipeline records for this demo session?'))return;
+  inspections=inspections.filter(i=>!i.isDemo);currentInspection=null;currentInspectionSaved=false;renderDashboard();renderInspections();
+}
+function restoreDemoData(){inspections=seedInspections();currentInspection=null;currentInspectionSaved=false;renderDashboard();renderInspections();alert('Pipeline demo examples restored.');}
+function openPurchaseModal(){document.getElementById('purchaseModal').classList.add('open');}
+function requestPurchase(plan){
+  const subject=encodeURIComponent(`API 1104 IM Purchase Request — ${plan}`);
+  const body=encodeURIComponent(`Hello Shell Key Support,\n\nPlease provide pricing and next steps for:\n${plan}\n\nCompany:\nContact Name:\nNumber of inspectors/users:\nExpected weld volume:\nPreferred deployment:\n\nThank you.`);
+  window.location.href=`mailto:support@shellkey.company?subject=${subject}&body=${body}`;
+}
+function resetDemoSession(){
+  if(!confirm('Reset the API 1104 demo and restore the original pipeline examples?'))return;
+  admin={...defaultAdmin};tutorialProgress={};inspections=seedInspections();currentInspection=null;currentInspectionSaved=false;activeReportId=null;demoNextInspectionNumber=42;applyAdmin();showView('dashboard');alert('API 1104 demo reset.');
+}
+function applyAdmin(){
+  document.documentElement.style.setProperty('--brand',admin.color);
+  document.getElementById('licensedToSide').textContent='Licensed to: '+admin.company;
+  document.getElementById('userName').textContent=admin.inspectorName;
+  document.getElementById('userRole').textContent=admin.inspectorRole;
+  document.getElementById('userInitials').textContent=admin.inspectorInitials||makeInitials(admin.inspectorName);
+}
+document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m&&m.id!=='sessionUserModal')m.classList.remove('open');}));
+window.addEventListener('load',()=>{applyAdmin();renderDashboard();renderTutorials();renderInfo();showSessionUserPrompt();});
+</script>
+
+</html>

@@ -359,4 +359,28 @@
       });
     }
   }
+
+  /* ---------------------------------------------------------------
+     Real activity counters on product cards / pages.
+     Views and demo starts: last 30 days. Sales: only shown once real.
+     --------------------------------------------------------------- */
+  var proofEls = document.querySelectorAll("[data-proof]");
+  if (proofEls.length) {
+    fetch(SK_API + "/stats").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+      if (!d || !d.ok) return;
+      var fmt = function (n) { return n >= 1000 ? (n / 1000).toFixed(1).replace(/\.0$/, "") + "k" : String(n); };
+      proofEls.forEach(function (el) {
+        var slug = el.getAttribute("data-proof");
+        var ref = el.getAttribute("data-ref") || "";
+        var p = d.products[slug] || { views: 0, demos: 0 };
+        var sold = 0;
+        Object.keys(d.sales_by_ref || {}).forEach(function (k) { if (k && ref.indexOf(k) >= 0) sold += d.sales_by_ref[k]; });
+        var parts = [];
+        if (sold > 0) parts.push('<span class="sold"><b>' + fmt(sold) + '</b> ' + (sold === 1 ? "company subscribed" : "subscribed") + '</span>');
+        if (p.demos > 0) parts.push('<span><b>' + fmt(p.demos) + '</b> ' + (p.demos === 1 ? "demo started" : "demos started") + ' this month</span>');
+        if (p.views > 0) parts.push('<span><b>' + fmt(p.views) + '</b> ' + (p.views === 1 ? "view" : "views") + ' this month</span>');
+        el.innerHTML = parts.join("");
+      });
+    }).catch(function () {});
+  }
 })();

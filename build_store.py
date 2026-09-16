@@ -52,12 +52,91 @@ CATEGORIES = [
 PAYPAL_BIDBOARD = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-1MD1072905987273YNKSDYIY"
 PAYPAL_INSPECTION = "PAYPAL_LINK_INSPECTION_ANNUAL"      # create plan: Shell Key Inspection System, $2,000 / year
 PAYPAL_FAMILY_FINANCE = "PAYPAL_LINK_FAMILY_FINANCE"    # Buy Now button: Family Finance full version, $49.95
+PAYPAL_CONTRACTOR = "PAYPAL_LINK_CONTRACTOR_MONTHLY"       # plan: Contractor System, $75 first month then $295/mo
+PAYPAL_CONTRACTOR_AI = "PAYPAL_LINK_CONTRACTOR_AI_MONTHLY" # plan: Contractor System + AI, $75 first month then $495/mo
+PAYPAL_PROJECT = "PAYPAL_LINK_PROJECT_MONTHLY"             # plan: Project System, $75 first month then $295/mo
+PAYPAL_PROJECT_AI = "PAYPAL_LINK_PROJECT_AI_MONTHLY"       # plan: Project System + AI, $75 first month then $495/mo
+PAYPAL_4D = "PAYPAL_LINK_4D_MONTHLY"                       # plan: 4D Schedule Sequence service, $295 first month then $495/mo
+PAYPAL_API653 = "PAYPAL_LINK_API653_ANNUAL"           # plan: API 653 IM, $75 / year
+PAYPAL_API1104 = "PAYPAL_LINK_API1104_ANNUAL"         # plan: API 1104 IM, $75 / year
+PAYPAL_AWSCWI = "PAYPAL_LINK_AWSCWI_ANNUAL"           # plan: AWS-CWI IM, $75 / year
+PAYPAL_BLUELINK = "PAYPAL_LINK_BLUELINK_ANNUAL"       # plan: BlueLink Inspection Management System, $2,400 / year
+PAYPAL_TURNAROUND = "PAYPAL_LINK_TURNAROUND_ANNUAL"   # plan: Turnaround Management System, $2,400 / year
 PAYPAL_WEBSITE_START = "PAYPAL_LINK_WEBSITE_START"       # Buy Now button: AI Website Studio start, $50
 PAYPAL_TRAINING_COURSE = "PAYPAL_LINK_TRAINING_COURSE"   # Buy Now button: one course, $39
 PAYPAL_TRAINING_ALL = "PAYPAL_LINK_TRAINING_ALL"         # Buy Now button: all-access year, $99
 
 PRODUCTS = [
     # ---------------- SOFTWARE SUBSCRIPTIONS ----------------
+    dict(slug="contractor-system", cat="software", cover=True, badge="New",
+         name="Shell Key Contractor System",
+         tagline="One project. Every contractor. One set of numbers.",
+         img=f"{IMG}/covers/contractor-system.jpg",
+         price="$75", price_note="first month, then $295 / mo &middot; $495 / mo with AI assistance", status="available", subscribe=True,
+         paypal=PAYPAL_CONTRACTOR, paypal_alt=("Subscribe with AI assistance", PAYPAL_CONTRACTOR_AI),
+         demo="demos/contractor-system.html",
+         short="Project tracking for owners and general contractors running multiple contractors. Each contractor submits a weekly return against the master schedule; you approve it, and progress, forecast finish, forecast cost, manpower, safety, materials and inspection roll up on one screen.",
+         bullets=["Contractor returns: submit, review, approve, one register",
+                  "Master schedule, progress and S-curves, estimates and cost",
+                  "Manpower, safety, materials and delivery, inspection and turnover",
+                  "Guided walkthrough that reads each screen to you"],
+         detail=[
+           ("What it is",
+            "A project tracking portal built around the contractor reporting cycle: every contractor reports against the same schedule, you approve the returns, and the project position updates from approved data only."),
+           ("Who it is for",
+            "Owner project teams, EPC and general contractors managing several subcontractors on a capital project, expansion or outage."),
+           ("What you get",
+            "Your project set up in the portal with contractors, schedule and areas; setup and a walkthrough with Kirby; support by phone and email. The AI-assistance tier adds AI-written status summaries, exception explanations and report drafting."),
+           ("How billing works",
+            "$75 for the first month so you can run it on a real project, then $295 a month (standard) or $495 a month (with AI assistance) until cancelled. Cancel any time by emailing support@shellkey.company; the introductory month is available once per company."),
+         ]),
+
+    dict(slug="project-system", cat="software", cover=True, badge="New",
+         name="Shell Key Project System",
+         tagline="From approved scope to verified turnover.",
+         img=f"{IMG}/covers/project-system.jpg",
+         price="$75", price_note="first month, then $295 / mo &middot; $495 / mo with AI assistance", status="available", subscribe=True,
+         paypal=PAYPAL_PROJECT, paypal_alt=("Subscribe with AI assistance", PAYPAL_PROJECT_AI),
+         demo="demos/project-system.html",
+         short="Work-package project control: approved worklist, work packages, schedule and milestones, progress updates, resources and cost, procurement and deliveries, quality and system turnover, documents and site conditions, template center, audit trail and report builder.",
+         bullets=["Approved worklist &rarr; work packages &rarr; progress &rarr; turnover",
+                  "Earned progress, SPI and forecast that follows the remaining plan",
+                  "Procurement, deliveries, quality and system turnover",
+                  "Template center, audit trail and report builder"],
+         detail=[
+           ("What it is",
+            "A work-packaging (AWP-style) project control system. Scope is approved into a worklist, broken into work packages with manhours, executed and progressed, and verified through quality and system turnover &mdash; with cost, procurement and documents attached along the way."),
+           ("Who it is for",
+            "Project controls groups, construction managers and turnaround planners who want scope, progress, cost and turnover in one system instead of four spreadsheets."),
+           ("What you get",
+            "Your company workspace with templates, users and your first project loaded; setup and a walkthrough with Kirby; support by phone and email. The AI-assistance tier adds plain-words status summaries generated from today's numbers, package write-ups and report drafting."),
+           ("How billing works",
+            "$75 for the first month, then $295 a month (standard) or $495 a month (with AI assistance) until cancelled. Cancel any time by emailing support@shellkey.company; the introductory month is available once per company."),
+         ]),
+
+    dict(slug="4d-schedule-sequence", cat="software", cover=True, badge="Service",
+         name="4D Schedule Sequence",
+         tagline="Your P6 schedule on your plot plan, animated week by week.",
+         img=f"{IMG}/covers/4d-schedule-sequence.jpg",
+         price="$295", price_note="first month, then $495 / month &middot; built and updated weekly by Shell Key", status="available", subscribe=True,
+         paypal=PAYPAL_4D,
+         demo="demos/4d-schedule-sequence.html",
+         short="A service, not just software. Send your P6 or MS Project schedule and a plot plan or model image; Shell Key builds a 4D construction sequence you can play forward by day, week or month &mdash; every activity appearing where it happens, green while it is being installed, with S-curves and a CWA timeline. Updated every week from your schedule update.",
+         bullets=["Built from your schedule and plot plan &mdash; nothing to install",
+                  "Play the build-up by CWA, discipline, actual and forecast",
+                  "S-curves, CWA timeline and work-at-this-date list",
+                  "Updated weekly by Shell Key from your progress update"],
+         detail=[
+           ("What it is",
+            "A 4D (schedule-driven) construction sequence of your project that runs in a browser. Foundations, steel, equipment, piping, E&amp;I, paint and test/turnover appear on the plot as their P6 activities progress, colored by discipline, green while in progress, with baseline comparison and a forecast to mechanical completion."),
+           ("Who it is for",
+            "Owners, EPCs and contractors who need leadership, the field and the client to see the plan the same way &mdash; without a Navisworks license on every desk."),
+           ("What you get",
+            "Shell Key builds the sequence from your XER / MPP and plot plan or model image within a week, then refreshes it after every schedule update. Delivered as a private link you can share; save-frame images for reports. Try the demo &mdash; it is a real 668-activity plant sequence with the names removed."),
+           ("How billing works",
+            "$295 for the first month (includes the initial build), then $495 a month while the project is active, cancel any time by emailing support@shellkey.company. Larger projects or multiple areas are quoted."),
+         ]),
+
     dict(slug="bid-board", cat="software", cover=True,
          name="Bid Board",
          tagline="Every Louisiana public bid, scored for your company, on one board.",
@@ -89,7 +168,7 @@ PRODUCTS = [
             "introductory month is available once per company."),
          ]),
 
-    dict(slug="family-finance", cat="software", cover=True,
+    dict(slug="family-finance", cat="software", cover=True, badge="Staff Pick",
          name="Family Finance Management System",
          tagline="Your household's financial command center.",
          img=f"{IMG}/covers/family-finance.jpg",
@@ -119,33 +198,148 @@ PRODUCTS = [
             "A browser. Data is stored locally on your device; export a backup from Settings any time."),
          ]),
 
-    dict(slug="inspection-system", cat="software", cover=True,
-         name="Shell Key Inspection System",
-         tagline="Welds, NDE, indications, repairs and reports — branded for your company.",
-         img=f"{IMG}/covers/inspection-system.jpg",
-         price="$2,000", price_note="per year, per company", status="available", subscribe=True,
-         paypal=PAYPAL_INSPECTION,
-         short="The inspection management system already running at a Louisiana NDE company. Projects, welds, materials and full traceability, VT/NDE scope, indications, repairs and re-inspection, technician photos from the phone, certification tracking, audit log, PDF reports and CSV export.",
-         bullets=["Weld and material traceability end to end",
-                  "Phone-first field board with QR field cards",
-                  "Certifications, audit log, PDF reports, CSV export",
-                  "Your company name on every screen"],
+    dict(slug="api-653-im", cat="software", cover=True, 
+         name="API 653 IM",
+         tagline="Tank inspection tracking from assignment to approved report.",
+         img=f"{IMG}/covers/api-653-im.jpg",
+         price="$75", price_note="per year &middot; single user", status="available", subscribe=True,
+         paypal=PAYPAL_API653,
+         demo="demos/api-653-im.html",
+         short="Inspection management for API 653 aboveground storage tank work. Track what is assigned, in progress, waiting review, approved, accepted or overdue; log recommendations; issue consistent reports; and keep the whole history in one place.",
+         bullets=[
+                  "Dashboard of outstanding, in-progress, review and overdue inspections",
+                  "Recommendations with follow-up tracking",
+                  "Guided workflow and consistent report format",
+                  "Tutorials and API 653 reference built in"],
          detail=[
            ("What it is",
-            "A browser-based inspection management system for NDE, API and weld inspection "
-            "companies. It replaces the spreadsheet stack: one place for projects, welds, "
-            "materials, inspection scope, indications, repairs, re-inspects, photos, technician "
-            "certifications, and the reports the client asks for."),
+            "A single-file inspection management application for API 653 tank inspectors and the companies that employ them. Runs in the browser, no install."),
            ("Who it is for",
-            "NDE and inspection companies, QA/QC managers, and owner-side inspection groups on "
-            "pipeline, refinery, and fabrication work."),
+            "API 653 inspectors, inspection companies, and owner-operators tracking tank inspection programs."),
            ("What you get",
-            "The system set up under your company name (Standard or AI edition), the field "
-            "board for technicians, setup and a walkthrough with Kirby, and support by phone "
-            "and email for the year."),
+            "One named-user license for a year: the full application, guided tutorials, PDF reports, CSV import and export, and email support. Try the free demo first &mdash; it is the complete system with sample data."),
            ("How billing works",
-            "$2,000 per year for the company — no per-user fees. Renews annually; cancel by "
-            "email before the renewal date."),
+            "$75 per year per named user. Renews annually; cancel by email before the renewal date. Company packages for five or more inspectors are available by quote."),
+         ]),
+
+    dict(slug="api-1104-im", cat="software", cover=True, badge="Most Popular",
+         name="API 1104 IM",
+         tagline="Weld traceability, NDE, repairs and release for pipeline work.",
+         img=f"{IMG}/covers/api-1104-im.jpg",
+         price="$75", price_note="per year &middot; single user", status="available", subscribe=True,
+         paypal=PAYPAL_API1104,
+         demo="demos/api-1104-im.html",
+         short="Pipeline weld inspection management to API 1104. Every weld from fit-up through visual, NDE, indications, repair, re-inspection and release &mdash; with welder and procedure traceability and reports the client accepts.",
+         bullets=[
+                  "Weld register with line, spread, welder and procedure",
+                  "NDE results, indications, repair control and release",
+                  "Field tutorials for technicians",
+                  "Reports and CSV export"],
+         detail=[
+           ("What it is",
+            "A pipeline weld inspection management application built around the API 1104 workflow: weld record, VT, NDE disposition, repair closure and release for coating and lowering-in."),
+           ("Who it is for",
+            "Pipeline welding inspectors, NDE companies and pipeline contractors who need defensible weld traceability."),
+           ("What you get",
+            "One named-user license for a year: the full application, guided tutorials, PDF reports, CSV import and export, and email support. Try the free demo first &mdash; it is the complete system with sample data."),
+           ("How billing works",
+            "$75 per year per named user. Renews annually; cancel by email before the renewal date. Company packages for five or more inspectors are available by quote."),
+         ]),
+
+    dict(slug="aws-cwi-im", cat="software", cover=True, 
+         name="AWS-CWI IM",
+         tagline="Welding quality control for fabrication and field welds.",
+         img=f"{IMG}/covers/aws-cwi-im.jpg",
+         price="$75", price_note="per year &middot; single user", status="available", subscribe=True,
+         paypal=PAYPAL_AWSCWI,
+         demo="demos/aws-cwi-im.html",
+         short="Welding inspection management for AWS Certified Welding Inspectors. Weld register, WPS/PQR/WPQ qualification traceability, visual inspection, NDE, corrective actions, approvals and turnover readiness on one dashboard.",
+         bullets=[
+                  "Weld register and qualification (WPS/PQR/WPQ) control",
+                  "Visual inspection, NDE and repair closure",
+                  "Corrective actions and NCR tracking",
+                  "Reports, tutorials and AWS reference"],
+         detail=[
+           ("What it is",
+            "A welding quality management application for CWIs covering structural, pressure and process welds: qualifications, inspections, NDE, corrective actions and approvals."),
+           ("Who it is for",
+            "AWS CWIs, fabrication shops, structural steel and process equipment contractors."),
+           ("What you get",
+            "One named-user license for a year: the full application, guided tutorials, PDF reports, CSV import and export, and email support. Try the free demo first &mdash; it is the complete system with sample data."),
+           ("How billing works",
+            "$75 per year per named user. Renews annually; cancel by email before the renewal date. Company packages for five or more inspectors are available by quote."),
+         ]),
+
+    dict(slug="bluelink-inspection", cat="software", cover=True, 
+         name="BlueLink Inspection Management System",
+         tagline="Turnaround inspection portal: packages, NDE requests, reports, audit.",
+         img=f"{IMG}/covers/bluelink-inspection.jpg",
+         price="$2,400", price_note="per year &middot; per company", status="available", subscribe=True,
+         paypal=PAYPAL_BLUELINK,
+         demo="demos/bluelink-inspection.html",
+         short="A branded inspection management portal for turnarounds and projects. Packages and inspections, NDE / API / AWS requests, reports and recommendations, daily log and audit trail, turnaround schedule, users and permissions &mdash; configured for your facility and standards.",
+         bullets=[
+                  "Packages &amp; inspections tied to the turnaround schedule",
+                  "NDE / API / AWS request workflow",
+                  "Reports, recommendations, daily log and audit",
+                  "Users, permissions and your company branding"],
+         detail=[
+           ("What it is",
+            "A full inspection management portal for a turnaround or capital project, branded for your company, with administrator controls, permissions, CSV import/export, photos and PDF reporting."),
+           ("Who it is for",
+            "Inspection companies and owner inspection groups running a turnaround or multi-package project."),
+           ("What you get",
+            "The portal configured with your logo, facility, standards and users; setup and walkthrough with Kirby; support for the year. Try the free demo &mdash; everything works with sample data."),
+           ("How billing works",
+            "$2,400 per year per company. Renews annually; cancel by email before the renewal date."),
+         ]),
+
+    dict(slug="inspection-system", cat="software", cover=True, 
+         name="NDE OneSystem",
+         tagline="Field operations and reporting for NDE companies.",
+         img=f"{IMG}/covers/inspection-system.jpg",
+         price="$2,000", price_note="per year &middot; per company", status="available", subscribe=True,
+         paypal=PAYPAL_INSPECTION,
+         demo="demos/inspection-system.html",
+         short="The NDE operations system already running at a Louisiana inspection company. Requests, dispatch, field inspections, technician certifications, review, controlled reports and field performance &mdash; with your company name on every screen.",
+         bullets=[
+                  "Request pipeline from new to complete",
+                  "Technicians, certifications and 14-day workload",
+                  "Field results, review and controlled reports",
+                  "Clients, projects and assets"],
+         detail=[
+           ("What it is",
+            "An NDE operations and reporting system: NDE requests, assignment, field inspection results, Level III review, controlled report issue, and performance dashboards."),
+           ("Who it is for",
+            "NDE and inspection companies, QA/QC managers, and owner-side inspection groups."),
+           ("What you get",
+            "The system set up under your company name, the field workflow for technicians, setup and a walkthrough with Kirby, and support by phone and email for the year."),
+           ("How billing works",
+            "$2,000 per year for the company &mdash; no per-user fees. Renews annually; cancel by email before the renewal date."),
+         ]),
+
+    dict(slug="turnaround-management", cat="software", cover=True, 
+         name="Turnaround Management System",
+         tagline="Schedule, cost, readiness, execution, quality, safety and turnover — one command center.",
+         img=f"{IMG}/covers/turnaround-management.jpg",
+         price="$2,400", price_note="per year &middot; per company", status="available", subscribe=True,
+         paypal=PAYPAL_TURNAROUND,
+         # demo="demos/turnaround-management.html",   # add the demo file, uncomment, rebuild
+         short="The Shell Key Turnaround Management System: an executive command center with planning and estimating, integrated schedule, work packages, daily execution, quality and inspection, safety and workforce, constraints, turnover and reports &mdash; branded for your company.",
+         bullets=[
+                  "Command center with progress, constraints and turnover",
+                  "Work packages, daily execution and integrated schedule",
+                  "Quality, safety, constraints and deviations",
+                  "Guided tour, reports and administrator licensing"],
+         detail=[
+           ("What it is",
+            "A complete turnaround management portal with administrator controls, user access, data import/export, photos, audit history and PDF reporting, branded with your company logo, workflows and forms."),
+           ("Who it is for",
+            "Turnaround managers, planners, owner reps and contractors running an outage from readiness through startup."),
+           ("What you get",
+            "The portal configured for your company and turnaround; setup and walkthrough with Kirby; support for the year. Try the free demo &mdash; a full turnaround with sample data."),
+           ("How billing works",
+            "$2,400 per year per company. Renews annually; cancel by email before the renewal date."),
          ]),
 
     dict(slug="ai-website-studio", cat="software", cover=True,
@@ -994,8 +1188,9 @@ def demo_link(p, root=""):
 
 
 def card(p):
-    feature = " card-feature" if p.get("feature") else ""
-    badge = '<span class="ribbon">Best Value</span>' if p.get("feature") else ""
+    feature = " card-feature" if (p.get("feature") or p.get("badge")) else ""
+    label = "Best Value" if p.get("feature") else p.get("badge", "")
+    badge = f'<span class="ribbon">{label}</span>' if label else ""
     bullets = "".join(f"<li>{b}</li>" for b in p["bullets"][:3])
     media_cls = "card-media cover-media" if p.get("cover") else "card-media"
     return f"""          <article class="card product-card{feature}" data-cat="{p['cat']}">
@@ -1009,6 +1204,7 @@ def card(p):
               <p class="card-short" title="{html.escape(re.sub('<[^>]+>','',p['short']))}">{p['short']}</p>
               <ul class="bullets">{bullets}</ul>
               {price_block(p)}
+              <div class="proof" data-proof="{p['slug']}" data-ref="{html.escape(p.get('paypal','') or '')}"></div>
               <div class="card-actions">
                 {demo_link(p) or f'<a class="btn btn-ghost btn-block" href="products/{p["slug"]}.html">Details</a>'}
                 {action_button(p)}
@@ -1144,6 +1340,7 @@ def build_product(p):
             <p>{p['short']}</p>
             <ul class="bullets">{bullets}</ul>
             {price_block(p)}
+            <div class="proof" data-proof="{p['slug']}" data-ref="{html.escape(p.get('paypal','') or '')}"></div>
             {demo_link(p, root)}
             {action_button(p, root)}
             <p class="muted tiny cta-note">{cta_note}</p>
