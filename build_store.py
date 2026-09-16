@@ -50,6 +50,7 @@ CATEGORIES = [
 # "Request This" until you paste the real one.
 PAYPAL_BIDBOARD = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-1MD1072905987273YNKSDYIY"
 PAYPAL_INSPECTION = "PAYPAL_LINK_INSPECTION_ANNUAL"      # create plan: Shell Key Inspection System, $2,000 / year
+PAYPAL_FAMILY_FINANCE = "PAYPAL_LINK_FAMILY_FINANCE"    # Buy Now button: Family Finance full version, $49.95
 PAYPAL_WEBSITE_START = "PAYPAL_LINK_WEBSITE_START"       # Buy Now button: AI Website Studio start, $50
 PAYPAL_TRAINING_COURSE = "PAYPAL_LINK_TRAINING_COURSE"   # Buy Now button: one course, $39
 PAYPAL_TRAINING_ALL = "PAYPAL_LINK_TRAINING_ALL"         # Buy Now button: all-access year, $99
@@ -85,6 +86,36 @@ PRODUCTS = [
             "until you cancel. Cancel any time by emailing support@shellkey.company; access "
             "ends at the close of the billing period and no further charges are made. The $75 "
             "introductory month is available once per company."),
+         ]),
+
+    dict(slug="family-finance", cat="software", cover=True,
+         name="Family Finance Management System",
+         tagline="Your household's financial command center.",
+         img=f"{IMG}/covers/family-finance.jpg",
+         price="$49.95", price_note="one-time &middot; full version", status="available",
+         paypal=PAYPAL_FAMILY_FINANCE,
+         demo="demos/family-finance.html",
+         short="Plan the month, track every dollar, and see where the family stands at a glance. Guided setup, monthly budget, bills and recurring payments, savings goals, debt payoff, net worth, a financial-health score with a recommended next action, calendar and annual reports.",
+         bullets=["Guided setup walks the whole family through it",
+                  "Budget, bills, savings goals, debt payoff, net worth",
+                  "Financial-health score with a best next action",
+                  "Your data stays on your computer &mdash; nothing uploaded"],
+         detail=[
+           ("What it is",
+            "A complete household finance system that runs in your browser. Enter income, bills "
+            "and a budget once; from then on it tracks spending against plan, funds savings goals, "
+            "schedules debt payoff, and scores your financial health every month with one "
+            "recommended action."),
+           ("Who it is for",
+            "Families and couples who want one place for the whole picture without a subscription "
+            "or handing bank logins to an app."),
+           ("What you get",
+            "The full version as a single file that opens in any modern browser on Windows, Mac, "
+            "phone or tablet. Backup and restore, print-ready monthly summaries, annual reports, and "
+            "free updates for a year. Try the free demo first &mdash; everything works, so you know "
+            "exactly what you are buying."),
+           ("What you need",
+            "A browser. Data is stored locally on your device; export a backup from Settings any time."),
          ]),
 
     dict(slug="inspection-system", cat="software", cover=True,
