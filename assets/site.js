@@ -169,88 +169,139 @@
   }
 
   /* ---------------------------------------------------------------
-     Index page "Quick Message" form (kept working)
+     Visitor tracking — first-party, no cookies from third parties.
+     One anonymous id per browser (localStorage), one page view per load,
+     plus clicks on checkout buttons. Everything lands in the CRM.
+     --------------------------------------------------------------- */
+  var SK_API = "/api";
+  var sid = null;
+  try {
+    sid = localStorage.getItem("sk_sid");
+    if (!sid) {
+      sid = "s_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem("sk_sid", sid);
+    }
+  } catch (err) { sid = "s_anon"; }
+
+  var track = function (type, extra) {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var payload = Object.assign({
+        sid: sid, type: type || "view",
+        page: window.location.pathname, ref: document.referrer || "",
+        utm_source: params.get("utm_source") || "", utm_campaign: params.get("utm_campaign") || "",
+        w: window.innerWidth
+      }, extra || {});
+      var body = JSON.stringify(payload);
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(SK_API + "/track", new Blob([body], { type: "application/json" }));
+      } else {
+        fetch(SK_API + "/track", { method: "POST", body: body, keepalive: true,
+          headers: { "Content-Type": "application/json" } }).catch(function () {});
+      }
+    } catch (err) { /* tracking must never break the page */ }
+  };
+  track("view");
+  document.querySelectorAll("[data-track]").forEach(function (a) {
+    a.addEventListener("click", function () {
+      track(a.getAttribute("data-track"), { item: a.getAttribute("data-item") || "" });
+    });
+  });
+
+  /* ---------------------------------------------------------------
+     Lead submission — POST to the CRM; fall back to the mail app if
+     the API is unreachable (e.g. previewing the HTML from disk).
+     --------------------------------------------------------------- */
+  var submitLead = function (lead, mailtoSubject, mailtoBody, onOk, onErr) {
+    lead.sid = sid;
+    lead.page = window.location.pathname + window.location.search;
+    fetch(SK_API + "/lead", {
+      method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(lead)
+    }).then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    }).then(function () { onOk(); })
+      .catch(function () {
+        if (window.location.protocol === "file:" || !window.fetch) {
+          window.location.href = "mailto:support@shellkey.company?subject=" +
+            encodeURIComponent(mailtoSubject) + "&body=" + encodeURIComponent(mailtoBody);
+          onOk();
+        } else { onErr(); }
+      });
+  };
+
+  var setBusy = function (form, busy) {
+    var btn = form.querySelector('button[type="submit"]');
+    if (!btn) return;
+    btn.disabled = busy;
+    if (busy) { btn.dataset.label = btn.textContent; btn.textContent = "Sending…"; }
+    else if (btn.dataset.label) { btn.textContent = btn.dataset.label; }
+  };
+
+  /* ---------------------------------------------------------------
+     Index page "Quick Message" form
      --------------------------------------------------------------- */
   var contactForm = document.getElementById("contactForm");
   if (contactForm) {
     contactForm.addEventListener("submit", function (e) {
       e.preventDefault();
-      var v = function (id) {
-        var el = document.getElementById(id);
-        return el ? el.value.trim() : "";
-      };
-      var body = [
-        "Hi Shell Key,", "",
-        "I'd like to request a demo / ask a question:", "",
-        "Name: " + (v("qName") || "(not provided)"),
-        "Email: " + (v("qEmail") || "(not provided)"), "",
-        "Message:", v("qMsg") || "(no message entered)", "",
-        "— Sent from shellkey.company"
-      ].join("\n");
-      window.location.href =
-        "mailto:support@shellkey.company?subject=" +
-        encodeURIComponent("Shell Key Website Inquiry") +
-        "&body=" + encodeURIComponent(body);
+      var v = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
+      var lead = { kind: "contact", name: v("qName"), email: v("qEmail"), company: v("qCompany"),
+                   phone: v("qPhone"), interest: v("qInterest"), message: v("qMsg") };
+      if (!lead.name && !lead.email && !lead.message) return;
+      var body = ["Name: " + lead.name, "Email: " + lead.email, "", lead.message, "", "— Sent from shellkey.company"].join("\n");
+      setBusy(contactForm, true);
+      submitLead(lead, "Shell Key Website Inquiry", body, function () {
+        setBusy(contactForm, false);
+        contactForm.reset();
+        var ok = document.getElementById("contactOk"); if (ok) ok.classList.add("show");
+        var er = document.getElementById("contactErr"); if (er) er.classList.remove("show");
+      }, function () {
+        setBusy(contactForm, false);
+        var er = document.getElementById("contactErr"); if (er) er.classList.add("show");
+      });
     });
   }
 
   /* ---------------------------------------------------------------
-     Request / appointment form
+     Request / quote form (request.html)
      --------------------------------------------------------------- */
   var requestForm = document.getElementById("requestForm");
   if (requestForm) {
     var itemSelect = document.getElementById("rItem");
-
-    // Pre-select whatever product sent them here (?item=slug).
     var slug = new URLSearchParams(window.location.search).get("item");
     if (slug && itemSelect) {
-      var match = Array.prototype.find.call(itemSelect.options, function (o) {
-        return o.value === slug;
-      });
+      var match = Array.prototype.find.call(itemSelect.options, function (o) { return o.value === slug; });
       if (match) itemSelect.value = slug;
     }
 
     requestForm.addEventListener("submit", function (e) {
       e.preventDefault();
-
-      var val = function (id) {
-        var el = document.getElementById(id);
-        return el ? el.value.trim() : "";
+      var val = function (id) { var el = document.getElementById(id); return el ? el.value.trim() : ""; };
+      var priority = !!(document.getElementById("rPriority") || {}).checked;
+      var itemLabel = itemSelect && itemSelect.selectedIndex >= 0 ? itemSelect.options[itemSelect.selectedIndex].text : "";
+      var lead = {
+        kind: "request", item: itemSelect ? itemSelect.value : "", item_label: itemLabel,
+        priority: priority, name: val("rName"), company: val("rCompany"), email: val("rEmail"),
+        phone: val("rPhone"), address: val("rAddress"), city: val("rCity"), zip: val("rZip"),
+        message: val("rNeed"), timeframe: val("rWhen")
       };
-      var chosen = itemSelect.options[itemSelect.selectedIndex];
-      var itemLabel = chosen ? chosen.text : "(not selected)";
-      var priority = document.getElementById("rPriority").checked;
-
       var subject = (priority ? "PRIORITY REQUEST: " : "Request: ") + itemLabel;
-
-      var body = [
-        "Shell Key — information request",
-        "==============================", "",
-        "ITEM:        " + itemLabel,
-        "PRIORITY:    " + (priority ? "YES — needed as soon as possible" : "Standard"),
-        "TIMEFRAME:   " + val("rWhen"), "",
-        "CONTACT",
-        "-------",
-        "Name:        " + val("rName"),
-        "Company:     " + val("rCompany"),
-        "Email:       " + val("rEmail"),
-        "Phone:       " + (val("rPhone") || "(not provided)"), "",
-        "ADDRESS",
-        "-------",
-        val("rAddress"),
-        val("rCity") + (val("rZip") ? "  " + val("rZip") : ""), "",
-        "WHAT THEY ARE LOOKING FOR",
-        "-------------------------",
-        val("rNeed"), "",
-        "— Sent from shellkey.company/request.html"
-      ].join("\n");
-
-      window.location.href =
-        "mailto:support@shellkey.company?subject=" +
-        encodeURIComponent(subject) + "&body=" + encodeURIComponent(body);
-
-      var ok = document.getElementById("formOk");
-      if (ok) ok.classList.add("show");
+      var body = ["ITEM: " + itemLabel, "PRIORITY: " + (priority ? "YES" : "Standard"),
+        "NAME: " + lead.name, "COMPANY: " + lead.company, "EMAIL: " + lead.email, "PHONE: " + lead.phone,
+        "ADDRESS: " + lead.address + ", " + lead.city + " " + lead.zip, "WHEN: " + lead.timeframe, "",
+        lead.message].join("\n");
+      setBusy(requestForm, true);
+      submitLead(lead, subject, body, function () {
+        setBusy(requestForm, false);
+        requestForm.reset();
+        var ok = document.getElementById("formOk"); if (ok) ok.classList.add("show");
+        var er = document.getElementById("formErr"); if (er) er.classList.remove("show");
+        ok && ok.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, function () {
+        setBusy(requestForm, false);
+        var er = document.getElementById("formErr"); if (er) er.classList.add("show");
+      });
     });
   }
 })();
