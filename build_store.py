@@ -60,7 +60,7 @@ PRODUCTS = [
          name="Bid Board",
          tagline="Every Louisiana public bid, scored for your company, on one board.",
          img=f"{IMG}/covers/bid-board.jpg",
-         price="$75", price_note="first month, then $750 / month", status="available", subscribe=True,
+         price="$75", price_note="first month, then $295 / month", status="available", subscribe=True,
          paypal=PAYPAL_BIDBOARD, feature=True,
          demo="https://shellkey-bidboard.pages.dev",
          short="Bid intelligence for Louisiana contractors. LaPAC, DOTD, parish and SAM.gov bids in one place, go / no-go scoring against your license and certifications, a company vault for your documents, and a bid-kit generator that assembles the government package.",
@@ -82,7 +82,7 @@ PRODUCTS = [
             "A company account on the Bid Board portal, the readiness check for each bid, the "
             "vault, the bid-kit generator, and email support from the person who built it."),
            ("How billing works",
-            "$75 for the first month so you can see it work on real bids, then $750 a month "
+            "$75 for the first month so you can see it work on real bids, then $295 a month "
             "until you cancel. Cancel any time by emailing support@shellkey.company; access "
             "ends at the close of the billing period and no further charges are made. The $75 "
             "introductory month is available once per company."),
@@ -1332,7 +1332,7 @@ TERMS = """
 <h3>Purchases and delivery</h3>
 <p>Prices are shown in U.S. dollars. Payments are processed by PayPal. Digital guides and files are delivered by email after payment. Software subscriptions (Bid Board, Shell Key Inspection System, training) are activated the same business day; access details are sent to the email used at checkout.</p>
 <h3>Subscriptions and cancellation</h3>
-<p>Bid Board bills $75 for the first month and $750 per month thereafter until cancelled. The introductory month is available once per company. The Inspection System bills $2,000 per year. To cancel, email support@shellkey.company from the account email; you will receive a confirmation, access ends at the close of the current billing period, and no further charges are made. Fees already billed are not refunded.</p>
+<p>Bid Board bills $75 for the first month and $295 per month thereafter until cancelled. The introductory month is available once per company. The Inspection System bills $2,000 per year. To cancel, email support@shellkey.company from the account email; you will receive a confirmation, access ends at the close of the current billing period, and no further charges are made. Fees already billed are not refunded.</p>
 <h3>Website builds</h3>
 <p>The AI Website Studio start fee of $50 is non-refundable and is credited toward the $500 purchase price when you approve the site. If you do not approve a site, nothing further is owed.</p>
 <h3>Custom work and quotes</h3>
