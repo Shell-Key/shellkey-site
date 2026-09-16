@@ -4,3 +4,13 @@
 /api/*
   X-Robots-Tag: noindex
   Cache-Control: no-store
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/assets/*.js
+  Cache-Control: public, max-age=300
+/assets/*.css
+  Cache-Control: public, max-age=300
+/demos/*
+  Cache-Control: public, max-age=0, must-revalidate

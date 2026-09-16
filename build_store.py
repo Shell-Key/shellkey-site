@@ -15,6 +15,7 @@ Status values:
 import html
 import os
 import re
+import time
 
 OUT_PRODUCTS = "products"
 IMG = "assets/img"
@@ -832,11 +833,12 @@ VIEWER = """  <div class="viewer" id="viewer" aria-hidden="true">
   </div>
 """
 
-SCRIPT = """  <script src="{root}assets/site.js" defer></script>
+SCRIPT = """  <script src="{root}assets/site.js?v={build}" defer></script>
 """
 
 
 SITE = "https://shellkey.company"
+BUILD = time.strftime("%Y%m%d%H%M")   # cache-buster for css/js — changes every build
 
 def seo(title, desc, root="", path="", image="assets/img/social/og-image.jpg"):
     """Favicons, canonical, Open Graph, Twitter card and Organization schema."""
@@ -924,8 +926,8 @@ def head(title, desc, root="", path="", schema=""):
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content="{desc}" />
-  <link rel="stylesheet" href="{root}assets/styles.css" />
-  <link rel="stylesheet" href="{root}assets/store.css" />
+  <link rel="stylesheet" href="{root}assets/styles.css?v={BUILD}" />
+  <link rel="stylesheet" href="{root}assets/store.css?v={BUILD}" />
 {seo(title, desc, root, path)}{SITE_SCHEMA}{schema}{analytics()}</head>
 <body>
 """
@@ -1079,7 +1081,7 @@ def build_store():
     parts.append("""  </main>
 """)
     parts.append(FOOTER.format(root=""))
-    parts.append(SCRIPT.format(root=""))
+    parts.append(SCRIPT.format(root="", build=BUILD))
     parts.append("</body>\n</html>\n")
     return "".join(parts)
 
@@ -1174,7 +1176,7 @@ def build_product(p):
 """)
     parts.append(FOOTER.format(root=root))
     parts.append(VIEWER)
-    parts.append(SCRIPT.format(root=root))
+    parts.append(SCRIPT.format(root=root, build=BUILD))
     parts.append("</body>\n</html>\n")
     return "".join(parts)
 
@@ -1314,7 +1316,7 @@ def build_request():
   </main>
 """)
     parts.append(FOOTER.format(root=""))
-    parts.append(SCRIPT.format(root=""))
+    parts.append(SCRIPT.format(root="", build=BUILD))
     parts.append("</body>\n</html>\n")
     return "".join(parts)
 
@@ -1336,7 +1338,7 @@ def build_legal(title, path, body):
   </main>
 """)
     parts.append(FOOTER.format(root=""))
-    parts.append(SCRIPT.format(root=""))
+    parts.append(SCRIPT.format(root="", build=BUILD))
     parts.append("</body>\n</html>\n")
     return "".join(parts)
 
@@ -1433,7 +1435,7 @@ def build_demo():
   </main>
 """)
     parts.append("  <script>window.SK_DEMOS = " + json.dumps(items) + ";</script>\n")
-    parts.append(SCRIPT.format(root=""))
+    parts.append(SCRIPT.format(root="", build=BUILD))
     parts.append("</body>\n</html>\n")
     return "".join(parts)
 
@@ -1459,8 +1461,20 @@ def build_robots():
             f"Sitemap: {SITE}/sitemap.xml\n")
 
 
+def stamp_index():
+    """Give index.html the same cache-busting version on its css/js links."""
+    with open("index.html", encoding="utf-8") as f:
+        html_ = f.read()
+    html_ = re.sub(r'(assets/(?:styles|store)\.css)(\?v=\d+)?', r'\1?v=' + BUILD, html_)
+    html_ = re.sub(r'(assets/site\.js)(\?v=\d+)?', r'\1?v=' + BUILD, html_)
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(html_)
+    print("stamped index.html with build " + BUILD)
+
+
 def main():
     os.makedirs(OUT_PRODUCTS, exist_ok=True)
+    stamp_index()
 
     with open("sitemap.xml", "w", encoding="utf-8") as f:
         f.write(build_sitemap())
