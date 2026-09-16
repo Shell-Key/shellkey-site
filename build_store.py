@@ -297,7 +297,7 @@ PRODUCTS = [
     dict(slug="inspection-system", cat="software", cover=True, 
          name="NDE OneSystem",
          tagline="Field operations and reporting for NDE companies.",
-         img=f"{IMG}/covers/inspection-system.jpg",
+         img=f"{IMG}/covers/nde-onesystem.jpg",
          price="$2,000", price_note="per year &middot; per company", status="available", subscribe=True,
          paypal=PAYPAL_INSPECTION,
          demo="demos/inspection-system.html",
@@ -340,61 +340,6 @@ PRODUCTS = [
             "The portal configured for your company and turnaround; setup and walkthrough with Kirby; support for the year. Try the free demo &mdash; a full turnaround with sample data."),
            ("How billing works",
             "$2,400 per year per company. Renews annually; cancel by email before the renewal date."),
-         ]),
-
-    dict(slug="ai-website-studio", cat="software", cover=True,
-         name="AI Website Studio",
-         tagline="A professional website for your business in days, not months.",
-         img=f"{IMG}/covers/ai-website-studio.jpg",
-         price="$50", price_note="to start &middot; $500 when you approve the site", status="available",
-         paypal=PAYPAL_WEBSITE_START,
-         short="Built for contractors, trades and local businesses in Acadiana and beyond. Pick from about twenty industry-specific designs, ask for changes in plain English, and launch a fast, mobile-ready site with your phone number and quote form front and center.",
-         bullets=["About 20 industry-specific design directions",
-                  "Ask for changes in plain English, see them instantly",
-                  "Mobile-ready, fast, built to make the phone ring",
-                  "Custom domain, real photography, quote and contact forms"],
-         detail=[
-           ("What it is",
-            "A website build service powered by Shell Key's AI studio. You pay $50 to start, "
-            "get a preview site in minutes, choose a direction, and request changes in plain "
-            "English. When you approve it, the $500 balance is due and the site goes live on "
-            "your domain."),
-           ("Who it is for",
-            "Plumbers, electricians, roofers, HVAC, fence, concrete, welding and dirt-work "
-            "contractors, and any small business whose current website is a Facebook page or "
-            "a template from 2012."),
-           ("What you get",
-            "A finished, mobile-responsive site on your own domain with contact and quote forms "
-            "that deliver to your email, plus 'continue building' access for later edits. Further "
-            "AI-assisted edits are $25 an hour; personal assistance is $150 an hour, four-hour minimum."),
-           ("How billing works",
-            "$50 non-refundable start fee, credited toward the $500 purchase price when you approve "
-            "the site. Nothing else is owed if you do not approve it."),
-         ]),
-
-    dict(slug="inspector-training", cat="software", cover=True,
-         name="AWS CWI &amp; API Inspector Training",
-         tagline="The full body of knowledge, timed practice exams, saved progress.",
-         img=f"{IMG}/covers/inspector-training.jpg",
-         price="$39", price_note="per course for 90 days &middot; $99 all courses for a year", status="soon",
-         paypal=PAYPAL_TRAINING_COURSE, paypal_alt=("All-access year — $99", PAYPAL_TRAINING_ALL),
-         short="Online preparation for the AWS Certified Welding Inspector exam and API 510 / 570 / 653 / 1169 inspector certifications. Twenty-plus hours of instruction with section imagery, timed tests that mirror the real exam, and progress that saves across devices.",
-         bullets=["Complete current AWS CWI body of knowledge",
-                  "Timed practice exams that mirror the real test",
-                  "Saved progress — pick up on any device",
-                  "API 510, 570, 653 and 1169 tracks"],
-         detail=[
-           ("What it is",
-            "Self-paced online courses for inspector certification exams, written by an API 510 / "
-            "570 certified inspector and NDE Level II who has sat the tests."),
-           ("Who it is for",
-            "Welders and QA/QC technicians moving up to CWI; inspectors adding API certifications; "
-            "companies putting a crew through certification together."),
-           ("What you get",
-            "Login to the training platform with the courses you purchased, timed exam simulator, "
-            "and progress tracking. Company packages for five or more seats are available by quote."),
-           ("How billing works",
-            "$39 gives one course for 90 days. $99 gives every course for 365 days. One-time payments."),
          ]),
 
     # ---------------- DIGITAL WALL CHARTS ----------------
