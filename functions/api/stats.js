@@ -26,6 +26,9 @@ export async function onRequestGet({ request, env }) {
   const out = {};
   const bump = (slug, k, n) => { slug = String(slug || "").replace(/\.html$/, ""); if (!slug) return; (out[slug] = out[slug] || { views: 0, demos: 0, sales: 0 })[k] += n; };
   views.forEach((r) => bump(r.slug, "views", r.n));
+  const impressions = (await env.DB.prepare(
+    `SELECT item AS slug, COUNT(*) n FROM visits WHERE type='impression' AND item != '' AND at >= datetime('now','-30 days') GROUP BY item`).all()).results;
+  impressions.forEach((r) => bump(r.slug, "views", r.n));
   demos.forEach((r) => bump(r.slug, "demos", r.n));
   // sales.item holds the PayPal plan id / button description; the page maps it to a slug
   const salesByRef = {}; sales.forEach((r) => { if (r.item) salesByRef[r.item] = r.n; });

@@ -202,6 +202,18 @@
     } catch (err) { /* tracking must never break the page */ }
   };
   track("view");
+  // Store cards: count one impression per card per visit when it scrolls into view
+  var cards = document.querySelectorAll(".product-card[data-slug]");
+  if (cards.length && "IntersectionObserver" in window) {
+    var seen = {};
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        var slug = en.target.getAttribute("data-slug");
+        if (en.isIntersecting && !seen[slug]) { seen[slug] = 1; track("impression", { item: slug }); io.unobserve(en.target); }
+      });
+    }, { threshold: 0.5 });
+    cards.forEach(function (c) { io.observe(c); });
+  }
   document.querySelectorAll("[data-track]").forEach(function (a) {
     a.addEventListener("click", function () {
       track(a.getAttribute("data-track"), { item: a.getAttribute("data-item") || "" });
@@ -379,6 +391,7 @@
         if (sold > 0) parts.push('<span class="sold"><b>' + fmt(sold) + '</b> ' + (sold === 1 ? "company subscribed" : "subscribed") + '</span>');
         if (p.demos > 0) parts.push('<span><b>' + fmt(p.demos) + '</b> ' + (p.demos === 1 ? "demo started" : "demos started") + ' this month</span>');
         if (p.views > 0) parts.push('<span><b>' + fmt(p.views) + '</b> ' + (p.views === 1 ? "view" : "views") + ' this month</span>');
+        if (!parts.length) parts.push('<span>New this month</span>');
         el.innerHTML = parts.join("");
       });
     }).catch(function () {});

@@ -441,7 +441,7 @@ PRODUCTS = [
          name="Project Mobile Application",
          tagline="Your whole project scope, in a hard hat pocket.",
          img=f"{IMG}/apps/SKAppHand.PNG",
-         price="from $3,500", status="quote",
+         price="from $495", status="quote",
          short="Activities, pipe, valves, vessels, exchangers, heaters, reactors, towers, tanks, photos, QR, NDE, RFI, drawings and dashboards — configured to your project.",
          bullets=["Built around your equipment and scope", "Photo capture with time and location",
                   "QR scanning for tags and packs", "Feeds straight into your wall charts"],
@@ -465,7 +465,7 @@ PRODUCTS = [
          name="Code Inspection Application",
          tagline="Multi-site inspection tracking, built for API work.",
          img=f"{IMG}/apps/CodeProDesk.JPG",
-         price="from $3,500", status="quote",
+         price="from $495", status="quote",
          short="Site-by-site inspection management with daily logs, RFIs, team assignment and reporting across multiple refineries.",
          bullets=["Multi-site and multi-client", "Daily inspection logs",
                   "RFI and deficiency tracking", "Mobile and desktop"],
@@ -487,7 +487,7 @@ PRODUCTS = [
          name="Desktop Companion",
          tagline="The office half of the field app.",
          img=f"{IMG}/apps/SKApp4.jpg",
-         price="from $3,500", status="quote",
+         price="from $495", status="quote",
          short="Work packages, reporting and dashboards in one desktop view for the people running the job from the trailer.",
          bullets=["Work package management", "Reporting hub",
                   "Multi-user with permissions", "Connects to your project databases"],
@@ -511,7 +511,7 @@ PRODUCTS = [
          name="Business Portal",
          tagline="Owner, contractor and inspector looking at the same truth.",
          img=f"{IMG}/cards/FutureDashboard.JPG",
-         price="from $3,500", status="quote",
+         price="from $495", status="quote",
          short="One portal where every party sees the same progress, documents, constraints and approvals — instead of trading spreadsheets.",
          bullets=["Role-based access per party", "Document control and approvals",
                   "Live progress and constraint views", "Training and 30 days support"],
@@ -533,7 +533,7 @@ PRODUCTS = [
          name="Custom Dashboard Build",
          tagline="Your data, your WBS, your reporting cycle.",
          img=f"{IMG}/cards/digital6.jpg",
-         price="from $3,500", status="quote",
+         price="from $495", status="quote",
          short="A Power BI dashboard built against your live sources, connected, refreshing and handed over working.",
          bullets=["Data model against your sources", "P6, SAP, EAM or Excel integration",
                   "Automatic refresh configured", "Team walkthrough and handover"],
@@ -555,7 +555,7 @@ PRODUCTS = [
          name="Business Website",
          tagline="Built to win work, not design awards.",
          img=f"{IMG}/cards/digital2.jpg",
-         price="from $3,500", status="quote",
+         price="from $495", status="quote",
          short="A professional site for a contractor, inspection outfit or engineering firm — fast, mobile-first, and yours.",
          bullets=["Up to 6 pages, mobile-first", "Capability and project pages",
                   "Contact and enquiry handling", "Search-ready, you own everything"],
@@ -1138,7 +1138,7 @@ def card(p):
     badge = f'<span class="ribbon">{label}</span>' if label else ""
     bullets = "".join(f"<li>{b}</li>" for b in p["bullets"][:3])
     media_cls = "card-media cover-media" if p.get("cover") else "card-media"
-    return f"""          <article class="card product-card{feature}" data-cat="{p['cat']}">
+    return f"""          <article class="card product-card{feature}" data-cat="{p['cat']}" data-slug="{p['slug']}">
             {badge}
             <a class="{media_cls}" href="products/{p['slug']}.html">
               <img src="{p['img']}" alt="{re.sub('&amp;','and',p['name'])}" loading="lazy" />
