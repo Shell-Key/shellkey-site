@@ -983,13 +983,13 @@ def seo(title, desc, root="", path="", image="assets/img/social/og-image.jpg"):
     """Favicons, canonical, Open Graph, Twitter card and Organization schema."""
     url = SITE + "/" + path.lstrip("/")
     return f"""  <link rel="canonical" href="{url}" />
-  <link rel="icon" href="{root}key.ico" sizes="any" />
-  <link rel="icon" type="image/png" sizes="32x32" href="{root}assets/img/logo/key-32.png" />
-  <link rel="icon" type="image/png" sizes="48x48" href="{root}assets/img/logo/key-48.png" />
-  <link rel="icon" type="image/png" sizes="96x96" href="{root}assets/img/logo/key-96.png" />
-  <link rel="icon" type="image/png" sizes="192x192" href="{root}assets/img/logo/key-192.png" />
-  <link rel="icon" type="image/png" sizes="512x512" href="{root}assets/img/logo/key-512.png" />
-  <link rel="apple-touch-icon" sizes="180x180" href="{root}assets/img/logo/key-touch.png" />
+  <link rel="icon" href="{root}keyw.ico" sizes="any" />
+  <link rel="icon" type="image/png" sizes="32x32" href="{root}assets/img/logo/keyw-32.png" />
+  <link rel="icon" type="image/png" sizes="48x48" href="{root}assets/img/logo/keyw-48.png" />
+  <link rel="icon" type="image/png" sizes="96x96" href="{root}assets/img/logo/keyw-96.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="{root}assets/img/logo/keyw-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="{root}assets/img/logo/keyw-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="{root}assets/img/logo/keyw-touch.png" />
   <link rel="manifest" href="{root}site.webmanifest" />
   <meta name="application-name" content="Shell Key" />
   <meta name="apple-mobile-web-app-title" content="Shell Key" />
