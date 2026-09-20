@@ -50,7 +50,7 @@ CATEGORIES = [
 # Any link still starting with PAYPAL_LINK_ is a placeholder: the button becomes
 # "Request This" until you paste the real one.
 PAYPAL_BIDBOARD = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-1MD1072905987273YNKSDYIY"
-PAYPAL_INSPECTION = "PAYPAL_LINK_INSPECTION_ANNUAL"      # create plan: Shell Key Inspection System, $2,000 / year
+PAYPAL_INSPECTION = "PAYPAL_LINK_INSPECTION_MONTHLY"      # plan: NDE OneSystem, $75 first month then $195/mo per company
 PAYPAL_FAMILY_FINANCE = "PAYPAL_LINK_FAMILY_FINANCE"    # Buy Now button: Family Finance full version, $49.95
 PAYPAL_CONTRACTOR = "PAYPAL_LINK_CONTRACTOR_MONTHLY"       # plan: Contractor System, $75 first month then $295/mo
 PAYPAL_CONTRACTOR_AI = "PAYPAL_LINK_CONTRACTOR_AI_MONTHLY" # plan: Contractor System + AI, $75 first month then $495/mo
@@ -60,8 +60,8 @@ PAYPAL_4D = "PAYPAL_LINK_4D_MONTHLY"                       # plan: 4D Schedule S
 PAYPAL_API653 = "PAYPAL_LINK_API653_ANNUAL"           # plan: API 653 IM, $75 / year
 PAYPAL_API1104 = "PAYPAL_LINK_API1104_ANNUAL"         # plan: API 1104 IM, $75 / year
 PAYPAL_AWSCWI = "PAYPAL_LINK_AWSCWI_ANNUAL"           # plan: AWS-CWI IM, $75 / year
-PAYPAL_BLUELINK = "PAYPAL_LINK_BLUELINK_ANNUAL"       # plan: BlueLink Inspection Management System, $2,400 / year
-PAYPAL_TURNAROUND = "PAYPAL_LINK_TURNAROUND_ANNUAL"   # plan: Turnaround Management System, $2,400 / year
+PAYPAL_BLUELINK = "PAYPAL_LINK_BLUELINK_MONTHLY"       # plan: BlueLink Inspection Management System, $75 first month then $195/mo per company
+PAYPAL_TURNAROUND = "PAYPAL_LINK_TURNAROUND_MONTHLY"   # plan: Turnaround Management System, $75 first month then $195/mo per company
 PAYPAL_WEBSITE_START = "PAYPAL_LINK_WEBSITE_START"       # Buy Now button: AI Website Studio start, $50
 PAYPAL_TRAINING_COURSE = "PAYPAL_LINK_TRAINING_COURSE"   # Buy Now button: one course, $39
 PAYPAL_TRAINING_ALL = "PAYPAL_LINK_TRAINING_ALL"         # Buy Now button: all-access year, $99
@@ -277,7 +277,7 @@ PRODUCTS = [
          name="BlueLink Inspection Management System",
          tagline="Turnaround inspection portal: packages, NDE requests, reports, audit.",
          img=f"{IMG}/covers/bluelink-inspection.jpg",
-         price="$2,400", price_note="per year &middot; per company", status="available", subscribe=True,
+         price="$75", price_note="first month, then $195 / month &middot; per company", status="available", subscribe=True,
          paypal=PAYPAL_BLUELINK,
          demo="demos/bluelink-inspection.html",
          short="A branded inspection management portal for turnarounds and projects. Packages and inspections, NDE / API / AWS requests, reports and recommendations, daily log and audit trail, turnaround schedule, users and permissions &mdash; configured for your facility and standards.",
@@ -292,16 +292,16 @@ PRODUCTS = [
            ("Who it is for",
             "Inspection companies and owner inspection groups running a turnaround or multi-package project."),
            ("What you get",
-            "The portal configured with your logo, facility, standards and users; setup and walkthrough with Kirby; support for the year. Try the free demo &mdash; everything works with sample data."),
+            "The portal configured with your logo, facility, standards and users; setup and walkthrough with Kirby; support while your subscription is active. Try the free demo &mdash; everything works with sample data."),
            ("How billing works",
-            "$2,400 per year per company. Renews annually; cancel by email before the renewal date."),
+            "$75 for the first month per company, then $195 per month. Renews monthly; cancel by email before the next renewal."),
          ]),
 
     dict(slug="inspection-system", cat="software", cover=True, 
          name="NDE OneSystem",
          tagline="Field operations and reporting for NDE companies.",
          img=f"{IMG}/covers/nde-onesystem.jpg",
-         price="$2,000", price_note="per year &middot; per company", status="available", subscribe=True,
+         price="$75", price_note="first month, then $195 / month &middot; per company", status="available", subscribe=True,
          paypal=PAYPAL_INSPECTION,
          demo="demos/inspection-system.html",
          short="The NDE operations system already running at a Louisiana inspection company. Requests, dispatch, field inspections, technician certifications, review, controlled reports and field performance &mdash; with your company name on every screen.",
@@ -316,16 +316,16 @@ PRODUCTS = [
            ("Who it is for",
             "NDE and inspection companies, QA/QC managers, and owner-side inspection groups."),
            ("What you get",
-            "The system set up under your company name, the field workflow for technicians, setup and a walkthrough with Kirby, and support by phone and email for the year."),
+            "The system set up under your company name, the field workflow for technicians, setup and a walkthrough with Kirby, and support by phone and email while your subscription is active."),
            ("How billing works",
-            "$2,000 per year for the company &mdash; no per-user fees. Renews annually; cancel by email before the renewal date."),
+            "$75 for the first month per company, then $195 per month. No per-user fees. Renews monthly; cancel by email before the next renewal."),
          ]),
 
     dict(slug="turnaround-management", cat="software", cover=True, 
          name="Turnaround Management System",
          tagline="Schedule, cost, readiness, execution, quality, safety and turnover — one command center.",
          img=f"{IMG}/covers/turnaround-management.jpg",
-         price="$2,400", price_note="per year &middot; per company", status="available", subscribe=True,
+         price="$75", price_note="first month, then $195 / month &middot; per company", status="available", subscribe=True,
          paypal=PAYPAL_TURNAROUND,
          # demo="demos/turnaround-management.html",   # add the demo file, uncomment, rebuild
          short="The Shell Key Turnaround Management System: an executive command center with planning and estimating, integrated schedule, work packages, daily execution, quality and inspection, safety and workforce, constraints, turnover and reports &mdash; branded for your company.",
@@ -340,9 +340,9 @@ PRODUCTS = [
            ("Who it is for",
             "Turnaround managers, planners, owner reps and contractors running an outage from readiness through startup."),
            ("What you get",
-            "The portal configured for your company and turnaround; setup and walkthrough with Kirby; support for the year. Try the free demo &mdash; a full turnaround with sample data."),
+            "The portal configured for your company and turnaround; setup and walkthrough with Kirby; support while your subscription is active. Try the free demo &mdash; a full turnaround with sample data."),
            ("How billing works",
-            "$2,400 per year per company. Renews annually; cancel by email before the renewal date."),
+            "$75 for the first month per company, then $195 per month. Renews monthly; cancel by email before the next renewal."),
          ]),
 
     # ---------------- DIGITAL WALL CHARTS ----------------
@@ -1526,7 +1526,7 @@ TERMS = """
 <h3>Purchases and delivery</h3>
 <p>Prices are shown in U.S. dollars. Payments are processed by PayPal. Digital guides and files are delivered by email after payment. Software subscriptions (Bid Board, Shell Key Inspection System, training) are activated the same business day; access details are sent to the email used at checkout.</p>
 <h3>Subscriptions and cancellation</h3>
-<p>Bid Board bills $75 for the first month and $295 per month thereafter until cancelled. The introductory month is available once per company. The Inspection System bills $2,000 per year. To cancel, email support@shellkey.company from the account email; you will receive a confirmation, access ends at the close of the current billing period, and no further charges are made. Fees already billed are not refunded.</p>
+<p>Bid Board bills $75 for the first month and $295 per month thereafter until cancelled. The introductory month is available once per company. BlueLink Inspection Management System, NDE OneSystem, and Turnaround Management System each bill $75 for the first month per company, then $195 per month thereafter until cancelled. To cancel, email support@shellkey.company from the account email; you will receive a confirmation, access ends at the close of the current billing period, and no further charges are made. Fees already billed are not refunded.</p>
 <h3>Website builds</h3>
 <p>The AI Website Studio start fee of $50 is non-refundable and is credited toward the $500 purchase price when you approve the site. If you do not approve a site, nothing further is owed.</p>
 <h3>Custom work and quotes</h3>
