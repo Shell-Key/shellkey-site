@@ -56,7 +56,7 @@ PAYPAL_CONTRACTOR = "PAYPAL_LINK_CONTRACTOR_MONTHLY"       # plan: Contractor Sy
 PAYPAL_CONTRACTOR_AI = "PAYPAL_LINK_CONTRACTOR_AI_MONTHLY" # plan: Contractor System + AI, $75 first month then $495/mo
 PAYPAL_PROJECT = "PAYPAL_LINK_PROJECT_MONTHLY"             # plan: Project System, $75 first month then $295/mo
 PAYPAL_PROJECT_AI = "PAYPAL_LINK_PROJECT_AI_MONTHLY"       # plan: Project System + AI, $75 first month then $495/mo
-PAYPAL_4D = "PAYPAL_LINK_4D_MONTHLY"                       # plan: 4D Schedule Sequence service, $295 first month then $495/mo
+PAYPAL_4D = "PAYPAL_LINK_4D_MONTHLY"                       # plan: 4D Schedule Sequence service, $75 first month then $295/mo
 PAYPAL_API653 = "PAYPAL_LINK_API653_ANNUAL"           # plan: API 653 IM, $75 / year
 PAYPAL_API1104 = "PAYPAL_LINK_API1104_ANNUAL"         # plan: API 1104 IM, $75 / year
 PAYPAL_AWSCWI = "PAYPAL_LINK_AWSCWI_ANNUAL"           # plan: AWS-CWI IM, $75 / year
@@ -117,8 +117,11 @@ PRODUCTS = [
     dict(slug="4d-schedule-sequence", cat="software", cover=True, badge="Service",
          name="4D Schedule Sequence",
          tagline="Your P6 schedule on your plot plan, animated week by week.",
-         img=f"{IMG}/covers/4d-schedule-sequence.jpg",
-         price="$295", price_note="first month, then $495 / month &middot; built and updated weekly by Shell Key", status="available", subscribe=True,
+         img=f"{IMG}/demos/4d-refinery-preview.png",
+         video="assets/video/4d-refinery-demo.mp4",
+         video_title="Watch the refinery sequence",
+         video_description="A 24-second preview of the Shell Key refinery demonstration. Press Play to watch, or use the free demo to explore the timeline yourself.",
+         price="$75", price_note="first month, then $295 / month &middot; built and updated weekly by Shell Key", status="available", subscribe=True,
          paypal=PAYPAL_4D,
          demo="demos/4d-schedule-sequence.html",
          short="A service, not just software. Send your P6 or MS Project schedule and a plot plan or model image; Shell Key builds a 4D construction sequence you can play forward by day, week or month &mdash; every activity appearing where it happens, green while it is being installed, with S-curves and a CWA timeline. Updated every week from your schedule update.",
@@ -132,9 +135,9 @@ PRODUCTS = [
            ("Who it is for",
             "Owners, EPCs and contractors who need leadership, the field and the client to see the plan the same way &mdash; without a Navisworks license on every desk."),
            ("What you get",
-            "Shell Key builds the sequence from your XER / MPP and plot plan or model image within a week, then refreshes it after every schedule update. Delivered as a private link you can share; save-frame images for reports. Try the demo &mdash; it is a real 668-activity plant sequence with the names removed."),
+            "Shell Key builds the sequence from your XER / MPP and plot plan or model image within a week, then refreshes it after every schedule update. Delivered as a private link you can share; save-frame images for reports. Try the demo &mdash; it is a sample refinery expansion with 81 activities and 20 schedule-connected images. Demo changes last only for the current session."),
            ("How billing works",
-            "$295 for the first month (includes the initial build), then $495 a month while the project is active, cancel any time by emailing support@shellkey.company. Larger projects or multiple areas are quoted."),
+            "$75 for the first month (includes the initial build), then $295 a month while the project is active, cancel any time by emailing support@shellkey.company. Larger projects or multiple areas are quoted."),
          ]),
 
     dict(slug="bid-board", cat="software", cover=True,
@@ -1266,15 +1269,30 @@ def build_product(p):
         cta_note = ("This one is in production. If you need it now, request it — priority builds "
                     "can usually be ready within a few days.")
 
+    media_html = f"""<img class="zoomable" src="{root}{p['img']}" data-full="{root}{p['img']}"
+               alt="{re.sub('&amp;', 'and', p['name'])}" loading="eager" />
+          <p class="muted tiny zoomhint">Click the image to view full size</p>"""
+    if p.get("video"):
+        media_html = f"""<h2 class="pd-video-title">{html.escape(p['video_title'])}</h2>
+          <video class="pd-video" controls playsinline preload="none"
+                 poster="{root}{p['img']}" aria-label="Shell Key refinery 4D schedule demonstration"
+                 aria-describedby="video-description">
+            <source src="{root}{p['video']}" type="video/mp4" />
+            Your browser cannot play this video. <a href="{root}{p['video']}">Open the video</a>.
+          </video>
+          <p class="muted pd-video-description" id="video-description">{html.escape(p['video_description'])}</p>
+          <div class="pd-media-links">
+            <a href="{root}{p['img']}" target="_blank" rel="noopener">View screenshot full size</a>
+            <a href="{root}{p['video']}" target="_blank" rel="noopener">Open video in a new tab</a>
+          </div>"""
+
     parts.append(f"""  <main>
     <div class="container">
       <nav class="crumbs"><a href="{root}store.html">Store</a> <span>/</span> {p['name']}</nav>
 
       <article class="product-detail">
         <div class="pd-media card{" pd-cover" if p.get("cover") else ""}">
-          <img class="zoomable" src="{root}{p['img']}" data-full="{root}{p['img']}"
-               alt="{re.sub('&amp;','and',p['name'])}" loading="eager" />
-          <p class="muted tiny zoomhint">Click the image to view full size</p>
+          {media_html}
         </div>
 
         <div class="pd-info card">

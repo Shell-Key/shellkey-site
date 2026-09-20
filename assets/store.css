@@ -473,3 +473,12 @@ textarea:invalid:not(:placeholder-shown){
 .proof b{color:var(--text);font-weight:600}
 .proof .sold{color:#cfff9b}
 .proof .sold b{color:var(--accent)}
+
+/* 4D product video: uses the supplied screenshot as the initial poster. */
+.pd-video-title{margin:0 0 14px;font-size:20px;text-align:left;line-height:1.3}
+.pd-video{display:block;width:100%;height:auto;aspect-ratio:1412 / 866;background:#0b111b;border-radius:12px}
+.pd-video-description{margin:14px 0 0;text-align:left;font-size:14px;line-height:1.6}
+.pd-media-links{display:flex;flex-wrap:wrap;gap:10px 20px;margin-top:12px;text-align:left;font-size:13px}
+.pd-media-links a{color:var(--accent);text-underline-offset:3px}
+.product-card[data-slug="4d-schedule-sequence"] .cover-media{padding:12px}
+.product-card[data-slug="4d-schedule-sequence"] .cover-media img{width:100%;height:auto;max-height:100%;object-fit:contain}
