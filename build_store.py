@@ -49,6 +49,8 @@ CATEGORIES = [
 # the "Buy Now" hosted button URL (https://www.paypal.com/ncp/payment/XXXX).
 # Any link still starting with PAYPAL_LINK_ is a placeholder: the button becomes
 # "Request This" until you paste the real one.
+# DCMA reviewer: checkout runs on its own site so access is granted automatically after PayPal approves.
+PAYPAL_DCMA = "https://shellkey-dcma.pages.dev/subscribe"
 PAYPAL_BIDBOARD = "https://www.paypal.com/webapps/billing/plans/subscribe?plan_id=P-1MD1072905987273YNKSDYIY"
 PAYPAL_INSPECTION = "PAYPAL_LINK_INSPECTION_MONTHLY"      # plan: NDE OneSystem, $75 first month then $195/mo per company
 PAYPAL_FAMILY_FINANCE = "PAYPAL_LINK_FAMILY_FINANCE"    # Buy Now button: Family Finance full version, $49.95
@@ -67,6 +69,30 @@ PAYPAL_TRAINING_COURSE = "PAYPAL_LINK_TRAINING_COURSE"   # Buy Now button: one c
 PAYPAL_TRAINING_ALL = "PAYPAL_LINK_TRAINING_ALL"         # Buy Now button: all-access year, $99
 
 PRODUCTS = [
+    dict(slug="dcma-health-reviewer", cat="software", cover=True, badge="New",
+         name="DCMA Schedule Health Reviewer",
+         tagline="Grade any P6 or MS Project schedule — and know exactly what to fix first.",
+         img=f"{IMG}/covers/dcma-health-reviewer.jpg",
+         price="$75", price_note="per month &middot; cancel anytime", status="available", subscribe=True,
+         paypal=PAYPAL_DCMA,
+         demo="demos/dcma-health-reviewer.html",
+         cta_note="Secure checkout by PayPal. Access starts the moment you subscribe and renews monthly until you cancel in PayPal.",
+         short="Load a Primavera P6 XER or XML, or a Microsoft Project XML, and get a letter grade on all 14 DCMA checks, a fix list sorted by priority with the Activity IDs ready to paste into P6, a dashboard with S-curve, manpower and cost, and branded reports.",
+         bullets=["All 14 DCMA checks, letter grade and critical path test",
+                  "Prioritized fix list &mdash; copy straight into Excel or P6",
+                  "Dashboard: S-curve, manpower and cost when loaded",
+                  "Client-ready reports, tutorials read aloud on every screen"],
+         detail=[
+           ("What it is",
+            "A schedule quality reviewer that runs the DCMA 14-Point Assessment on your schedule in seconds and turns every finding into a plain-English fix: which activity, what to change and why, ordered P1 Fix now, P2 This update, P3 Review."),
+           ("Who it is for",
+            "Schedulers, project controls leads, owner&rsquo;s representatives and contractors who need to prove a schedule is sound before an update goes out or a baseline is approved."),
+           ("What you get",
+            "Unlimited reviews of P6 XER, P6 XML and MS Project XML files; grade and all 14 checks; prioritized fix list with copy-to-Excel; critical path view; dashboard with S-curve, manpower and cost; Executive Summary, DCMA Detail, Fix List, Critical Path and Cost &amp; Manpower reports. Your schedule is read in your own browser and never uploaded."),
+           ("How billing works",
+            "$75 a month through PayPal. Access starts right away and continues while your subscription is active. Cancel any time in your PayPal account &mdash; you keep access to the end of the month you paid for. Try the free demo first: it is the full reviewer with a fictional sample schedule."),
+         ]),
+
     # ---------------- SOFTWARE SUBSCRIPTIONS ----------------
     dict(slug="contractor-system", cat="software", cover=True, badge="New",
          name="Shell Key Contractor System",
@@ -1254,7 +1280,9 @@ def build_product(p):
             f'<div class="shot-grid">{shots}</div></section>')
     bullets = "".join(f"<li>{b}</li>" for b in p["bullets"])
 
-    if p["status"] == "available" and p.get("subscribe"):
+    if p.get("cta_note"):
+        cta_note = p["cta_note"]
+    elif p["status"] == "available" and p.get("subscribe"):
         cta_note = ("Secure checkout by PayPal — cards accepted without a PayPal account. "
                     "Your access details are emailed the same business day.")
     elif p["status"] == "available" and not live_link(p.get("paypal")):
