@@ -95,3 +95,10 @@ CREATE TABLE IF NOT EXISTS spend (
 );
 CREATE INDEX IF NOT EXISTS spend_campaign ON spend(campaign);
 CREATE INDEX IF NOT EXISTS visits_campaign ON visits(utm_campaign);
+
+-- Small key/value store for the agent (LinkedIn sign-in and the like). Added Oct 2026.
+CREATE TABLE IF NOT EXISTS settings (
+  k          TEXT PRIMARY KEY,
+  v          TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);

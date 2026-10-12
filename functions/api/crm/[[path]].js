@@ -15,8 +15,11 @@
 //   GET   /api/crm/results?days=90       clicks, leads, sales, spend and ROI per post and platform
 //   POST  /api/crm/spend                 {day, platform, campaign?, amount, note?}
 //   DELETE /api/crm/spend/:id
+//   POST  /api/crm/linkedin/start        returns the LinkedIn sign-in link
+//   POST  /api/crm/linkedin/disconnect
 import { json, bad, readJson, clean, authed } from "../../_lib.js";
 import { setupStatus, today, writeDailyPosts, publishPost, results, PLATFORMS } from "../../_agent.js";
+import { linkedinStatus, startUrl as linkedinStartUrl, setSetting } from "../../_linkedin.js";
 
 const POST_STATUSES = ["draft", "approved", "posted", "rejected"];
 
@@ -121,13 +124,22 @@ export async function onRequest({ request, env, params }) {
     let posts = [], tables = true;
     try { posts = (await db.prepare("SELECT * FROM posts WHERE day >= date('now','-60 days') ORDER BY day DESC, id ASC").all()).results; }
     catch (e) { tables = false; }
-    return json({ ok: true, setup: Object.assign(setupStatus(env), { tables }), today: today(), posts });
+    const li = await linkedinStatus(env);
+    return json({ ok: true, setup: Object.assign(setupStatus(env), { tables, linkedin: li.connected, linkedin_app: li.app,
+      linkedin_days_left: li.days_left, linkedin_name: li.name }), today: today(), posts });
   }
 
   if (route === "write" && request.method === "POST") {
     const b = (await readJson(request)) || {};
     try { return json(await writeDailyPosts(env, { force: !!b.force, slug: clean(b.slug, 80) })); }
     catch (e) { return bad(String(e.message || e), 500); }
+  }
+
+  if (route === "linkedin" && request.method === "POST") {
+    try {
+      if (parts[1] === "start") return json({ ok: true, url: await linkedinStartUrl(env) });
+      if (parts[1] === "disconnect") { await setSetting(db, "linkedin", "{}"); return json({ ok: true }); }
+    } catch (e) { return bad(String(e.message || e).includes("no such table") ? "Run the settings table SQL in the D1 console first." : String(e.message || e), 400); }
   }
 
   if (route === "post" && id) {

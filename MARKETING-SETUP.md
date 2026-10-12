@@ -79,9 +79,36 @@ If you ever change your Facebook password or remove the app, the token stops wor
 
 Now the posts are waiting for you each morning, and you get an email when they're ready (through the same email notice the site already uses for new leads).
 
+## Step 6. LinkedIn automatic posting (20 min once, then a sign-in every 60 days)
+
+LinkedIn lets small apps post on **your personal profile** for free. Posting on the **Shell Key company page** needs LinkedIn's Community Management API, which LinkedIn must approve; until then, company page posts are copy and paste. Personal posts usually reach more people anyway.
+
+**6a. Add the settings table** (D1 → shellkey-crm → Console → paste → Execute):
+
+```sql
+CREATE TABLE IF NOT EXISTS settings (
+  k TEXT PRIMARY KEY,
+  v TEXT NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+```
+
+**6b. Make the LinkedIn app**
+
+1. Go to **linkedin.com/developers/apps** → **Create app**.
+2. App name `Shell Key Marketing`. LinkedIn Page: pick your **Shell Key** company page. Upload the Shell Key logo. Tick the agreement → **Create app**.
+3. **Settings** tab → next to the company page, **Verify** → open the link it gives you and approve it (you are the page admin).
+4. **Products** tab → **Request access** on **Share on LinkedIn** and on **Sign In with LinkedIn using OpenID Connect**. Both are normally granted right away.
+5. **Auth** tab → **Authorized redirect URLs for your app** → add exactly `https://shellkey.company/api/linkedin/callback` → Update.
+6. On the same Auth tab, copy the **Client ID** and the **Primary Client Secret**.
+
+**6c. Put them in Cloudflare** (shellkey-site → Settings → Variables and Secrets → Add, type Secret): `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET`. Retry deployment.
+
+**6d. Connect.** CRM → Marketing → **Connect LinkedIn** → sign in → **Allow**. You land back on the Marketing tab and the LinkedIn chip turns green with the days left. LinkedIn makes you do this again every 60 days; the button turns green and the morning email reminds you a week ahead.
+
 ## Later: skip the approval step
 
-Once you trust the posts, add a variable `AUTO_POST` = `yes` on shellkey-site and retry deployment. Facebook and Instagram then post the moment they're written. LinkedIn still waits for you to paste.
+Once you trust the posts, add a variable `AUTO_POST` = `yes` on shellkey-site and retry deployment. Every connected platform then posts the moment the agent writes it.
 
 ## Changing what the agent says
 

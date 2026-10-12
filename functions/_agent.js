@@ -16,6 +16,7 @@
 import { CATALOG } from "./_catalog.js";
 import { BRAND } from "./_brand.js";
 import { notify } from "./_lib.js";
+import { linkedinStatus, postToLinkedIn } from "./_linkedin.js";
 
 export const PLATFORMS = ["facebook", "instagram", "linkedin"];
 const MODEL = "claude-sonnet-5-5";
@@ -167,16 +168,24 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
     created.push({ id, platform });
   }
 
-  const auto = setupStatus(env).auto_post;
+  const s = setupStatus(env);
+  const li = await linkedinStatus(env);
+  const connected = { facebook: s.facebook, instagram: s.instagram, linkedin: li.connected };
+  const auto = s.auto_post;
+  const posted = [];
   if (auto) {
-    for (const c of created) if (c.platform !== "linkedin") await publishPost(env, c.id).catch(() => {});
+    for (const c of created) {
+      if (!connected[c.platform]) continue;
+      try { await publishPost(env, c.id); posted.push(c.platform); } catch { /* the card shows the error */ }
+    }
   }
-  await notify(env, `${created.length} posts ready to approve: ${product.name}`, [
+  const lines = [
     `Today's product: ${product.name} (${angle.split(":")[0]} post)`,
-    auto ? "Facebook and Instagram were posted automatically. LinkedIn is waiting for you to copy and paste."
+    auto && posted.length ? "Posted automatically: " + posted.join(", ") + ". Anything else is waiting for you."
          : "Open the Marketing tab, read them, fix anything you want, and press Approve & Post.",
-    "", "https://shellkey.company/crm.html#marketing",
-  ]);
+  ];
+  if (li.connected && li.days_left <= 7) lines.push("", `LinkedIn sign-in runs out in ${li.days_left} day(s). Press Reconnect LinkedIn on the Marketing tab.`);
+  await notify(env, `${created.length} posts ready: ${product.name}`, [...lines, "", "https://shellkey.company/crm.html#marketing"]);
   return { ok: true, day, product: product.slug, angle, created };
 }
 
@@ -205,8 +214,10 @@ export async function publishPost(env, id) {
       const c = await graph(env, `/${env.IG_USER_ID}/media`, { image_url: p.image, caption: p.body, access_token: env.FB_PAGE_TOKEN });
       const d = await graph(env, `/${env.IG_USER_ID}/media_publish`, { creation_id: c.id, access_token: env.FB_PAGE_TOKEN });
       remote = d.id || "";
+    } else if (p.platform === "linkedin") {
+      remote = await postToLinkedIn(env, p);
     } else {
-      throw new Error("LinkedIn posts are copied and pasted. Press Copy, post it on LinkedIn, then press Mark as posted.");
+      throw new Error("Unknown platform " + p.platform);
     }
   } catch (e) {
     await db.prepare("UPDATE posts SET error=?, updated_at=datetime('now') WHERE id=?").bind(String(e.message).slice(0, 500), id).run();

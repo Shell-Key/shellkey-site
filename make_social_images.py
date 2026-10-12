@@ -8,7 +8,8 @@ looks branded and every image works on Facebook, Instagram and LinkedIn.
 Run after adding or changing products:
     pip install pillow
     python make_social_images.py
-Writes assets/img/social/posts/<slug>.jpg
+Writes assets/img/social/posts/<slug>.jpg   1080x1080, the picture on Instagram / Facebook / LinkedIn posts
+       assets/img/social/links/<slug>.jpg   1200x630, the preview card when a product link is shared
 """
 import glob
 import importlib.util
@@ -18,6 +19,7 @@ from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "assets", "img", "social", "posts")
+OUT_LINKS = os.path.join(HERE, "assets", "img", "social", "links")
 LOGO = os.path.join(HERE, "assets", "img", "logo", "ShellKeyWhiteTrace.png")
 S = 1080
 NAVY_TOP, NAVY_BOT = (11, 33, 68), (5, 10, 22)
@@ -102,11 +104,54 @@ def make(p, logo):
     return bg
 
 
+def make_link(p, logo):
+    """1200x630 link-preview card: product picture left, name and tagline right."""
+    W, H = 1200, 630
+    bg = Image.new("RGB", (W, H))
+    d = ImageDraw.Draw(bg)
+    for y in range(H):
+        t = y / (H - 1)
+        d.line([(0, y), (W, y)], fill=tuple(int(a + (b - a) * t) for a, b in zip(NAVY_TOP, NAVY_BOT)))
+    src = Image.open(os.path.join(HERE, p["img"])).convert("RGB")
+    box_w, box_h, left, top = 600, 510, 50, 60
+    r = min(box_w / src.width, box_h / src.height)
+    w, h = int(src.width * r), int(src.height * r)
+    src = src.resize((w, h), Image.LANCZOS)
+    x, y = left + (box_w - w) // 2, top + (box_h - h) // 2
+    mask = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(mask).rounded_rectangle([0, 0, w - 1, h - 1], radius=16, fill=255)
+    shadow = Image.new("L", (W, H), 0)
+    ImageDraw.Draw(shadow).rounded_rectangle([x + 5, y + 10, x + w + 5, y + h + 10], radius=20, fill=150)
+    bg.paste((0, 0, 0), (0, 0), shadow.filter(ImageFilter.GaussianBlur(12)))
+    bg.paste(src, (x, y), mask)
+    d = ImageDraw.Draw(bg)
+    tx, tw = 690, 470
+    ft, fs = font(BOLD, 48), font(REG, 28)
+    name_lines = wrap(d, p["name"], ft, tw, 3)
+    tag_lines = wrap(d, p["tagline"], fs, tw, 4)
+    block = len(name_lines) * 58 + 16 + len(tag_lines) * 38
+    ty = max(70, (H - 110 - block) // 2)
+    for line in name_lines:
+        d.text((tx, ty), line, font=ft, fill=WHITE); ty += 58
+    ty += 16
+    for line in tag_lines:
+        d.text((tx, ty), line, font=fs, fill=SOFT); ty += 38
+    d.line([(tx, 520), (W - 50, 520)], fill=GREEN, width=3)
+    lh = 52
+    lg = logo.resize((int(logo.width * lh / logo.height), lh), Image.LANCZOS)
+    bg.paste(lg, (tx, 545), lg)
+    cta = "Free demo" if p.get("demo") else "shellkey.company"
+    fc = font(BOLD, 28)
+    d.text((W - 50 - d.textlength(cta, font=fc), 556), cta, font=fc, fill=GREEN)
+    return bg
+
+
 def main():
     spec = importlib.util.spec_from_file_location("build_store", os.path.join(HERE, "build_store.py"))
     m = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(m)
     os.makedirs(OUT, exist_ok=True)
+    os.makedirs(OUT_LINKS, exist_ok=True)
     logo = Image.open(LOGO).convert("RGBA")
     logo = logo.crop(logo.getbbox())
     for p in m.PRODUCTS:
@@ -115,7 +160,8 @@ def main():
              "tagline": html.unescape(re.sub(r"<[^>]+>", "", p.get("tagline", ""))),
              "img": p["img"], "demo": p.get("demo")}
         make(q, logo).save(os.path.join(OUT, p["slug"] + ".jpg"), "JPEG", quality=86, optimize=True, progressive=True)
-    print(f"wrote {len(m.PRODUCTS)} images into {OUT}")
+        make_link(q, logo).save(os.path.join(OUT_LINKS, p["slug"] + ".jpg"), "JPEG", quality=86, optimize=True, progressive=True)
+    print(f"wrote {len(m.PRODUCTS)} post images into {OUT} and {len(m.PRODUCTS)} link previews into {OUT_LINKS}")
 
 
 if __name__ == "__main__":

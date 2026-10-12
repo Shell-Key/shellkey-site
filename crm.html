@@ -165,6 +165,7 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
       <div class="toolbar">
         <button class="btn" id="writeBtn">Write today's posts</button>
         <button class="btn ghost" id="mktRefresh">Refresh</button>
+        <button class="btn ghost" id="liBtn" title="Lets Approve &amp; Post publish LinkedIn posts as you. LinkedIn makes you sign in again every 60 days.">Connect LinkedIn</button>
         <span class="legend" id="mktInfo"></span>
       </div>
       <div class="note" id="mktHelp">Every morning the agent picks one product and writes a Facebook, Instagram and LinkedIn post about it. Read each one, fix anything you want right in the box, then press <b>Approve &amp; Post</b>. If Facebook or Instagram is not connected yet, press <b>Copy</b>, paste it yourself, then press <b>Mark as posted</b> so the Results tab can track it.</div>
@@ -336,9 +337,12 @@ var PLAT_NAME={facebook:"Facebook",instagram:"Instagram",linkedin:"LinkedIn"};
 function loadMarketing(){
   return api("marketing").then(function(d){
     var st=d.setup||{};SETUP=st;
-    var chips=[["tables","Marketing tables"],["claude","Claude writer"],["facebook","Facebook auto-post"],["instagram","Instagram auto-post"],["timer_key","Daily timer key"]];
+    var chips=[["tables","Marketing tables"],["claude","Claude writer"],["facebook","Facebook auto-post"],["instagram","Instagram auto-post"],["linkedin","LinkedIn auto-post"+(st.linkedin&&st.linkedin_days_left!=null?" ("+st.linkedin_days_left+" days left)":"")],["timer_key","Daily timer key"]];
     $("setupChips").innerHTML=chips.map(function(c){return'<span class="chip '+(st[c[0]]?"ok":"no")+'" title="'+(st[c[0]]?"Connected":"Not set up yet. See MARKETING-SETUP.md")+'">'+(st[c[0]]?"✓ ":"○ ")+esc(c[1])+'</span>';}).join("")
       +'<span class="chip'+(st.auto_post?" ok":"")+'">'+(st.auto_post?"Auto-post ON":"Approval first")+'</span>';
+    var lb=$("liBtn");lb.textContent=st.linkedin?"Reconnect LinkedIn":"Connect LinkedIn";
+    lb.classList.toggle("hidden",!st.linkedin_app&&!st.linkedin);
+    if(st.linkedin&&st.linkedin_days_left<=7){lb.textContent="Reconnect LinkedIn (runs out in "+st.linkedin_days_left+" days)";lb.classList.remove("ghost");}
     POSTS=d.posts||[];
     var hasToday=POSTS.some(function(p){return p.day===d.today;});
     $("writeBtn").textContent=hasToday?"Write another set":"Write today's posts";
@@ -360,13 +364,13 @@ function loadMarketing(){
   });
 }
 function postCard(p){
-  var auto=(p.platform!=="linkedin")&&!!SETUP[p.platform];  // only offer Approve & Post where that platform is connected
+  var auto=!!SETUP[p.platform];  // only offer Approve & Post where that platform is connected
   var done=p.status==="posted",rej=p.status==="rejected";
   var b='';
   if(!done&&!rej){
     if(auto)b+='<button class="btn sm" data-act="publish" data-id="'+p.id+'">Approve &amp; Post</button>';
     b+='<button class="btn sm ghost" data-act="copy" data-id="'+p.id+'">Copy</button>';
-    if(p.platform==="linkedin")b+='<a class="btn sm ghost" href="https://www.linkedin.com/feed/?shareActive=true" target="_blank" rel="noopener" style="text-decoration:none">Open LinkedIn</a>';
+    if(p.platform==="linkedin"&&!auto)b+='<a class="btn sm ghost" href="https://www.linkedin.com/feed/?shareActive=true" target="_blank" rel="noopener" style="text-decoration:none">Open LinkedIn</a>';
     b+='<a class="btn sm ghost" href="'+esc(p.image)+'" download target="_blank" rel="noopener" style="text-decoration:none">Image</a>';
     b+='<button class="btn sm ghost" data-act="save" data-id="'+p.id+'">Save edits</button>';
     b+='<button class="btn sm ghost" data-act="posted" data-id="'+p.id+'">Mark as posted</button>';
@@ -413,6 +417,9 @@ $("writeBtn").onclick=function(){
     .catch(function(){b.disabled=false;loadMarketing();});
 };
 $("mktRefresh").onclick=loadMarketing;
+$("liBtn").onclick=function(){
+  api("linkedin/start",{method:"POST"}).then(function(r){if(r.ok&&r.url)location.href=r.url;else alert(r.error||"Could not start the LinkedIn sign-in.");});
+};
 
 /* ---------- results ---------- */
 var pct=function(r){if(r==null)return'<span style="color:var(--text2)">no spend</span>';var v=Math.round(r*100);return'<span class="'+(v>=0?"roi-pos":"roi-neg")+'">'+(v>=0?"+":"")+v+'%</span>';};

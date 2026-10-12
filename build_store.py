@@ -1086,7 +1086,7 @@ ORG_SCHEMA = """  <script type="application/ld+json">
 """
 
 
-def head(title, desc, root="", path="", schema=""):
+def head(title, desc, root="", path="", schema="", image=None):
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1096,7 +1096,7 @@ def head(title, desc, root="", path="", schema=""):
   <meta name="description" content="{desc}" />
   <link rel="stylesheet" href="{root}assets/styles.css?v={BUILD}" />
   <link rel="stylesheet" href="{root}assets/store.css?v={BUILD}" />
-{seo(title, desc, root, path)}{SITE_SCHEMA}{schema}{analytics()}</head>
+{seo(title, desc, root, path, image or "assets/img/social/og-image.jpg")}{SITE_SCHEMA}{schema}{analytics()}</head>
 <body>
 """
 
@@ -1259,7 +1259,10 @@ def build_store():
 def build_product(p):
     root = "../"
     title = f"{p['name']} | Shell Key"
-    parts = [head(title, p["short"], root, path=f"products/{p['slug']}.html")]
+    # Link previews (Facebook, LinkedIn, texts) show this product's own card when one exists
+    card_img = f"assets/img/social/links/{p['slug']}.jpg"
+    parts = [head(title, p["short"], root, path=f"products/{p['slug']}.html",
+                  image=card_img if os.path.exists(card_img) else None)]
     parts.append(NAV.format(root=root, store_on=" active"))
 
     detail_html = "".join(
