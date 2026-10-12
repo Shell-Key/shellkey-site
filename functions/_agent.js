@@ -19,7 +19,7 @@ import { notify } from "./_lib.js";
 
 export const PLATFORMS = ["facebook", "instagram", "linkedin"];
 const MODEL = "claude-sonnet-5-5";
-const GRAPH = "https://graph.facebook.com/v23.0";
+const GRAPH = "https://graph.facebook.com/v26.0";
 const SHORT = { facebook: "fb", instagram: "ig", linkedin: "li" };
 
 // Today's date in Lafayette, not UTC, so "today's posts" means Kirby's today.
