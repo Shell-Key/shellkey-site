@@ -331,11 +331,11 @@ function loadSales(){
 
 
 /* ---------- marketing ---------- */
-var POSTS=[];
+var POSTS=[];var SETUP={};
 var PLAT_NAME={facebook:"Facebook",instagram:"Instagram",linkedin:"LinkedIn"};
 function loadMarketing(){
   return api("marketing").then(function(d){
-    var st=d.setup||{};
+    var st=d.setup||{};SETUP=st;
     var chips=[["tables","Marketing tables"],["claude","Claude writer"],["facebook","Facebook auto-post"],["instagram","Instagram auto-post"],["timer_key","Daily timer key"]];
     $("setupChips").innerHTML=chips.map(function(c){return'<span class="chip '+(st[c[0]]?"ok":"no")+'" title="'+(st[c[0]]?"Connected":"Not set up yet. See MARKETING-SETUP.md")+'">'+(st[c[0]]?"✓ ":"○ ")+esc(c[1])+'</span>';}).join("")
       +'<span class="chip'+(st.auto_post?" ok":"")+'">'+(st.auto_post?"Auto-post ON":"Approval first")+'</span>';
@@ -360,7 +360,7 @@ function loadMarketing(){
   });
 }
 function postCard(p){
-  var auto=(p.platform!=="linkedin");
+  var auto=(p.platform!=="linkedin")&&!!SETUP[p.platform];  // only offer Approve & Post where that platform is connected
   var done=p.status==="posted",rej=p.status==="rejected";
   var b='';
   if(!done&&!rej){
