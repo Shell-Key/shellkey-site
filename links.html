@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Shell Key | Latest</title>
+<meta name="description" content="The Shell Key products from our latest posts. Free demos, no card, no install." />
+<link rel="canonical" href="https://shellkey.company/links" />
+<meta property="og:title" content="Shell Key | Latest" />
+<meta property="og:description" content="The Shell Key products from our latest posts. Free demos, no card, no install." />
+<meta property="og:image" content="https://shellkey.company/assets/img/social/og-image.jpg" />
+<link rel="icon" type="image/png" sizes="32x32" href="assets/img/logo/keyw-32.png" />
+<link rel="apple-touch-icon" href="assets/img/logo/apple-touch-icon.png" />
+<style>
+:root{--bg0:#050a16;--bg1:#07142a;--card:rgba(255,255,255,0.05);--stroke:rgba(255,255,255,0.10);
+  --text:#eaf2ff;--muted:rgba(234,242,255,0.72);--accent:#7CFF00;--radius:18px}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--text);
+  background:radial-gradient(700px 500px at 15% 0%,rgba(30,110,255,0.20),transparent 60%),
+             radial-gradient(700px 500px at 90% 20%,rgba(0,255,180,0.10),transparent 60%),
+             linear-gradient(180deg,var(--bg1),var(--bg0)) fixed}
+a{color:inherit}
+.wrap{width:min(100% - 32px,560px);margin:0 auto;padding:28px 0 48px}
+header{text-align:center;margin-bottom:22px}
+header img{height:64px;width:auto}
+header h1{font-size:20px;margin:12px 0 4px;letter-spacing:.01em}
+header p{margin:0;color:var(--muted);font-size:15px;line-height:1.45}
+.top{display:flex;gap:10px;justify-content:center;margin:16px 0 4px;flex-wrap:wrap}
+.pill{border:1px solid var(--stroke);border-radius:999px;padding:9px 16px;font-size:14px;font-weight:600;text-decoration:none;background:rgba(255,255,255,0.04)}
+.label{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:22px 4px 10px}
+.item{display:block;background:var(--card);border:1px solid var(--stroke);border-radius:var(--radius);overflow:hidden;margin-bottom:16px}
+.item img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;background:#0a1d3a}
+.body{padding:16px}
+.body h2{font-size:19px;margin:0 0 6px;line-height:1.25}
+.body p{margin:0 0 12px;color:var(--muted);font-size:15px;line-height:1.45}
+.price{font-size:14px;color:var(--muted);margin-bottom:14px}
+.price b{color:var(--text);font-size:16px}
+.btns{display:flex;gap:10px}
+.btn{flex:1;text-align:center;text-decoration:none;font-weight:700;font-size:15px;padding:13px 10px;border-radius:12px;border:1px solid var(--stroke)}
+.btn.go{background:var(--accent);color:#06210b;border-color:var(--accent)}
+.new{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:var(--accent);color:#06210b;
+  border-radius:6px;padding:3px 7px;margin-bottom:8px}
+.empty{text-align:center;color:var(--muted);padding:30px 0}
+footer{text-align:center;color:var(--muted);font-size:13px;margin-top:26px;line-height:1.6}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="assets/img/logo/ShellKeyWhiteTrace.png" alt="Shell Key" />
+    <h1>Software from the field, for the field</h1>
+    <p>Project controls and inspection tools built by a 32-year scheduler and API inspector in Lafayette, Louisiana.</p>
+    <div class="top">
+      <a class="pill" href="store.html?utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=bio">All products</a>
+      <a class="pill" href="request.html?utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=bio">Ask a question</a>
+    </div>
+  </header>
+
+  <div class="label">From our latest posts</div>
+  <div id="list"><div class="empty">Loading&hellip;</div></div>
+
+  <footer>
+    <a href="tel:+13372548321">(337) 254-8321</a> &middot; <a href="mailto:support@shellkey.company">support@shellkey.company</a><br />
+    <a href="index.html?utm_source=instagram&amp;utm_medium=social&amp;utm_campaign=bio">shellkey.company</a>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var esc=function(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});};
+  // Clicks from this page are credited to the Instagram post the product came from.
+  var tag=function(c){return "utm_source=instagram&utm_medium=social&utm_campaign="+encodeURIComponent(c||"bio");};
+  var today=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});
+  fetch("/api/links").then(function(r){return r.json();}).then(function(d){
+    var items=(d&&d.items)||[];
+    if(!items.length){document.getElementById("list").innerHTML='<div class="empty">See everything in the <a href="store.html">store</a>.</div>';return;}
+    document.getElementById("list").innerHTML=items.map(function(p,i){
+      var page="products/"+p.slug+".html?"+tag(p.campaign);
+      var demo="demo.html?item="+p.slug+"&"+tag(p.campaign);
+      var price=p.price?'<div class="price"><b>'+esc(p.price)+'</b> '+esc(p.price_note||"")+'</div>':"";
+      var fresh=(i===0&&p.day&&p.day>=today)?'<span class="new">Today\'s post</span>':(i===0&&p.day?'<span class="new">Latest post</span>':"");
+      return '<div class="item"><a href="'+page+'"><img src="'+esc(p.image)+'" alt="'+esc(p.name)+'" loading="'+(i<2?"eager":"lazy")+'" /></a>'
+        +'<div class="body">'+fresh+'<h2>'+esc(p.name)+'</h2><p>'+esc(p.tagline)+'</p>'+price
+        +'<div class="btns">'+(p.demo?'<a class="btn go" href="'+demo+'">Try the free demo</a>':'')
+        +'<a class="btn'+(p.demo?'':' go')+'" href="'+page+'">See details</a></div></div></div>';
+    }).join("");
+  }).catch(function(){document.getElementById("list").innerHTML='<div class="empty">See everything in the <a href="store.html">store</a>.</div>';});
+})();
+</script>
+<script src="assets/site.js" defer></script>
+</body>
+</html>
