@@ -79,32 +79,26 @@ If you ever change your Facebook password or remove the app, the token stops wor
 
 Now the posts are waiting for you each morning, and you get an email when they're ready (through the same email notice the site already uses for new leads).
 
-## Step 6. LinkedIn automatic posting (20 min once, then a sign-in every 60 days)
+## Step 6. LinkedIn: the Shell Key company page
 
-LinkedIn lets small apps post on **your personal profile** for free. Posting on the **Shell Key company page** needs LinkedIn's Community Management API, which LinkedIn must approve; until then, company page posts are copy and paste. Personal posts usually reach more people anyway.
+Posts go on the **Shell Key company page only**, never your personal profile. LinkedIn only allows that through its **Community Management API**, which it approves for registered businesses. Until it's approved, press **Copy** on the LinkedIn card, paste the post on the company page, then press **Mark as posted**.
 
-**6a. Add the settings table** (D1 → shellkey-crm → Console → paste → Execute):
+**Already done (Oct 12):** LinkedIn app "Shell Key Marketing" created, verified by the Shell Key page, and Community Management API requested.
 
-```sql
-CREATE TABLE IF NOT EXISTS settings (
-  k TEXT PRIMARY KEY,
-  v TEXT NOT NULL,
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-```
+**6a. Fill in LinkedIn's access form** when it appears on the app's Products tab (you have 21 days). Use the registered LLC name and address, your shellkey.company email, and this use case: *Shell Key is a small software company in Lafayette, Louisiana that sells project controls and inspection software. This app is used only by our own staff to publish posts to our own Shell Key LinkedIn Page. Our team writes and approves each post in our internal admin portal, and the app publishes it to the Page. We do not access other members' or other companies' data, and we do not offer this app to anyone else.*
 
-**6b. Make the LinkedIn app**
+**6b. Once approved:**
 
-1. Go to **linkedin.com/developers/apps** → **Create app**.
-2. App name `Shell Key Marketing`. LinkedIn Page: pick your **Shell Key** company page. Upload the Shell Key logo. Tick the agreement → **Create app**.
-3. **Settings** tab → next to the company page, **Verify** → open the link it gives you and approve it (you are the page admin).
-4. **Products** tab → **Request access** on **Share on LinkedIn** and on **Sign In with LinkedIn using OpenID Connect**. Both are normally granted right away.
-5. **Auth** tab → **Authorized redirect URLs for your app** → add exactly `https://shellkey.company/api/linkedin/callback` → Update.
-6. On the same Auth tab, copy the **Client ID** and the **Primary Client Secret**.
+1. D1 → shellkey-crm → Console → paste and Execute:
+   ```sql
+   CREATE TABLE IF NOT EXISTS settings (k TEXT PRIMARY KEY, v TEXT NOT NULL, updated_at TEXT NOT NULL DEFAULT (datetime('now')));
+   ```
+2. LinkedIn app → **Auth** tab → **Authorized redirect URLs** → add `https://shellkey.company/api/linkedin/callback`. Copy the **Client ID** and **Primary Client Secret**.
+3. Find the company page number: open the Shell Key page as admin; the address looks like `linkedin.com/company/12345678/admin/`. The number is the page ID.
+4. Cloudflare → shellkey-site → Variables and Secrets → add Secrets `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET`, `LINKEDIN_ORG_ID`. Retry deployment.
+5. CRM → Marketing → **Connect LinkedIn** → sign in → Allow. The LinkedIn chip turns green.
 
-**6c. Put them in Cloudflare** (shellkey-site → Settings → Variables and Secrets → Add, type Secret): `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET`. Retry deployment.
-
-**6d. Connect.** CRM → Marketing → **Connect LinkedIn** → sign in → **Allow**. You land back on the Marketing tab and the LinkedIn chip turns green with the days left. LinkedIn makes you do this again every 60 days; the button turns green and the morning email reminds you a week ahead.
+If LinkedIn names the permission differently in the Products tab (for example `w_organization_social_feed`), add a Secret `LINKEDIN_SCOPES` with that exact name.
 
 ## Later: skip the approval step
 

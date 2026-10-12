@@ -165,7 +165,7 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
       <div class="toolbar">
         <button class="btn" id="writeBtn">Write today's posts</button>
         <button class="btn ghost" id="mktRefresh">Refresh</button>
-        <button class="btn ghost" id="liBtn" title="Lets Approve &amp; Post publish LinkedIn posts as you. LinkedIn makes you sign in again every 60 days.">Connect LinkedIn</button>
+        <button class="btn ghost" id="liBtn" title="Lets Approve &amp; Post publish LinkedIn posts on the Shell Key company page. Works once LinkedIn approves the Community Management API.">Connect LinkedIn</button>
         <span class="legend" id="mktInfo"></span>
       </div>
       <div class="note" id="mktHelp">Every morning the agent picks one product and writes a Facebook, Instagram and LinkedIn post about it. Read each one, fix anything you want right in the box, then press <b>Approve &amp; Post</b>. If Facebook or Instagram is not connected yet, press <b>Copy</b>, paste it yourself, then press <b>Mark as posted</b> so the Results tab can track it.</div>
@@ -370,7 +370,7 @@ function postCard(p){
   if(!done&&!rej){
     if(auto)b+='<button class="btn sm" data-act="publish" data-id="'+p.id+'">Approve &amp; Post</button>';
     b+='<button class="btn sm ghost" data-act="copy" data-id="'+p.id+'">Copy</button>';
-    if(p.platform==="linkedin"&&!auto)b+='<a class="btn sm ghost" href="https://www.linkedin.com/feed/?shareActive=true" target="_blank" rel="noopener" style="text-decoration:none">Open LinkedIn</a>';
+    if(p.platform==="linkedin"&&!auto)b+='<a class="btn sm ghost" href="https://www.linkedin.com/company/shell-key/" target="_blank" rel="noopener" style="text-decoration:none">Open LinkedIn</a>';
     b+='<a class="btn sm ghost" href="'+esc(p.image)+'" download target="_blank" rel="noopener" style="text-decoration:none">Image</a>';
     b+='<button class="btn sm ghost" data-act="save" data-id="'+p.id+'">Save edits</button>';
     b+='<button class="btn sm ghost" data-act="posted" data-id="'+p.id+'">Mark as posted</button>';

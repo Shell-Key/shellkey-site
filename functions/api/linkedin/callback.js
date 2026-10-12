@@ -19,7 +19,7 @@ export async function onRequestGet({ request, env }) {
   }
   try {
     const name = await finishSignIn(env, u.searchParams.get("code") || "", u.searchParams.get("state") || "");
-    return page("LinkedIn connected", "Posts will go out as " + esc(name) + ". This sign-in lasts 60 days; the Marketing tab will remind you before it runs out.", true);
+    return page("LinkedIn connected", "Posts will go out on " + esc(name) + ". The Marketing tab shows how long this sign-in lasts and reminds you before it runs out.", true);
   } catch (e) {
     return page("LinkedIn not connected", esc(e.message || e), false);
   }
