@@ -17,7 +17,7 @@ a{color:var(--accent)}
 header{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:12px 0 18px;border-bottom:1px solid var(--stroke)}
 header img{height:30px}
 header h1{font-size:18px;margin:0;font-weight:700}
-.tabs{display:flex;gap:6px;margin-left:auto}
+.tabs{display:flex;gap:6px;margin-left:auto;flex-wrap:wrap}
 .tab{background:transparent;border:1px solid var(--stroke);color:var(--text2);padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:600}
 .tab.on{background:var(--accent);color:#06210b;border-color:var(--accent)}
 .btn{background:var(--accent);color:#06210b;border:0;padding:9px 14px;border-radius:10px;font-weight:700;cursor:pointer}
@@ -73,6 +73,27 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#06210b;padding:10px 18px;border-radius:10px;font-weight:700;display:none;z-index:30}
 .hidden{display:none!important}
 .legend{font-size:12px;color:var(--text2);margin:6px 2px}
+/* marketing */
+.setup{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 14px}
+.chip{padding:5px 11px;border-radius:999px;font-size:13px;font-weight:700;border:1px solid var(--stroke);color:var(--text2)}
+.chip.ok{background:rgba(74,222,128,.15);border-color:var(--green);color:var(--green)}
+.chip.no{background:rgba(255,200,87,.1);border-color:var(--amber);color:var(--amber)}
+.dayhead{display:flex;align-items:baseline;gap:12px;margin:22px 0 8px}
+.dayhead h3{margin:0}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+.pcard{background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius);padding:14px;display:flex;flex-direction:column;gap:10px}
+.pcard.st-posted{border-color:rgba(74,222,128,.5)} .pcard.st-rejected{opacity:.55}
+.pcard .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.plat{padding:3px 10px;border-radius:7px;font-size:12px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.05em}
+.plat.facebook{background:#1877F2} .plat.instagram{background:#C13584} .plat.linkedin{background:#0A66C2}
+.pcard img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;border:1px solid var(--stroke);background:#08182f}
+.pcard textarea{width:100%;min-height:210px;font-size:14px;line-height:1.45;resize:vertical}
+.pcard .err{color:var(--amber);font-size:13px}
+.pcard .meta{color:var(--text2);font-size:12px}
+.p-draft{background:var(--blue);color:#021} .p-approved{background:var(--amber);color:#211} .p-posted{background:var(--green);color:#021} .p-rejected{background:#6b7a90;color:#fff}
+.btn.sm{padding:7px 11px;font-size:13px}
+.note{background:rgba(124,255,0,.06);border:1px solid rgba(124,255,0,.3);border-radius:var(--radius);padding:12px 14px;font-size:14px;color:var(--text2);margin:10px 0}
+.roi-pos{color:var(--green);font-weight:800} .roi-neg{color:var(--red);font-weight:800}
 </style>
 </head>
 <body>
@@ -84,6 +105,8 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
       <button class="tab on" data-tab="pipeline">Pipeline</button>
       <button class="tab" data-tab="visitors">Visitors</button>
       <button class="tab" data-tab="sales">Sales</button>
+      <button class="tab" data-tab="marketing">Marketing</button>
+      <button class="tab" data-tab="results">Results</button>
       <button class="tab ghost" id="logout" title="Forget the key on this browser">Sign out</button>
     </div>
   </header>
@@ -135,6 +158,39 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
     <section id="tab-sales" class="hidden">
       <p class="legend">Every PayPal event received by the webhook. A sale also marks the matching lead as Won.</p>
       <div class="tablewrap"><table id="salesTable"></table></div>
+    </section>
+
+    <section id="tab-marketing" class="hidden">
+      <div class="setup" id="setupChips"></div>
+      <div class="toolbar">
+        <button class="btn" id="writeBtn">Write today's posts</button>
+        <button class="btn ghost" id="mktRefresh">Refresh</button>
+        <span class="legend" id="mktInfo"></span>
+      </div>
+      <div class="note" id="mktHelp">Every morning the agent picks one product and writes a Facebook, Instagram and LinkedIn post about it. Read each one, fix anything you want right in the box, then press <b>Approve &amp; Post</b>. If Facebook or Instagram is not connected yet, press <b>Copy</b>, paste it yourself, then press <b>Mark as posted</b> so the Results tab can track it.</div>
+      <div id="postsWrap"></div>
+    </section>
+
+    <section id="tab-results" class="hidden">
+      <div class="toolbar">
+        <select id="resDays"><option value="30">Last 30 days</option><option value="90" selected>Last 90 days</option><option value="365">Last year</option></select>
+        <button class="btn ghost" id="resRefresh">Refresh</button>
+      </div>
+      <div class="note">Clicks are people who came to the site from a post. Leads are form fills from those people. Sales are PayPal payments whose email matches one of those leads. Return shows only after you enter money spent on a boost. Free posts have no cost, so any sale from them is all profit.</div>
+      <h3>By platform</h3>
+      <div class="tablewrap"><table id="platTable"></table></div>
+      <h3>By post</h3>
+      <div class="tablewrap"><table id="postResTable"></table></div>
+      <h3>Money spent on boosts and ads</h3>
+      <div class="toolbar">
+        <input type="date" id="spDay" />
+        <select id="spPlat"><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option><option value="other">Other</option></select>
+        <select id="spCamp"><option value="">General (not one post)</option></select>
+        <input type="number" id="spAmt" placeholder="Amount $" min="0" step="0.01" style="width:120px" />
+        <input id="spNote" placeholder="Note (optional)" style="flex:1;min-width:160px" />
+        <button class="btn" id="spAdd">Add spend</button>
+      </div>
+      <div class="tablewrap"><table id="spendTable"></table></div>
     </section>
   </div>
 </div>
@@ -273,15 +329,139 @@ function loadSales(){
   ],d.sales);});
 }
 
+
+/* ---------- marketing ---------- */
+var POSTS=[];
+var PLAT_NAME={facebook:"Facebook",instagram:"Instagram",linkedin:"LinkedIn"};
+function loadMarketing(){
+  return api("marketing").then(function(d){
+    var st=d.setup||{};
+    var chips=[["tables","Marketing tables"],["claude","Claude writer"],["facebook","Facebook auto-post"],["instagram","Instagram auto-post"],["timer_key","Daily timer key"]];
+    $("setupChips").innerHTML=chips.map(function(c){return'<span class="chip '+(st[c[0]]?"ok":"no")+'" title="'+(st[c[0]]?"Connected":"Not set up yet. See MARKETING-SETUP.md")+'">'+(st[c[0]]?"✓ ":"○ ")+esc(c[1])+'</span>';}).join("")
+      +'<span class="chip'+(st.auto_post?" ok":"")+'">'+(st.auto_post?"Auto-post ON":"Approval first")+'</span>';
+    POSTS=d.posts||[];
+    var hasToday=POSTS.some(function(p){return p.day===d.today;});
+    $("writeBtn").textContent=hasToday?"Write another set":"Write today's posts";
+    $("writeBtn").dataset.force=hasToday?"1":"";
+    var waiting=POSTS.filter(function(p){return p.status==="draft"||p.status==="approved";}).length;
+    $("mktInfo").textContent=waiting?waiting+" post"+(waiting>1?"s":"")+" waiting for you":"Nothing waiting";
+    if(!st.tables){$("postsWrap").innerHTML='<div class="empty">The marketing tables are not in the database yet. Run the new part of schema.sql in the D1 console (step 1 in MARKETING-SETUP.md), then refresh.</div>';return;}
+    if(!POSTS.length){$("postsWrap").innerHTML='<div class="empty">No posts yet. Press <b>Write today\'s posts</b> to make the first set.</div>';return;}
+    var days={};POSTS.forEach(function(p){(days[p.day]=days[p.day]||[]).push(p);});
+    var html="";
+    Object.keys(days).sort().reverse().forEach(function(day){
+      var list=days[day];
+      html+='<div class="dayhead"><h3>'+esc(new Date(day+"T12:00:00").toLocaleDateString("en-US",{weekday:"long",month:"short",day:"numeric"}))+'</h3><span class="legend">'+esc(list.map(function(p){return p.item_label||"";}).filter(function(v,i,a){return v&&a.indexOf(v)===i;}).join(" · "))+'</span></div><div class="pgrid">';
+      list.forEach(function(p){html+=postCard(p);});
+      html+='</div>';
+    });
+    $("postsWrap").innerHTML=html;
+    $("postsWrap").querySelectorAll("[data-act]").forEach(function(b){b.onclick=function(){postAction(+b.dataset.id,b.dataset.act,b);};});
+  });
+}
+function postCard(p){
+  var auto=(p.platform!=="linkedin");
+  var done=p.status==="posted",rej=p.status==="rejected";
+  var b='';
+  if(!done&&!rej){
+    if(auto)b+='<button class="btn sm" data-act="publish" data-id="'+p.id+'">Approve &amp; Post</button>';
+    b+='<button class="btn sm ghost" data-act="copy" data-id="'+p.id+'">Copy</button>';
+    if(p.platform==="linkedin")b+='<a class="btn sm ghost" href="https://www.linkedin.com/feed/?shareActive=true" target="_blank" rel="noopener" style="text-decoration:none">Open LinkedIn</a>';
+    b+='<a class="btn sm ghost" href="'+esc(p.image)+'" download target="_blank" rel="noopener" style="text-decoration:none">Image</a>';
+    b+='<button class="btn sm ghost" data-act="save" data-id="'+p.id+'">Save edits</button>';
+    b+='<button class="btn sm ghost" data-act="posted" data-id="'+p.id+'">Mark as posted</button>';
+    b+='<button class="btn sm ghost" data-act="reject" data-id="'+p.id+'">Reject</button>';
+  }else if(rej){
+    b+='<button class="btn sm ghost" data-act="undo" data-id="'+p.id+'">Bring back</button>';
+  }else{
+    b+='<button class="btn sm ghost" data-act="copy" data-id="'+p.id+'">Copy</button>';
+  }
+  return'<div class="pcard st-'+esc(p.status)+'">'
+    +'<div class="top"><span class="plat '+esc(p.platform)+'">'+esc(PLAT_NAME[p.platform]||p.platform)+'</span><span class="pill p-'+esc(p.status)+'">'+esc(p.status)+'</span><span class="meta">'+esc(p.angle||"")+' · '+esc(p.campaign||"")+'</span></div>'
+    +'<img src="'+esc(p.image)+'" alt="" loading="lazy" />'
+    +'<textarea id="pt'+p.id+'"'+(done||rej?" readonly":"")+'>'+esc(p.body)+'</textarea>'
+    +(p.error?'<div class="err">'+esc(p.error)+'</div>':'')
+    +(done?'<div class="meta">Posted '+esc(fmtDate(p.posted_at))+(p.remote_id?" · id "+esc(p.remote_id):"")+'</div>':'')
+    +'<div class="row" style="margin:0">'+b+'</div></div>';
+}
+function postAction(id,act,btn){
+  var text=$("pt"+id)?$("pt"+id).value:"";
+  var busy=function(on){btn.disabled=on;if(on){btn.dataset.l=btn.textContent;btn.textContent="Working…";}else if(btn.dataset.l)btn.textContent=btn.dataset.l;};
+  if(act==="copy"){
+    var done=function(){toast("Copied. Paste it on "+(PLAT_NAME[(POSTS.find(function(p){return p.id===id;})||{}).platform]||"the site"));};
+    if(navigator.clipboard)navigator.clipboard.writeText(text).then(done,function(){$("pt"+id).select();document.execCommand("copy");done();});
+    else{$("pt"+id).select();document.execCommand("copy");done();}
+    return;
+  }
+  if(act==="save"){busy(true);api("post/"+id,{method:"PATCH",body:{body:text}}).then(function(r){busy(false);toast(r.ok?"Saved":(r.error||"Not saved"));});return;}
+  if(act==="reject"){api("post/"+id,{method:"PATCH",body:{status:"rejected"}}).then(loadMarketing);return;}
+  if(act==="undo"){api("post/"+id,{method:"PATCH",body:{status:"draft"}}).then(loadMarketing);return;}
+  if(act==="posted"){api("post/"+id,{method:"PATCH",body:{body:text,status:"posted"}}).then(function(){toast("Marked as posted");loadMarketing();});return;}
+  if(act==="publish"){
+    busy(true);
+    api("post/"+id,{method:"PATCH",body:{body:text,status:"approved"}})
+      .then(function(){return api("post/"+id+"/publish",{method:"POST"});})
+      .then(function(r){busy(false);if(r.ok)toast("Posted");else alert(r.error||"That did not post.");loadMarketing();})
+      .catch(function(){busy(false);});
+  }
+}
+$("writeBtn").onclick=function(){
+  var force=!!$("writeBtn").dataset.force;
+  if(force&&!confirm("Today's posts are already written. Write another set about a different product?"))return;
+  var b=$("writeBtn");b.disabled=true;b.textContent="Writing… (about 30 seconds)";
+  api("write",{method:"POST",body:{force:force}}).then(function(r){b.disabled=false;if(!r.ok)alert(r.error||"The agent could not write posts.");loadMarketing();})
+    .catch(function(){b.disabled=false;loadMarketing();});
+};
+$("mktRefresh").onclick=loadMarketing;
+
+/* ---------- results ---------- */
+var pct=function(r){if(r==null)return'<span style="color:var(--text2)">no spend</span>';var v=Math.round(r*100);return'<span class="'+(v>=0?"roi-pos":"roi-neg")+'">'+(v>=0?"+":"")+v+'%</span>';};
+var numCol=function(k,l){return{key:k,label:l,val:function(r){return Number(r[k])||0;}};};
+var moneyCol=function(k,l){return{key:k,label:l,val:function(r){return Number(r[k])||0;},render:function(r){return r[k]?money(r[k]):"";}};};
+function loadResults(){
+  api("results?days="+$("resDays").value).then(function(d){
+    if(!d.ok){$("platTable").innerHTML='<tr><td class="empty">'+esc(d.error||"No results")+'</td></tr>';return;}
+    renderTable($("platTable"),[
+      {key:"platform",label:"Platform",render:function(r){return r.platform==="All"?"<b>All</b>":esc(PLAT_NAME[r.platform]||r.platform);}},
+      numCol("posts","Posts"),numCol("clicks","Clicks"),numCol("checkouts","Checkout clicks"),numCol("leads","Leads"),numCol("sales","Sales"),
+      moneyCol("revenue","Revenue"),moneyCol("spend","Spent"),{key:"roi",label:"Return",val:function(r){return r.roi==null?-1e9:r.roi;},render:function(r){return pct(r.roi);}}
+    ],d.totals);
+    renderTable($("postResTable"),[
+      {key:"day",label:"Day"},{key:"platform",label:"Platform",val:function(r){return PLAT_NAME[r.platform]||r.platform;}},
+      {key:"item_label",label:"Product",clip:true},{key:"angle",label:"Type"},{key:"campaign",label:"Tag"},
+      numCol("clicks","Clicks"),numCol("checkouts","Checkout clicks"),numCol("leads","Leads"),numCol("sales","Sales"),
+      moneyCol("revenue","Revenue"),moneyCol("spend","Spent"),{key:"roi",label:"Return",val:function(r){return r.roi==null?-1e9:r.roi;},render:function(r){return pct(r.roi);}}
+    ],d.posts);
+    var cur=$("spCamp").value;
+    $("spCamp").innerHTML='<option value="">General (not one post)</option>'+d.posts.map(function(p){return'<option value="'+esc(p.campaign)+'">'+esc(p.day+" · "+(PLAT_NAME[p.platform]||p.platform)+" · "+(p.item_label||"")+" ("+p.campaign+")")+'</option>';}).join("");
+    $("spCamp").value=cur;
+    renderTable($("spendTable"),[
+      {key:"day",label:"Day"},{key:"platform",label:"Platform",val:function(r){return PLAT_NAME[r.platform]||r.platform;}},
+      {key:"campaign",label:"Post",val:function(r){return r.campaign||"General";}},moneyCol("amount","Amount"),{key:"note",label:"Note",clip:true},
+      {key:"del",label:"",val:function(){return"";},render:function(r){return'<a href="#" data-del="'+r.id+'">Delete</a>';}}
+    ],d.spend);
+    $("spendTable").querySelectorAll("[data-del]").forEach(function(a){a.onclick=function(e){e.preventDefault();if(confirm("Delete this spend entry?"))api("spend/"+a.dataset.del,{method:"DELETE"}).then(loadResults);};});
+  });
+}
+$("resDays").onchange=loadResults;$("resRefresh").onclick=loadResults;
+$("spAdd").onclick=function(){
+  api("spend",{method:"POST",body:{day:$("spDay").value,platform:$("spPlat").value,campaign:$("spCamp").value,amount:$("spAmt").value,note:$("spNote").value}})
+    .then(function(r){if(!r.ok){alert(r.error);return;}$("spAmt").value="";$("spNote").value="";toast("Spend added");loadResults();});
+};
+try{$("spDay").value=new Date().toLocaleDateString("en-CA",{timeZone:"America/Chicago"});}catch(e){}
+
 /* ---------- tabs / boot ---------- */
 document.querySelectorAll(".tab[data-tab]").forEach(function(b){b.onclick=function(){
   document.querySelectorAll(".tab[data-tab]").forEach(function(x){x.classList.remove("on");});b.classList.add("on");
-  ["pipeline","visitors","sales"].forEach(function(n){$("tab-"+n).classList.toggle("hidden",n!==b.dataset.tab);});
+  ["pipeline","visitors","sales","marketing","results"].forEach(function(n){$("tab-"+n).classList.toggle("hidden",n!==b.dataset.tab);});
+  $("tiles").classList.toggle("hidden",b.dataset.tab==="marketing"||b.dataset.tab==="results");
   if(b.dataset.tab==="visitors")loadVisitors();if(b.dataset.tab==="sales")loadSales();
+  if(b.dataset.tab==="marketing")loadMarketing();if(b.dataset.tab==="results")loadResults();
 };});
 function start(){
   $("login").classList.add("hidden");$("app").classList.remove("hidden");
   loadStats();loadLeads().then(function(){var m=location.hash.match(/lead=(\d+)/);if(m)openLead({id:+m[1]});});
+  var h=(location.hash.match(/^#(marketing|results)$/)||[])[1];if(h)document.querySelector('.tab[data-tab="'+h+'"]').click();
 }
 if(KEY){api("stats").then(start).catch(function(){$("login").classList.remove("hidden");});}else{$("login").classList.remove("hidden");}
 })();

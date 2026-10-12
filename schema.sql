@@ -54,3 +54,44 @@ CREATE TABLE IF NOT EXISTS activity (
   body     TEXT
 );
 CREATE INDEX IF NOT EXISTS activity_lead ON activity(lead_id);
+
+-- ---------------------------------------------------------------
+-- Marketing agent (added Oct 2026). Safe to run on the live database:
+-- these only add new tables, nothing above is changed.
+-- ---------------------------------------------------------------
+
+-- One row per social post. The agent writes drafts; you approve them in the CRM.
+CREATE TABLE IF NOT EXISTS posts (
+  id           INTEGER PRIMARY KEY AUTOINCREMENT,
+  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at   TEXT NOT NULL DEFAULT (datetime('now')),
+  day          TEXT NOT NULL,                     -- the date the agent wrote it for (YYYY-MM-DD, Lafayette time)
+  platform     TEXT NOT NULL,                     -- facebook | instagram | linkedin
+  item         TEXT,                              -- product slug
+  item_label   TEXT,
+  angle        TEXT,                              -- tip | demo | feature | story | offer
+  body         TEXT NOT NULL,                     -- the post text
+  link         TEXT,                              -- tracked link to the product page
+  image        TEXT,                              -- full image URL
+  campaign     TEXT,                              -- tracking tag in the link, e.g. p12
+  status       TEXT NOT NULL DEFAULT 'draft',     -- draft | approved | posted | rejected
+  posted_at    TEXT,
+  remote_id    TEXT,                              -- Facebook / Instagram post id
+  error        TEXT
+);
+CREATE INDEX IF NOT EXISTS posts_day      ON posts(day);
+CREATE INDEX IF NOT EXISTS posts_status   ON posts(status);
+CREATE INDEX IF NOT EXISTS posts_campaign ON posts(campaign);
+
+-- Money spent boosting posts or on ads. Return = (sales from that post - spend) / spend.
+CREATE TABLE IF NOT EXISTS spend (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  at         TEXT NOT NULL DEFAULT (datetime('now')),
+  day        TEXT NOT NULL,
+  platform   TEXT NOT NULL,                       -- facebook | instagram | linkedin | other
+  campaign   TEXT,                                -- the post's tag (p12), blank = general spend
+  amount     REAL NOT NULL DEFAULT 0,
+  note       TEXT
+);
+CREATE INDEX IF NOT EXISTS spend_campaign ON spend(campaign);
+CREATE INDEX IF NOT EXISTS visits_campaign ON visits(utm_campaign);

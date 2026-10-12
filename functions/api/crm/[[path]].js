@@ -7,7 +7,18 @@
 //   GET   /api/crm/visits?days=30        page-view summary + recent sessions
 //   GET   /api/crm/sales                 PayPal events
 //   GET   /api/crm/export.csv            all leads as CSV
+// Marketing agent:
+//   GET   /api/crm/marketing             setup status + posts from the last 60 days
+//   POST  /api/crm/write                 {force?, slug?}  agent writes posts now
+//   PATCH /api/crm/post/:id              {body?, status?}  edit, approve, reject, mark posted
+//   POST  /api/crm/post/:id/publish      send to Facebook / Instagram
+//   GET   /api/crm/results?days=90       clicks, leads, sales, spend and ROI per post and platform
+//   POST  /api/crm/spend                 {day, platform, campaign?, amount, note?}
+//   DELETE /api/crm/spend/:id
 import { json, bad, readJson, clean, authed } from "../../_lib.js";
+import { setupStatus, today, writeDailyPosts, publishPost, results, PLATFORMS } from "../../_agent.js";
+
+const POST_STATUSES = ["draft", "approved", "posted", "rejected"];
 
 const STATUSES = ["new", "contacted", "demo", "quoted", "won", "lost", "stop"];
 
@@ -103,6 +114,65 @@ export async function onRequest({ request, env, params }) {
     const head = Object.keys(rows[0] || { id: 0 });
     const csv = [head.join(",")].concat(rows.map((r) => head.map((k) => esc(r[k])).join(","))).join("\r\n");
     return new Response(csv, { headers: { "content-type": "text/csv", "content-disposition": "attachment; filename=shellkey-leads.csv" } });
+  }
+
+  // ---------------------------------------------------------------- marketing agent
+  if (route === "marketing" && request.method === "GET") {
+    let posts = [], tables = true;
+    try { posts = (await db.prepare("SELECT * FROM posts WHERE day >= date('now','-60 days') ORDER BY day DESC, id ASC").all()).results; }
+    catch (e) { tables = false; }
+    return json({ ok: true, setup: Object.assign(setupStatus(env), { tables }), today: today(), posts });
+  }
+
+  if (route === "write" && request.method === "POST") {
+    const b = (await readJson(request)) || {};
+    try { return json(await writeDailyPosts(env, { force: !!b.force, slug: clean(b.slug, 80) })); }
+    catch (e) { return bad(String(e.message || e), 500); }
+  }
+
+  if (route === "post" && id) {
+    if (request.method === "POST" && parts[2] === "publish") {
+      try { return json(await publishPost(env, id)); }
+      catch (e) { return bad(String(e.message || e), 400); }
+    }
+    if (request.method === "PATCH") {
+      const b = await readJson(request); if (!b) return bad("Expected JSON");
+      const sets = [], vals = [];
+      if (b.body !== undefined) { const t = clean(b.body, 5000); if (!t) return bad("Post text is empty"); sets.push("body=?"); vals.push(t); }
+      if (b.status !== undefined) {
+        if (!POST_STATUSES.includes(b.status)) return bad("Bad status");
+        sets.push("status=?"); vals.push(b.status);
+        if (b.status === "posted") sets.push("posted_at=COALESCE(posted_at, datetime('now'))", "error=NULL");
+      }
+      if (!sets.length) return bad("Nothing to change");
+      sets.push("updated_at=datetime('now')"); vals.push(id);
+      await db.prepare("UPDATE posts SET " + sets.join(", ") + " WHERE id=?").bind(...vals).run();
+      return json({ ok: true });
+    }
+  }
+
+  if (route === "results" && request.method === "GET") {
+    const days = Math.min(730, Math.max(1, parseInt(url.searchParams.get("days") || "90", 10)));
+    try { return json(await results(db, days)); }
+    catch (e) { return bad("Results need the marketing tables. Run the new part of schema.sql in the D1 console. (" + e.message + ")", 500); }
+  }
+
+  if (route === "spend") {
+    if (request.method === "POST") {
+      const b = await readJson(request); if (!b) return bad("Expected JSON");
+      const amount = parseFloat(b.amount);
+      const platform = clean(b.platform, 20).toLowerCase();
+      if (!(amount > 0)) return bad("Enter the amount you spent");
+      if (!PLATFORMS.includes(platform) && platform !== "other") return bad("Pick a platform");
+      const day = /^\d{4}-\d{2}-\d{2}$/.test(b.day || "") ? b.day : today();
+      await db.prepare("INSERT INTO spend (day, platform, campaign, amount, note) VALUES (?,?,?,?,?)")
+        .bind(day, platform, clean(b.campaign, 20), amount, clean(b.note, 300)).run();
+      return json({ ok: true });
+    }
+    if (request.method === "DELETE" && id) {
+      await db.prepare("DELETE FROM spend WHERE id=?").bind(id).run();
+      return json({ ok: true });
+    }
   }
 
   return bad("Unknown route", 404);
