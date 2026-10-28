@@ -1,4 +1,27 @@
 {
- "posts": [],
- "days": {}
+ "posts": [
+  {
+   "id": "lj8LLRTUSxE",
+   "url": "https://youtube.com/shorts/lj8LLRTUSxE",
+   "slug": "contractor-system",
+   "title": "Shell Key Contractor System: try the free demo #Shorts",
+   "slot": "manual",
+   "date": "2026-10-28",
+   "postedAt": "2026-10-28T21:29:49.876Z",
+   "privacy": "unlisted",
+   "views48": null,
+   "videoUrl": "https://github.com/Shell-Key/shellkey-site/releases/download/shorts/contractor-system-20261028-2129.mp4"
+  }
+ ],
+ "days": {
+  "2026-10-28": {
+   "slots": [
+    15,
+    17,
+    19
+   ],
+   "mode": "testing",
+   "ranked": false
+  }
+ }
 }
