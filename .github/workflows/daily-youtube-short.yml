@@ -1,0 +1,63 @@
+# Daily YouTube Short: records one portal demo, adds the voice, posts it.
+# Runs every morning by itself. To run it now: GitHub > Actions >
+# "Daily YouTube Short" > Run workflow (you can name a product, or leave "auto").
+name: Daily YouTube Short
+
+on:
+  schedule:
+    - cron: "41 14 * * *"     # 9:41 AM Central (8:41 in winter)
+  workflow_dispatch:
+    inputs:
+      product:
+        description: "Product slug from shorts/products.json, or auto for the next one in line"
+        default: "auto"
+      privacy:
+        description: "public, unlisted or private"
+        default: "public"
+
+permissions:
+  contents: read
+
+jobs:
+  short:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg python3-pil
+          npm install --no-save --no-audit --no-fund playwright@1.49.1
+          npx playwright install --with-deps chromium
+
+      - name: Record the demo and make the voice
+        env:
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_AI_TOKEN: ${{ secrets.CF_AI_TOKEN }}
+        run: node shorts/record.mjs "${{ github.event.inputs.product || 'auto' }}" shorts-out
+
+      - name: Build the Short (10 to 30 seconds)
+        run: python3 shorts/compose.py shorts-out
+
+      - name: Keep a copy of the video
+        uses: actions/upload-artifact@v4
+        with:
+          name: short
+          path: |
+            shorts-out/short.mp4
+            shorts-out/youtube.json
+          retention-days: 14
+
+      - name: Post to YouTube
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          YT_PRIVACY: ${{ github.event.inputs.privacy || 'public' }}
+        run: node shorts/upload.mjs shorts-out

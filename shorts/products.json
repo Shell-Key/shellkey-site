@@ -1,0 +1,275 @@
+{
+  "_read_me": "One entry per portal with a free demo. The daily job picks the next one in this list. Each scene: what to click (button text on the demo screen, or null to stay), the caption on screen, and the line the voice says. Keep voice lines short: the whole video must be 10 to 30 seconds.",
+  "voice": "asteria",
+  "products": [
+    {
+      "slug": "dcma-health-reviewer",
+      "title": "DCMA Schedule Health Reviewer",
+      "tagline": "Grade any P6 schedule in seconds",
+      "start": [
+        "See the sample review"
+      ],
+      "scenes": [
+        {
+          "click": "Dashboard",
+          "caption": "Load any P6 or MS Project schedule",
+          "say": "Load your P6 or Microsoft Project schedule."
+        },
+        {
+          "click": "DCMA 14-Point",
+          "caption": "All 14 DCMA checks, graded",
+          "say": "Get a grade on all fourteen DCMA checks."
+        },
+        {
+          "click": "Fix List",
+          "caption": "A fix list, sorted by priority",
+          "say": "Then a fix list, sorted by what to fix first."
+        },
+        {
+          "click": "Critical Path",
+          "caption": "See your critical path",
+          "say": "And see your critical path at a glance."
+        }
+      ]
+    },
+    {
+      "slug": "4d-schedule-sequence",
+      "title": "4D Schedule Sequence",
+      "tagline": "Your P6 schedule on your plot plan",
+      "start": [],
+      "scenes": [
+        {
+          "click": null,
+          "caption": "Your P6 schedule, on your plot plan",
+          "say": "Put your P6 schedule right on your plot plan."
+        },
+        {
+          "click": "Play",
+          "caption": "Watch the job build week by week",
+          "say": "Press play, and watch the job build week by week.",
+          "hold": 2.5
+        },
+        {
+          "click": "S-curves",
+          "caption": "S-curves: planned vs. actual",
+          "say": "Check planned versus actual progress."
+        },
+        {
+          "click": "Area timeline",
+          "caption": "What gets built where, and when",
+          "say": "And see what gets built where, and when."
+        }
+      ]
+    },
+    {
+      "slug": "contractor-system",
+      "title": "Shell Key Contractor System",
+      "tagline": "Every contractor, one set of numbers",
+      "start": [],
+      "scenes": [
+        {
+          "click": "Project overview",
+          "caption": "Every contractor on one project",
+          "say": "Every contractor on your project, in one place."
+        },
+        {
+          "click": "Master schedule",
+          "caption": "One master schedule",
+          "say": "One master schedule everyone updates."
+        },
+        {
+          "click": "Progress & S-curves",
+          "caption": "Progress and S-curves",
+          "say": "Progress and S-curves, ready for the owner."
+        },
+        {
+          "click": "Estimates, bids & cost",
+          "caption": "Estimates, bids and cost",
+          "say": "Plus estimates, bids and cost tracking."
+        }
+      ]
+    },
+    {
+      "slug": "project-system",
+      "title": "Shell Key Project System",
+      "tagline": "From approved scope to turnover",
+      "start": [],
+      "scenes": [
+        {
+          "click": "Project overview",
+          "caption": "Your whole project, one screen",
+          "say": "See your whole project on one screen."
+        },
+        {
+          "click": "Work packages",
+          "caption": "Work packages, ready to issue",
+          "say": "Build and track every work package."
+        },
+        {
+          "click": "Schedule & milestones",
+          "caption": "Schedule and milestones",
+          "say": "Keep the schedule and milestones on track."
+        },
+        {
+          "click": "Resources & cost",
+          "caption": "Resources and cost",
+          "say": "And watch resources and cost every week."
+        }
+      ]
+    },
+    {
+      "slug": "family-finance",
+      "title": "Family Finance",
+      "tagline": "Your household money, in one place",
+      "start": [
+        "Skip tutorial"
+      ],
+      "scenes": [
+        {
+          "click": "Dashboard",
+          "caption": "Your household money, one screen",
+          "say": "All your household money on one screen."
+        },
+        {
+          "click": "Monthly Budget",
+          "caption": "A monthly budget that works",
+          "say": "Set a monthly budget you can actually keep."
+        },
+        {
+          "click": "Debt Payoff",
+          "caption": "A plan to pay off debt",
+          "say": "Make a plan to pay off debt."
+        },
+        {
+          "click": "Savings Goals",
+          "caption": "Track your savings goals",
+          "say": "And watch your savings goals grow."
+        }
+      ],
+      "hashtags": "#Shorts #PersonalFinance #Budgeting"
+    },
+    {
+      "slug": "inspection-system",
+      "title": "NDE OneSystem",
+      "tagline": "Field operations for NDE companies",
+      "start": [
+        "Continue in Demo Mode"
+      ],
+      "scenes": [
+        {
+          "click": "Dashboard",
+          "caption": "Your NDE company, one dashboard",
+          "say": "Run your NDE company from one dashboard."
+        },
+        {
+          "click": "NDE Requests",
+          "caption": "Every NDE request in one register",
+          "say": "Every NDE request in one register."
+        },
+        {
+          "click": "Field Inspections",
+          "caption": "Field inspections, logged on site",
+          "say": "Field inspections, logged right on site."
+        },
+        {
+          "click": "Technicians",
+          "caption": "Technicians and certifications",
+          "say": "And every technician's certifications, tracked."
+        }
+      ]
+    },
+    {
+      "slug": "api-1104-im",
+      "title": "API 1104 IM",
+      "tagline": "Pipeline weld inspection, traced",
+      "start": [
+        "Continue to API 1104 IM",
+        "Go to Dashboard"
+      ],
+      "scenes": [
+        {
+          "click": "Weld Dashboard",
+          "caption": "Every pipeline weld, traced",
+          "say": "Trace every pipeline weld in one place."
+        },
+        {
+          "click": "Weld Inspections",
+          "caption": "Weld inspections in the field",
+          "say": "Log weld inspections in the field."
+        },
+        {
+          "click": "Indications & Repairs",
+          "caption": "Indications and repairs",
+          "say": "Track indications and repairs to release."
+        },
+        {
+          "click": "Weld Reports",
+          "caption": "Reports, ready to send",
+          "say": "And send reports in one click."
+        }
+      ]
+    },
+    {
+      "slug": "api-653-im",
+      "title": "API 653 IM",
+      "tagline": "Tank inspection, start to report",
+      "start": [
+        "Continue to API 653 IM",
+        "Go to Dashboard"
+      ],
+      "scenes": [
+        {
+          "click": "Dashboard",
+          "caption": "Every tank inspection, one dashboard",
+          "say": "Every tank inspection on one dashboard."
+        },
+        {
+          "click": "My Inspections",
+          "caption": "Inspections, assigned and tracked",
+          "say": "Assign and track each inspection."
+        },
+        {
+          "click": "Recommendations",
+          "caption": "Recommendations, followed up",
+          "say": "Follow up every recommendation."
+        },
+        {
+          "click": "Reports",
+          "caption": "Approved reports",
+          "say": "And get to an approved report faster."
+        }
+      ]
+    },
+    {
+      "slug": "aws-cwi-im",
+      "title": "AWS-CWI IM",
+      "tagline": "Welding quality control, simplified",
+      "start": [
+        "Continue to AWS-CWI IM",
+        "Go to Dashboard"
+      ],
+      "scenes": [
+        {
+          "click": "Dashboard",
+          "caption": "Welding QC, one dashboard",
+          "say": "Run welding quality control from one dashboard."
+        },
+        {
+          "click": "Weld Register",
+          "caption": "A complete weld register",
+          "say": "Keep a complete weld register."
+        },
+        {
+          "click": "Qualifications",
+          "caption": "Welder qualifications tracked",
+          "say": "Track every welder's qualifications."
+        },
+        {
+          "click": "Corrective Actions",
+          "caption": "Corrective actions closed out",
+          "say": "And close out corrective actions."
+        }
+      ]
+    }
+  ]
+}
