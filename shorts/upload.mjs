@@ -55,6 +55,7 @@ async function main() {
   const url = `https://youtube.com/shorts/${v.id}`;
   writeFileSync(join(outDir, "posted.json"), JSON.stringify({ id: v.id, url, title: meta.title, privacy: PRIVACY }, null, 1));
   console.log(`Posted to YouTube (${PRIVACY}): ${url}`);
+  console.log(`::notice title=Posted to YouTube (${PRIVACY})::${meta.title} ${url}`);   // shows on the run page
 }
 
 main().catch(e => { console.log(`::error title=YouTube upload failed::${String(e.message || e).replace(/\n/g, " ")}`); process.exit(1); });
