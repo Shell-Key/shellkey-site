@@ -51,7 +51,11 @@ async function pickProduct(db, day) {
     if (!last[slug]) return 60;
     return Math.max(0, Math.round((Date.parse(day) - Date.parse(last[slug])) / 86400000));
   };
-  const pool = CATALOG.filter((p) => !BRAND.never.includes(p.slug));
+  // Only post about things a visitor can pay for today. Request-only and coming-soon
+  // items waste the post: people click, can't buy, and leave.
+  const open = CATALOG.filter((p) => !BRAND.never.includes(p.slug));
+  const buyNow = open.filter((p) => p.status === "available" && p.buyable);
+  const pool = buyNow.length ? buyNow : open;
   let best = null, bestScore = -1;
   for (const p of pool) {
     let s = 0;
