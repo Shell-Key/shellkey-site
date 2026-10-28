@@ -75,6 +75,12 @@ function pickAngle(product, day) {
   return angles[n % angles.length];
 }
 
+// Word limits (not counting hashtags or the link); a post over this gets rewritten once
+const LIMIT = { facebook: 40, instagram: 40, linkedin: 45 };
+function words(text) {
+  return String(text || "").replace(/\{LINK\}|https?:\/\/\S+|#\w+/g, " ").split(/\s+/).filter(Boolean).length;
+}
+
 // ---------------------------------------------------------------- talking to Claude
 async function askClaude(env, system, user) {
   const r = await fetch((env.ANTHROPIC_BASE_URL || "https://api.anthropic.com") + "/v1/messages", {
@@ -86,7 +92,7 @@ async function askClaude(env, system, user) {
     },
     body: JSON.stringify({
       model: env.CLAUDE_MODEL || MODEL,
-      max_tokens: 2500,
+      max_tokens: 1000,
       system,
       messages: [{ role: "user", content: user }],
     }),
@@ -151,7 +157,13 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
     recent.length ? "RECENT POSTS. Do not repeat their openings or phrasing:\n" + recent.map((r) => "- " + r.body.slice(0, 160).replace(/\s+/g, " ")).join("\n") : "",
   ].join("\n");
 
-  const out = parseJson(await askClaude(env, systemPrompt(), user));
+  let out = parseJson(await askClaude(env, systemPrompt(), user));
+  // Posts must stay short. If any came back long, ask once more for shorter ones.
+  const tooLong = PLATFORMS.filter((pl) => words(out[pl]) > LIMIT[pl]);
+  if (tooLong.length) {
+    out = { ...out, ...parseJson(await askClaude(env, systemPrompt(), user +
+      `\n\nYour last version was too long for: ${tooLong.join(", ")}. Rewrite ALL posts much shorter: 2 or 3 short lines each, no paragraphs.`)) };
+  }
   const image = BRAND.site + "/" + (product.social || product.img);
   const created = [];
   for (const platform of PLATFORMS) {

@@ -30,9 +30,11 @@ export const BRAND = {
 
   voice: [
     "Sound like Kirby talking to someone on the job: plain, direct, practical, a little dry humor is fine.",
-    "Lead with the problem the reader has this week, then how the product fixes it.",
+    "SHORT. Nobody reads paragraphs. The image does most of the work; the words just make people want to click.",
+    "Shape of every post: one hook line (a question or 'Check this out'), one line on what it does, then the next step. That's it.",
+    "Lead with the problem the reader has this week, in a few words.",
     "Use real job language (P6, XER, critical path, workpacks, weld map, NDE, turnaround, TAR) when the audience is industrial.",
-    "Short sentences. No hype words: never 'revolutionary', 'game-changer', 'unlock', 'supercharge', 'elevate', 'seamless'.",
+    "No paragraphs, no long descriptions, no lists of features. Short sentences. No hype words: never 'revolutionary', 'game-changer', 'unlock', 'supercharge', 'elevate', 'seamless'.",
     "US English spelling. Write the company name as Shell Key.",
     "Never invent customers, results, testimonials, statistics, discounts or deadlines. Only use facts from the product data.",
     "Always give one clear next step: try the free demo, see the product, or call or email Kirby.",
@@ -40,18 +42,18 @@ export const BRAND = {
 
   // How each platform should look.
   platforms: {
-    facebook: "80 to 160 words. Conversational. Can open with a short question or a job-site moment. Put the link on its own line at the end. 0 to 3 hashtags.",
-    instagram: "60 to 140 words. Strong first line, short paragraphs. Links are not clickable on Instagram, so end with 'Link in bio, or search shellkey.company'. 5 to 10 relevant hashtags on the last line.",
-    linkedin: "100 to 220 words. Professional but still Kirby's voice. Open with a lesson from the field, then the product as the fix. Put the link on its own line at the end. 3 to 5 hashtags.",
+    facebook: "15 to 35 words, 2 or 3 short lines. Hook line, what it does, next step (for example 'Try the free demo'). Put the link on its own line at the end. 0 to 2 hashtags.",
+    instagram: "15 to 35 words, 2 or 3 short lines. Hook line, what it does, next step. Links are not clickable on Instagram, so end with 'Link in bio'. 3 to 5 hashtags on the last line.",
+    linkedin: "20 to 40 words, 2 or 3 short lines. Hook line, what it does, next step. Still Kirby's voice, a bit more professional. Put the link on its own line at the end. 2 or 3 hashtags.",
   },
 
   // What kind of post to write, rotated day by day so the feed is not all ads.
+  // Every angle is still a SHORT post (see platforms above).
   angles: [
-    "tip: a useful how-to or lesson from the field related to the product, with the product mentioned as the shortcut",
-    "demo: invite people to try the free demo, say exactly what they will see in the first two minutes",
-    "feature: one specific feature, the problem it solves, and what it replaces (usually a spreadsheet)",
-    "story: a short job-site story about the problem the product was built for",
-    "offer: who it is for, what it costs, what they get, and how to start today",
+    "question: open with 'Do you need ...?' or 'Still doing ... by hand?', then the product in one line",
+    "demo: 'Try this' or 'Check this out', what it does in one line, then 'Try the free demo'",
+    "feature: one feature in one line and what it replaces (usually a spreadsheet)",
+    "offer: who it is for and the price in one line, then how to start today",
   ],
 
   // Products to push harder. Slugs from the store. Leave empty to rotate evenly.
