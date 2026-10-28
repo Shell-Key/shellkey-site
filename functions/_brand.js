@@ -55,7 +55,7 @@ export const BRAND = {
   ],
 
   // Products to push harder. Slugs from the store. Leave empty to rotate evenly.
-  focus: ["dcma-health-reviewer", "bid-board", "learn-power-bi-4-hours"],
+  focus: ["dcma-health-reviewer", "bid-board", "4d-schedule-sequence", "family-finance"],
 
   // Products the agent must never post about (slugs).
   never: [],
