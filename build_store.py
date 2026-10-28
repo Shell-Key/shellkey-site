@@ -39,10 +39,11 @@ CATEGORIES = [
      "you know what you are getting before anyone starts."),
     ("training", "Training &amp; Procedures",
      "Courses and SOPs written for industrial execution, using industrial data."),
-    ("guides", "Guides &amp; eBooks",
-     "Practical step-by-step guides. Instant download, delivered by email."),
     ("free", "Free Tools",
      "Useful on their own. No purchase, no catch."),
+    # eBooks always go last on the store page (Kirby's rule: portals and software first)
+    ("guides", "Guides &amp; eBooks",
+     "Practical step-by-step guides. Instant download, delivered by email."),
 ]
 
 # PayPal links. Subscription plans use the hosted subscribe URL; one-time items use
@@ -1217,7 +1218,7 @@ def build_store():
             <div class="hero-cta">
               <a class="btn btn-primary" href="#software">Software Subscriptions</a>
               <a class="btn btn-ghost" href="#wallcharts">Wall Charts</a>
-              <a class="btn btn-ghost" href="#guides">Guides — Available Now</a>
+              <a class="btn btn-ghost" href="#builds">Portals Built For You</a>
             </div>
           </div>
         </div>
@@ -1232,7 +1233,8 @@ def build_store():
 """)
 
     # Things a visitor can pay for right now go first, in one place.
-    buy_now = [p for p in PRODUCTS if p["status"] == "available" and live_link(p.get("paypal"))]
+    # eBooks are left out here; they have their own section at the very bottom.
+    buy_now = [p for p in PRODUCTS if p["status"] == "available" and live_link(p.get("paypal")) and p["cat"] != "guides"]
     buy_slugs = {p["slug"] for p in buy_now}
     if buy_now:
         parts.append("""    <section id="buy-today" class="section">
