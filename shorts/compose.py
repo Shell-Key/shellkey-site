@@ -106,8 +106,8 @@ if clips:
         ms = int(at * 1000)
         fc.append(f"[{n_img + k}:a]aresample=48000,adelay={ms}|{ms}[a{k}]")
     mix = "".join(f"[a{k}]" for k in range(len(clips)))
-    fc.append(f"{mix}amix=inputs={len(clips)}:normalize=0:dropout_transition=0,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{total:.2f}[aout]")
-    amap = ["-map", "[aout]", "-c:a", "aac", "-b:a", "160k"]
+    fc.append(f"{mix}amix=inputs={len(clips)}:normalize=0:dropout_transition=0,acompressor=threshold=0.1:ratio=4:attack=5:release=120:makeup=2,loudnorm=I=-10:TP=-1:LRA=7,aresample=48000,pan=stereo|c0=c0|c1=c0,apad,atrim=0:{total:.2f}[aout]")
+    amap = ["-map", "[aout]", "-c:a", "aac", "-b:a", "192k", "-ac", "2"]
 else:
     # Silent track so every upload has audio (YouTube handles it better)
     inputs += ["-f", "lavfi", "-t", f"{total:.2f}", "-i", "anullsrc=r=48000:cl=stereo"]
