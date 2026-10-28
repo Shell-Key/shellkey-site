@@ -53,13 +53,22 @@ async function speak(text, file) {
   }
   const voice = process.env.SHORTS_VOICE || CONFIG.voice || "asteria";
   const url = `https://api.cloudflare.com/client/v4/accounts/${process.env.CF_ACCOUNT_ID}/ai/run/@cf/deepgram/aura-1`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { authorization: `Bearer ${process.env.CF_AI_TOKEN}`, "content-type": "application/json" },
-    body: JSON.stringify({ text, speaker: voice, encoding: "mp3" })
-  });
+  // Cloudflare's voice service sometimes has a hiccup: try up to 4 times, a few seconds apart
+  let res, lastErr = "";
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    const body = attempt === 1 ? { text, speaker: voice, encoding: "mp3" } : { text, speaker: voice };
+    res = await fetch(url, {
+      method: "POST",
+      headers: { authorization: `Bearer ${process.env.CF_AI_TOKEN}`, "content-type": "application/json" },
+      body: JSON.stringify(body)
+    });
+    if (res.ok) break;
+    lastErr = `(${res.status}): ${(await res.text()).slice(0, 300)}`;
+    if (res.status < 500 && res.status !== 429) break;
+    await new Promise(r => setTimeout(r, 3000 * attempt));
+  }
+  if (!res.ok) throw new Error(`Cloudflare voice failed ${lastErr}`);
   const type = res.headers.get("content-type") || "";
-  if (!res.ok) throw new Error(`Cloudflare voice failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
   if (type.includes("json")) {
     const j = await res.json();
     const b64 = j?.result?.audio || j?.audio;
@@ -97,19 +106,21 @@ async function main() {
   // Voice first, so each scene can stay up exactly as long as its line.
   // If the voice service fails, keep going with captions only and say why on the run page.
   let useVoice = voiceOn;
-  if (useVoice) {
-    try { await speak("Test.", join(outDir, "voice_test.mp3")); }
-    catch (e) { useVoice = false; console.log(`::warning title=Voice not used::${String(e.message).replace(/\n/g, " ")}`); }
-  }
-  let scenes = [];
-  for (const [i, s] of product.scenes.entries()) {
-    let audio = null, talk = 0;
-    if (useVoice) { audio = join(outDir, `say${i}.mp3`); talk = await speak(s.say, audio); }
-    const dur = Math.max(MIN_SCENE, talk + 0.6) + (s.hold || 0);
-    scenes.push({ ...s, audio, dur });
-  }
-  let endAudio = null, endDur = END_CARD;
-  if (useVoice) { endAudio = join(outDir, "say_end.mp3"); endDur = Math.max(END_CARD, (await speak(END_LINE, endAudio)) + 0.6); }
+  const build = async (withVoice) => {
+    const list = [];
+    for (const [i, s] of product.scenes.entries()) {
+      let audio = null, talk = 0;
+      if (withVoice) { audio = join(outDir, `say${i}.mp3`); talk = await speak(s.say, audio); }
+      list.push({ ...s, audio, dur: Math.max(MIN_SCENE, talk + 0.6) + (s.hold || 0) });
+    }
+    let endAudio = null, endDur = END_CARD;
+    if (withVoice) { endAudio = join(outDir, "say_end.mp3"); endDur = Math.max(END_CARD, (await speak(END_LINE, endAudio)) + 0.6); }
+    return { list, endAudio, endDur };
+  };
+  let built;
+  try { built = await build(useVoice); }
+  catch (e) { useVoice = false; console.log(`::warning title=Voice not used::${String(e.message).replace(/\n/g, " ")}`); built = await build(false); }
+  let scenes = built.list, endAudio = built.endAudio, endDur = built.endDur;
 
   // 10–30 seconds: drop scenes from the end until it fits, stretch the end card if too short
   const total = () => scenes.reduce((a, s) => a + s.dur, 0) + endDur;
