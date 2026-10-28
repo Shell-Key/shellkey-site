@@ -1223,35 +1223,19 @@ def build_store():
         </div>
 
         <div class="notice">
-          <strong>Start with <a href="#buy-today">Buy Today</a></strong> &mdash; those are ready now.
-          Everything else can be requested. If you need one soon, request it and we can usually
-          have it ready in a few days.
+          <strong>Most items below are in production.</strong> The guides are available for instant
+          download today. Everything marked <em>Coming Soon</em> can be prioritised &mdash; if you
+          need one now, request it and we can usually have it ready in a few days.
         </div>
       </div>
     </section>
 """)
 
-    # Things a visitor can pay for right now go first, in one place.
-    buy_now = [p for p in PRODUCTS if p["status"] == "available" and live_link(p.get("paypal"))]
-    buy_slugs = {p["slug"] for p in buy_now}
-    if buy_now:
-        parts.append("""    <section id="buy-today" class="section">
-      <div class="container">
-        <div class="section-head">
-          <h2>Buy Today</h2>
-          <p>Ready now. Pay with PayPal and get access or your download right away.</p>
-        </div>
-        <div class="grid">
-""")
-        for p in buy_now:
-            parts.append(card(p))
-        parts.append("        </div>\n      </div>\n    </section>\n")
-
     for i, (cid, cname, cdesc) in enumerate(CATEGORIES):
-        items = [p for p in PRODUCTS if p["cat"] == cid and p["slug"] not in buy_slugs]
+        items = [p for p in PRODUCTS if p["cat"] == cid]
         if not items:
             continue
-        alt = " section-alt" if i % 2 == 0 else ""
+        alt = " section-alt" if i % 2 == 1 else ""
         parts.append(f"""    <section id="{cid}" class="section{alt}">
       <div class="container">
         <div class="section-head">
