@@ -33,6 +33,7 @@ export const BRAND = {
     "SHORT. Nobody reads paragraphs. The image does most of the work; the words just make people want to click.",
     "Shape of every post: one hook line (a question or 'Check this out'), one line on what it does, then the next step. That's it.",
     "Lead with the problem the reader has this week, in a few words.",
+    "Kirby approved this example as the right length and tone (Facebook): 'Still explaining the schedule with a bar chart nobody reads? / See your P6 schedule build out on your plot plan, week by week. / Try the free demo' then the link. Match its length and shape; never copy its words.",
     "Use real job language (P6, XER, critical path, workpacks, weld map, NDE, turnaround, TAR) when the audience is industrial.",
     "No paragraphs, no long descriptions, no lists of features. Short sentences. No hype words: never 'revolutionary', 'game-changer', 'unlock', 'supercharge', 'elevate', 'seamless'.",
     "US English spelling. Write the company name as Shell Key.",
