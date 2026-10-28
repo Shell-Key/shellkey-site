@@ -43,9 +43,9 @@ im, d = base()
 lg = logo.copy(); lg.thumbnail((380, 200)); im.paste(lg, ((W - lg.width) // 2, 70), lg)
 center(d, 300, job["title"], fit(d, job["title"], "Bold", 72, W - 100), WHITE)
 center(d, 395, job["tagline"], fit(d, job["tagline"], "Medium", 38, W - 100), MUTED)
-d.rounded_rectangle([(90, 1600), (W - 90, 1730)], 34, fill=GREEN)
-center(d, 1628, "Try the free demo", font("Bold", 60), NAVY)
-center(d, 1765, job["url"], fit(d, job["url"], "Medium", 36, W - 80), WHITE)
+d.rounded_rectangle([(90, 1630), (W - 90, 1755)], 34, fill=GREEN)
+center(d, 1656, "Try the free demo", font("Bold", 60), NAVY)
+center(d, 1790, job["url"], fit(d, job["url"], "Medium", 36, W - 80), WHITE)
 im.save(P("frame.png"))
 
 # End card
@@ -85,11 +85,11 @@ for i, _ in enumerate(job["scenes"]):
 inputs += ["-loop", "1", "-t", f"{endd:.2f}", "-i", P("end.png")]
 n_img = 2 + len(job["scenes"]) + 1
 
-fc = ["[1:v]crop=1000:720:140:0,scale=1080:778,pad=1092:790:6:6:color=0x7cff00[app]",
-      "[0:v][app]overlay=-6:480[v0]"]
+fc = ["[1:v]scale=1068:918,pad=1080:930:6:6:color=0x7cff00[app]",
+      "[0:v][app]overlay=0:465[v0]"]
 last = "v0"
 for i, s in enumerate(job["scenes"]):
-    fc.append(f"[{last}][{i + 2}:v]overlay=0:1320:enable='between(t,{s['t']:.2f},{s['until']:.2f})'[v{i + 1}]")
+    fc.append(f"[{last}][{i + 2}:v]overlay=0:1405:enable='between(t,{s['t']:.2f},{s['until']:.2f})'[v{i + 1}]")
     last = f"v{i + 1}"
 endi = n_img - 1
 fc += [f"[{last}]fps=30,format=yuv420p,setsar=1[main]",
@@ -106,7 +106,7 @@ if clips:
         ms = int(at * 1000)
         fc.append(f"[{n_img + k}:a]aresample=48000,adelay={ms}|{ms}[a{k}]")
     mix = "".join(f"[a{k}]" for k in range(len(clips)))
-    fc.append(f"{mix}amix=inputs={len(clips)}:normalize=0:dropout_transition=0,apad,atrim=0:{total:.2f}[aout]")
+    fc.append(f"{mix}amix=inputs={len(clips)}:normalize=0:dropout_transition=0,loudnorm=I=-14:TP=-1.5:LRA=11,aresample=48000,apad,atrim=0:{total:.2f}[aout]")
     amap = ["-map", "[aout]", "-c:a", "aac", "-b:a", "160k"]
 else:
     # Silent track so every upload has audio (YouTube handles it better)

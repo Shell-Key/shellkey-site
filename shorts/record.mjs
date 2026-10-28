@@ -124,7 +124,7 @@ async function main() {
   const browser = await chromium.launch();
   const rawDir = join(outDir, "raw");
   const t0 = Date.now();
-  const ctx = await browser.newContext({ viewport: { width: 1280, height: 720 }, recordVideo: { dir: rawDir, size: { width: 1280, height: 720 } } });
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 1100 }, recordVideo: { dir: rawDir, size: { width: 1280, height: 1100 } } });
   const page = await ctx.newPage();
   page.on("dialog", d => d.dismiss().catch(() => {}));
   await page.addInitScript(() => {   // a visible cursor so viewers can follow the clicks
@@ -139,7 +139,7 @@ async function main() {
   });
   await page.goto(`${base}/demos/${product.slug}.html`, { waitUntil: "load" });
   await page.waitForTimeout(2000);
-  await page.mouse.move(640, 360);
+  await page.mouse.move(640, 550);
 
   // Find a visible button/link/tab by its words (exact match first, then "contains")
   async function findByText(text) {
@@ -181,7 +181,7 @@ async function main() {
     marks.push((Date.now() - t0) / 1000);
     const sceneStart = Date.now();
     if (s.click) await clickText(s.click, true);
-    else await page.mouse.move(720, 380, { steps: 18 });
+    else await page.mouse.move(720, 560, { steps: 18 });
     const left = s.dur * 1000 - (Date.now() - sceneStart);
     if (left > 0) await page.waitForTimeout(left);
   }
