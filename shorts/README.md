@@ -1,6 +1,8 @@
 # Daily YouTube Shorts
 
-Every morning GitHub makes one 10 to 30 second YouTube Short from a free portal demo and posts it to the Shell Key channel. Each Short has:
+GitHub posts **3 YouTube Shorts a day** (10 to 30 seconds each), made from the free portal demos, and learns the best times to post.
+
+**Best times:** it first tests 8 times of day (6, 8, 11 AM, 12, 3, 5, 7, 9 PM Central), 3 per day, until each time has 3 Shorts with 2-day view counts. Then it posts at the 3 times with the most views per Short, best first, and re-checks one other time every Sunday. Open any run under Actions to see the table of times and views. The log lives on the `shorts-log` branch. Settings are at the top of `shorts/plan.mjs`. Each Short has:
 
 - the demo screens being clicked,
 - a caption and a natural woman's voice for each screen (Cloudflare Workers AI, Deepgram Aura),
@@ -17,7 +19,9 @@ It only uses GitHub, Cloudflare and YouTube.
 | `shorts/record.mjs` | Makes the voice, opens the demo, clicks through it, and records it. Keeps every video between 10 and 30 seconds. |
 | `shorts/compose.py` | Builds the upright 1080x1920 video with the logo, captions, voice and end card. |
 | `shorts/upload.mjs` | Posts the video to YouTube. |
-| `.github/workflows/daily-youtube-short.yml` | Runs all three every morning at 9:41 Central. |
+| `shorts/plan.mjs` | Every hour: decides whether this hour is a posting time, measures 2-day views, ranks the times. |
+| `shorts/log_add.mjs` | Adds each posted Short to the log. |
+| `.github/workflows/daily-youtube-short.yml` | Runs every hour at :41 and posts when the plan says so. |
 
 ## One-time setup: five secrets in GitHub
 
@@ -45,6 +49,10 @@ Add each one in GitHub under **shellkey-site > Settings > Secrets and variables 
    4. Google says the app isn't verified. Click **Advanced**, then **Go to Shell Key Shorts**, then **Continue**.
    5. Click **Exchange authorization code for tokens**.
    - **YT_REFRESH_TOKEN** = the Refresh token.
+
+### Views (for finding the best times)
+
+- **YT_API_KEY**: in Google Cloud (project Shell Key Shorts) open **APIs & Services > Credentials > Create credentials > API key**. Restrict it to **YouTube Data API v3**. Without it the Shorts still post, but every time gets tested evenly and nothing is ranked.
 
 ## Try it
 

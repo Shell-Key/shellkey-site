@@ -1,11 +1,13 @@
-# Daily YouTube Short: records one portal demo, adds the voice, posts it.
-# Runs every morning by itself. To run it now: GitHub > Actions >
-# "Daily YouTube Short" > Run workflow (you can name a product, or leave "auto").
+# YouTube Shorts: 3 a day at the best times.
+# Runs every hour; shorts/plan.mjs decides if this hour is one of today's 3
+# posting times (testing all times first, then the 3 best). Each post records
+# a portal demo, adds the voice, and uploads it. Results table: open any run.
+# To post one right now: Actions > "Daily YouTube Short" > Run workflow.
 name: Daily YouTube Short
 
 on:
   schedule:
-    - cron: "41 14 * * *"     # 9:41 AM Central (8:41 in winter)
+    - cron: "41 * * * *"     # every hour at :41; the plan decides whether to post
   workflow_dispatch:
     inputs:
       product:
@@ -16,20 +18,37 @@ on:
         default: "public"
 
 permissions:
-  contents: read
+  contents: write            # only to save the posting log on the shorts-log branch
+
+concurrency:
+  group: youtube-shorts      # one run at a time, so two posts never collide
+  cancel-in-progress: false
 
 jobs:
   short:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+
+      - name: Get the posting log
+        uses: actions/checkout@v4
+        with:
+          ref: shorts-log
+          path: shorts-log
 
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
 
+      - name: Plan (post now? best times?)
+        id: plan
+        env:
+          YT_API_KEY: ${{ secrets.YT_API_KEY }}
+        run: node shorts/plan.mjs shorts-log
+
       - name: Install tools
+        if: github.event_name == 'workflow_dispatch' || steps.plan.outputs.post == 'true'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg python3-pil
@@ -37,15 +56,22 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Record the demo and make the voice
+        if: github.event_name == 'workflow_dispatch' || steps.plan.outputs.post == 'true'
         env:
           CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
           CF_AI_TOKEN: ${{ secrets.CF_AI_TOKEN }}
-        run: node shorts/record.mjs "${{ github.event.inputs.product || 'auto' }}" shorts-out
+          PRODUCT_IN: ${{ github.event.inputs.product }}
+          PRODUCT_PLAN: ${{ steps.plan.outputs.product }}
+        run: |
+          P="$PRODUCT_IN"; if [ -z "$P" ] || [ "$P" = "auto" ]; then P="$PRODUCT_PLAN"; fi
+          node shorts/record.mjs "$P" shorts-out
 
       - name: Build the Short (10 to 30 seconds)
+        if: github.event_name == 'workflow_dispatch' || steps.plan.outputs.post == 'true'
         run: python3 shorts/compose.py shorts-out
 
       - name: Keep a copy of the video
+        if: github.event_name == 'workflow_dispatch' || steps.plan.outputs.post == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: short
@@ -55,9 +81,26 @@ jobs:
           retention-days: 14
 
       - name: Post to YouTube
+        if: github.event_name == 'workflow_dispatch' || steps.plan.outputs.post == 'true'
         env:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           YT_PRIVACY: ${{ github.event.inputs.privacy || 'public' }}
         run: node shorts/upload.mjs shorts-out
+
+      - name: Add it to the posting log
+        if: github.event_name == 'workflow_dispatch' || steps.plan.outputs.post == 'true'
+        run: node shorts/log_add.mjs shorts-out shorts-log "${{ github.event_name == 'workflow_dispatch' && 'manual' || steps.plan.outputs.slot }}"
+
+      - name: Save the posting log
+        if: always()
+        working-directory: shorts-log
+        run: |
+          git config user.name "Shell Key Shorts"
+          git config user.email "support@shellkey.company"
+          git add log.json
+          if git diff --cached --quiet; then echo "Log unchanged."; exit 0; fi
+          git commit -qm "Shorts log $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git pull -q --rebase origin shorts-log && git push -q origin HEAD:shorts-log && exit 0; sleep 5; done
+          exit 1
