@@ -57,4 +57,4 @@ async function main() {
   console.log(`Posted to YouTube (${PRIVACY}): ${url}`);
 }
 
-main().catch(e => { console.error(e.message || e); process.exit(1); });
+main().catch(e => { console.log(`::error title=YouTube upload failed::${String(e.message || e).replace(/\n/g, " ")}`); process.exit(1); });

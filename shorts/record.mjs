@@ -59,11 +59,13 @@ async function speak(text, file) {
     body: JSON.stringify({ text, speaker: voice, encoding: "mp3" })
   });
   const type = res.headers.get("content-type") || "";
-  if (!res.ok || type.includes("json")) {
-    const body = await res.text();
-    throw new Error(`Cloudflare voice failed (${res.status}): ${body.slice(0, 300)}`);
-  }
-  writeFileSync(file, Buffer.from(await res.arrayBuffer()));
+  if (!res.ok) throw new Error(`Cloudflare voice failed (${res.status}): ${(await res.text()).slice(0, 300)}`);
+  if (type.includes("json")) {
+    const j = await res.json();
+    const b64 = j?.result?.audio || j?.audio;
+    if (!b64) throw new Error(`Cloudflare voice sent no audio: ${JSON.stringify(j).slice(0, 300)}`);
+    writeFileSync(file, Buffer.from(b64, "base64"));
+  } else writeFileSync(file, Buffer.from(await res.arrayBuffer()));
   return seconds(file);
 }
 function seconds(file) {
@@ -92,23 +94,29 @@ async function main() {
   const product = pickProduct();
   console.log(`Product: ${product.title} (${product.slug})`);
 
-  // Voice first, so each scene can stay up exactly as long as its line
+  // Voice first, so each scene can stay up exactly as long as its line.
+  // If the voice service fails, keep going with captions only and say why on the run page.
+  let useVoice = voiceOn;
+  if (useVoice) {
+    try { await speak("Test.", join(outDir, "voice_test.mp3")); }
+    catch (e) { useVoice = false; console.log(`::warning title=Voice not used::${String(e.message).replace(/\n/g, " ")}`); }
+  }
   let scenes = [];
   for (const [i, s] of product.scenes.entries()) {
     let audio = null, talk = 0;
-    if (voiceOn) { audio = join(outDir, `say${i}.mp3`); talk = await speak(s.say, audio); }
+    if (useVoice) { audio = join(outDir, `say${i}.mp3`); talk = await speak(s.say, audio); }
     const dur = Math.max(MIN_SCENE, talk + 0.6) + (s.hold || 0);
     scenes.push({ ...s, audio, dur });
   }
   let endAudio = null, endDur = END_CARD;
-  if (voiceOn) { endAudio = join(outDir, "say_end.mp3"); endDur = Math.max(END_CARD, (await speak(END_LINE, endAudio)) + 0.6); }
+  if (useVoice) { endAudio = join(outDir, "say_end.mp3"); endDur = Math.max(END_CARD, (await speak(END_LINE, endAudio)) + 0.6); }
 
   // 10–30 seconds: drop scenes from the end until it fits, stretch the end card if too short
   const total = () => scenes.reduce((a, s) => a + s.dur, 0) + endDur;
   while (total() > MAX_SECONDS && scenes.length > 2) scenes.pop();
   if (total() > MAX_SECONDS) throw new Error(`Even 2 scenes run ${total().toFixed(1)}s. Shorten the voice lines for ${product.slug}.`);
   if (total() < MIN_SECONDS) endDur += MIN_SECONDS - total();
-  console.log(`Video length: ${total().toFixed(1)}s, ${scenes.length} scenes, voice ${voiceOn ? "on" : "off (captions only)"}`);
+  console.log(`Video length: ${total().toFixed(1)}s, ${scenes.length} scenes, voice ${useVoice ? "on" : "off (captions only)"}`);
 
   // Record
   const server = await serve();
@@ -184,7 +192,7 @@ async function main() {
   const job = {
     slug: product.slug, title: product.title, tagline: product.tagline, hashtags: product.hashtags || "",
     url: `shellkey.company/products/${product.slug}`,
-    raw, start: marks[0], end, voice: voiceOn,
+    raw, start: marks[0], end, voice: useVoice,
     scenes: scenes.map((s, i) => ({ caption: s.caption, say: s.say, audio: s.audio, t: marks[i] - marks[0], until: (marks[i + 1] ?? end) - marks[0] })),
     endCard: { audio: endAudio, dur: endDur }
   };
@@ -192,4 +200,4 @@ async function main() {
   console.log(`Recorded ${(end - marks[0]).toFixed(1)}s of demo -> ${join(outDir, "job.json")}`);
 }
 
-main().catch(e => { console.error(e.message || e); process.exit(1); });
+main().catch(e => { console.log(`::error title=Recording failed::${String(e.message || e).replace(/\n/g, " ")}`); console.error(e.stack || e); process.exit(1); });
