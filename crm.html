@@ -87,6 +87,7 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 .plat{padding:3px 10px;border-radius:7px;font-size:12px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.05em}
 .plat.facebook{background:#1877F2} .plat.instagram{background:#C13584} .plat.linkedin{background:#0A66C2}
 .pcard img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;border:1px solid var(--stroke);background:#08182f}
+.pcard video{width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:10px;border:1px solid var(--stroke);background:#08182f}
 .pcard textarea{width:100%;min-height:210px;font-size:14px;line-height:1.45;resize:vertical}
 .pcard .err{color:var(--amber);font-size:13px}
 .pcard .meta{color:var(--text2);font-size:12px}
@@ -363,6 +364,7 @@ function loadMarketing(){
     $("postsWrap").querySelectorAll("[data-act]").forEach(function(b){b.onclick=function(){postAction(+b.dataset.id,b.dataset.act,b);};});
   });
 }
+function isVideo(u){return /\.mp4(\?|$)/i.test(u||"");}   // LinkedIn video days use the day's YouTube Short
 function postCard(p){
   var auto=!!SETUP[p.platform];  // only offer Approve & Post where that platform is connected
   var done=p.status==="posted",rej=p.status==="rejected";
@@ -371,7 +373,7 @@ function postCard(p){
     if(auto)b+='<button class="btn sm" data-act="publish" data-id="'+p.id+'">Approve &amp; Post</button>';
     b+='<button class="btn sm ghost" data-act="copy" data-id="'+p.id+'">Copy</button>';
     if(p.platform==="linkedin"&&!auto)b+='<a class="btn sm ghost" href="https://www.linkedin.com/company/shell-key/" target="_blank" rel="noopener" style="text-decoration:none">Open LinkedIn</a>';
-    b+='<a class="btn sm ghost" href="'+esc(p.image)+'" download target="_blank" rel="noopener" style="text-decoration:none">Image</a>';
+    b+='<a class="btn sm ghost" href="'+esc(p.image)+'" download target="_blank" rel="noopener" style="text-decoration:none">'+(isVideo(p.image)?"Video":"Image")+'</a>';
     b+='<button class="btn sm ghost" data-act="save" data-id="'+p.id+'">Save edits</button>';
     b+='<button class="btn sm ghost" data-act="posted" data-id="'+p.id+'">Mark as posted</button>';
     b+='<button class="btn sm ghost" data-act="reject" data-id="'+p.id+'">Reject</button>';
@@ -382,7 +384,7 @@ function postCard(p){
   }
   return'<div class="pcard st-'+esc(p.status)+'">'
     +'<div class="top"><span class="plat '+esc(p.platform)+'">'+esc(PLAT_NAME[p.platform]||p.platform)+'</span><span class="pill p-'+esc(p.status)+'">'+esc(p.status)+'</span><span class="meta">'+esc(p.angle||"")+' · '+esc(p.campaign||"")+'</span></div>'
-    +'<img src="'+esc(p.image)+'" alt="" loading="lazy" />'
+    +(isVideo(p.image)?'<video src="'+esc(p.image)+'" controls muted playsinline preload="metadata"></video>':'<img src="'+esc(p.image)+'" alt="" loading="lazy" />')
     +'<textarea id="pt'+p.id+'"'+(done||rej?" readonly":"")+'>'+esc(p.body)+'</textarea>'
     +(p.error?'<div class="err">'+esc(p.error)+'</div>':'')
     +(done?'<div class="meta">Posted '+esc(fmtDate(p.posted_at))+(p.remote_id?" · id "+esc(p.remote_id):"")+'</div>':'')

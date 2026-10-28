@@ -16,7 +16,8 @@ const today = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Chicago" }).
 log.posts.push({
   id: posted.id, url: posted.url, slug: job.slug, title: posted.title,
   slot: slotArg === "manual" || slotArg === "" ? "manual" : parseInt(slotArg, 10),
-  date: today, postedAt: new Date().toISOString(), privacy: posted.privacy, views48: null
+  date: today, postedAt: new Date().toISOString(), privacy: posted.privacy, views48: null,
+  videoUrl: process.env.VIDEO_URL || ""   // MP4 for LinkedIn video days
 });
 writeFileSync(LOG, JSON.stringify(log, null, 1) + "\n");
 console.log(`Logged ${job.slug} at slot ${slotArg}.`);

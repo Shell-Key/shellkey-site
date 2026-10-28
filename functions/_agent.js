@@ -67,6 +67,21 @@ async function pickProduct(db, day) {
   return best;
 }
 
+// ---------------------------------------------------------------- LinkedIn video days
+// LinkedIn alternates: a video post one day (the newest YouTube Short), an image post the next.
+// The Shorts job (GitHub) keeps its log on the shorts-log branch; each entry has the MP4 link.
+const SHORTS_LOG = "https://raw.githubusercontent.com/Shell-Key/shellkey-site/shorts-log/log.json";
+export function isVideoDay(day) { return Math.round(Date.parse(day) / 86400000) % 2 === 0; }
+async function latestShort(env) {
+  try {
+    const r = await fetch(env.SHORTS_LOG_URL || SHORTS_LOG, { cf: { cacheTtl: 300 } });
+    if (!r.ok) return null;
+    const log = await r.json();
+    const fresh = (log.posts || []).filter((p) => p.videoUrl && p.privacy !== "private" && Date.now() - Date.parse(p.postedAt) < 4 * 86400e3);
+    return fresh.length ? fresh[fresh.length - 1] : null;
+  } catch { return null; }
+}
+
 function pickAngle(product, day) {
   const n = Math.round(Date.parse(day) / 86400000);
   let angles = BRAND.angles.slice();
@@ -135,7 +150,11 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
     if (have) return { ok: true, skipped: true, day, message: "Today's posts are already written." };
   }
 
-  const product = slug ? CATALOG.find((p) => p.slug === slug) : await pickProduct(db, day);
+  const videoDay = isVideoDay(day);
+  const short = videoDay ? await latestShort(env) : null;
+  const shortProduct = short && CATALOG.find((p) => p.slug === short.slug);
+  const product = slug ? CATALOG.find((p) => p.slug === slug) : (shortProduct || await pickProduct(db, day));
+  const liVideo = short && shortProduct && product.slug === short.slug ? short.videoUrl : "";
   if (!product) throw new Error("No product to post about");
   const angle = pickAngle(product, day);
 
@@ -171,7 +190,7 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
     if (!text) continue;
     const r = await db.prepare(
       "INSERT INTO posts (day, platform, item, item_label, angle, body, image) VALUES (?,?,?,?,?,?,?)"
-    ).bind(day, platform, product.slug, product.name, angle.split(":")[0], text, image).run();
+    ).bind(day, platform, product.slug, product.name, angle.split(":")[0], text, platform === "linkedin" && liVideo ? liVideo : image).run();
     const id = r.meta.last_row_id;
     const campaign = "p" + id;
     const link = `${product.url}?utm_source=${platform}&utm_medium=social&utm_campaign=${campaign}`;
@@ -196,6 +215,8 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
     auto && posted.length ? "Posted automatically: " + posted.join(", ") + ". Anything else is waiting for you."
          : "Open the Marketing tab, read them, fix anything you want, and press Approve & Post.",
   ];
+  if (liVideo) lines.push("", "LinkedIn today is a VIDEO post. Download the video:", liVideo, "Then on the Shell Key LinkedIn page: Start a post > Video, add the video, and paste the LinkedIn text from the Marketing tab.");
+  else lines.push("", "LinkedIn today is an IMAGE post" + (videoDay ? " (no new Short was found for a video)." : ". Tomorrow is a video post."));
   if (li.connected && li.days_left <= 7) lines.push("", `LinkedIn sign-in runs out in ${li.days_left} day(s). Press Reconnect LinkedIn on the Marketing tab.`);
   await notify(env, `${created.length} posts ready: ${product.name}`, [...lines, "", "https://shellkey.company/crm.html#marketing"]);
   return { ok: true, day, product: product.slug, angle, created };
@@ -227,6 +248,7 @@ export async function publishPost(env, id) {
       const d = await graph(env, `/${env.IG_USER_ID}/media_publish`, { creation_id: c.id, access_token: env.FB_PAGE_TOKEN });
       remote = d.id || "";
     } else if (p.platform === "linkedin") {
+      if (/\.mp4(\?|$)/i.test(p.image || "")) throw new Error("LinkedIn video posts go up by hand for now: press Video to download it, post it on the Shell Key page, then press Mark as posted.");
       remote = await postToLinkedIn(env, p);
     } else {
       throw new Error("Unknown platform " + p.platform);

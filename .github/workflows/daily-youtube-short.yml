@@ -89,8 +89,25 @@ jobs:
           YT_PRIVACY: ${{ github.event.inputs.privacy || 'public' }}
         run: node shorts/upload.mjs shorts-out
 
+      - name: Save the video for LinkedIn (download link for the CRM)
+        id: video
+        if: github.event_name == 'workflow_dispatch' || steps.plan.outputs.post == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          [ -f shorts-out/posted.json ] || { echo "Not posted; skipping."; exit 0; }
+          NAME="$(node -e 'const j=require("./shorts-out/job.json");process.stdout.write(j.slug)')-$(date -u +%Y%m%d-%H%M).mp4"
+          cp shorts-out/short.mp4 "$NAME"
+          gh release view shorts >/dev/null 2>&1 || gh release create shorts --title "Shorts videos" --notes "MP4s of the daily YouTube Shorts, for LinkedIn video posts. Made by the GitHub job." --latest=false
+          gh release upload shorts "$NAME" --clobber
+          echo "url=https://github.com/${{ github.repository }}/releases/download/shorts/$NAME" >> "$GITHUB_OUTPUT"
+          # keep the last 60 videos
+          gh release view shorts --json assets -q '.assets | sort_by(.createdAt) | reverse | .[60:] | .[].name' | while read -r old; do gh release delete-asset shorts "$old" -y; done
+
       - name: Add it to the posting log
         if: github.event_name == 'workflow_dispatch' || steps.plan.outputs.post == 'true'
+        env:
+          VIDEO_URL: ${{ steps.video.outputs.url }}
         run: node shorts/log_add.mjs shorts-out shorts-log "${{ github.event_name == 'workflow_dispatch' && 'manual' || steps.plan.outputs.slot }}"
 
       - name: Save the posting log
