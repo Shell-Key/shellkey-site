@@ -51,7 +51,7 @@ async function pickProduct(db, day) {
     if (!last[slug]) return 60;
     return Math.max(0, Math.round((Date.parse(day) - Date.parse(last[slug])) / 86400000));
   };
-  const pool = CATALOG.filter((p) => !BRAND.never.includes(p.slug));
+  const pool = CATALOG.filter((p) => !BRAND.never.includes(p.slug) && BRAND.post_categories.includes(p.cat));
   let best = null, bestScore = -1;
   for (const p of pool) {
     let s = 0;

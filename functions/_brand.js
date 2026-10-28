@@ -59,6 +59,10 @@ export const BRAND = {
   // Products to push harder. Slugs from the store. Leave empty to rotate evenly.
   focus: ["dcma-health-reviewer", "bid-board", "4d-schedule-sequence", "family-finance"],
 
+  // Only post about these store sections: portals and software, dashboards (wall charts),
+  // apps, and development services (built for you). No eBooks/guides, courses or free tools.
+  post_categories: ["software", "wallcharts", "apps", "builds"],
+
   // Products the agent must never post about (slugs).
   never: [],
 
