@@ -194,7 +194,7 @@ export async function onRequest({ request, env, params }) {
       const amount = parseFloat(b.amount);
       const platform = clean(b.platform, 20).toLowerCase();
       if (!(amount > 0)) return bad("Enter the amount you spent");
-      if (!PLATFORMS.includes(platform) && platform !== "other") return bad("Pick a platform");
+      if (!PLATFORMS.includes(platform) && platform !== "fbgroup" && platform !== "other") return bad("Pick a platform");
       const day = /^\d{4}-\d{2}-\d{2}$/.test(b.day || "") ? b.day : today();
       await db.prepare("INSERT INTO spend (day, platform, campaign, amount, note) VALUES (?,?,?,?,?)")
         .bind(day, platform, clean(b.campaign, 20), amount, clean(b.note, 300)).run();

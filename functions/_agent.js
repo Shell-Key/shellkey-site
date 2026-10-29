@@ -21,7 +21,10 @@ import { linkedinStatus, postToLinkedIn } from "./_linkedin.js";
 export const PLATFORMS = ["facebook", "instagram", "linkedin"];
 const MODEL = "claude-sonnet-5-5";
 const GRAPH = "https://graph.facebook.com/v26.0";
-const SHORT = { facebook: "fb", instagram: "ig", linkedin: "li" };
+const SHORT = { facebook: "fb", instagram: "ig", linkedin: "li", fbgroup: "fg" };
+// Facebook no longer lets any app post into Groups, so the Group gets a copy of the
+// Facebook post that Kirby pastes in by hand (Copy & open Group on the Marketing tab).
+export const FB_GROUP_URL = "https://www.facebook.com/share/g/1JXMxNfGbZ/";
 
 // Today's date in Lafayette, not UTC, so "today's posts" means Kirby's today.
 export function today() {
@@ -37,6 +40,7 @@ export function setupStatus(env) {
     timer_key: !!env.AGENT_KEY,
     auto_post: String(env.AUTO_POST || "").toLowerCase() === "yes",
     model: env.CLAUDE_MODEL || MODEL,
+    fb_group_url: env.FB_GROUP_URL || FB_GROUP_URL,
   };
 }
 
@@ -204,8 +208,8 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
   }
   const image = BRAND.site + "/" + (product.social || product.img);
   const created = [];
-  for (const platform of PLATFORMS) {
-    const text = String(out[platform] || "").trim();
+  for (const platform of [...PLATFORMS, "fbgroup"]) {
+    const text = String(out[platform === "fbgroup" ? "facebook" : platform] || "").trim();
     if (!text) continue;
     const r = await db.prepare(
       "INSERT INTO posts (day, platform, item, item_label, angle, body, image) VALUES (?,?,?,?,?,?,?)"
@@ -239,6 +243,7 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
          : "Open the Marketing tab, read them, fix anything you want, and press Approve & Post.",
   ];
   if (reels.length) lines.push("", "Reels: today's YouTube Short also goes to Facebook and Instagram as a Reel" + (auto ? "." : " (press Approve & Post on the Reel cards)."));
+  lines.push("", "Facebook Group: press Copy & open Group on the Group card, paste it in the Group, post, then press Mark as posted.");
   if (liVideo) lines.push("", "LinkedIn today is a VIDEO post. Download the video:", liVideo, "Then on the Shell Key LinkedIn page: Start a post > Video, add the video, and paste the LinkedIn text from the Marketing tab.");
   else lines.push("", "LinkedIn today is an IMAGE post" + (videoDay ? " (no new Short was found for a video)." : ". Tomorrow is a video post."));
   if (li.connected && li.days_left <= 7) lines.push("", `LinkedIn sign-in runs out in ${li.days_left} day(s). Press Reconnect LinkedIn on the Marketing tab.`);
@@ -346,6 +351,8 @@ export async function publishPost(env, id) {
     } else if (p.platform === "linkedin") {
       if (isMp4(p.image)) throw new Error("LinkedIn video posts go up by hand for now: press Video to download it, post it on the Shell Key page, then press Mark as posted.");
       remote = await postToLinkedIn(env, p);
+    } else if (p.platform === "fbgroup") {
+      throw new Error("Facebook doesn't let apps post into Groups. Press Copy & open Group, paste it in the Group, then press Mark as posted.");
     } else {
       throw new Error("Unknown platform " + p.platform);
     }

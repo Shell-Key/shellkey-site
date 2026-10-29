@@ -85,7 +85,7 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 .pcard.st-posted{border-color:rgba(74,222,128,.5)} .pcard.st-rejected{opacity:.55}
 .pcard .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .plat{padding:3px 10px;border-radius:7px;font-size:12px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.05em}
-.plat.facebook{background:#1877F2} .plat.instagram{background:#C13584} .plat.linkedin{background:#0A66C2}
+.plat.facebook{background:#1877F2} .plat.instagram{background:#C13584} .plat.linkedin{background:#0A66C2} .plat.fbgroup{background:#0F5FC4}
 .pcard img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:10px;border:1px solid var(--stroke);background:#08182f}
 .pcard video{width:100%;aspect-ratio:1/1;object-fit:contain;border-radius:10px;border:1px solid var(--stroke);background:#08182f}
 .pcard textarea{width:100%;min-height:210px;font-size:14px;line-height:1.45;resize:vertical}
@@ -169,7 +169,7 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
         <button class="btn ghost" id="liBtn" title="Lets Approve &amp; Post publish LinkedIn posts on the Shell Key company page. Works once LinkedIn approves the Community Management API.">Connect LinkedIn</button>
         <span class="legend" id="mktInfo"></span>
       </div>
-      <div class="note" id="mktHelp">Every morning the agent picks one product and writes a Facebook, Instagram and LinkedIn post about it. Read each one, fix anything you want right in the box, then press <b>Approve &amp; Post</b>. If Facebook or Instagram is not connected yet, press <b>Copy</b>, paste it yourself, then press <b>Mark as posted</b> so the Results tab can track it.</div>
+      <div class="note" id="mktHelp">Every morning the agent picks one product and writes a Facebook, Instagram and LinkedIn post about it, plus a copy of the Facebook post for your Facebook Group. Facebook doesn't let apps post into Groups, so on the Group card press <b>Copy &amp; open Group</b>, paste it in, post it, then press <b>Mark as posted</b>. Read each one, fix anything you want right in the box, then press <b>Approve &amp; Post</b>. If Facebook or Instagram is not connected yet, press <b>Copy</b>, paste it yourself, then press <b>Mark as posted</b> so the Results tab can track it.</div>
       <div id="postsWrap"></div>
       <div class="dayhead" style="margin-top:28px"><h3>Weekly articles</h3><span class="legend">A new how-to article goes live on shellkey.company/articles every Monday.</span></div>
       <div class="toolbar"><button class="btn ghost" id="artBtn">Write an article now</button></div>
@@ -189,7 +189,7 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
       <h3>Money spent on boosts and ads</h3>
       <div class="toolbar">
         <input type="date" id="spDay" />
-        <select id="spPlat"><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option><option value="other">Other</option></select>
+        <select id="spPlat"><option value="facebook">Facebook</option><option value="instagram">Instagram</option><option value="linkedin">LinkedIn</option><option value="fbgroup">Facebook Group</option><option value="other">Other</option></select>
         <select id="spCamp"><option value="">General (not one post)</option></select>
         <input type="number" id="spAmt" placeholder="Amount $" min="0" step="0.01" style="width:120px" />
         <input id="spNote" placeholder="Note (optional)" style="flex:1;min-width:160px" />
@@ -337,7 +337,7 @@ function loadSales(){
 
 /* ---------- marketing ---------- */
 var POSTS=[];var SETUP={};
-var PLAT_NAME={facebook:"Facebook",instagram:"Instagram",linkedin:"LinkedIn"};
+var PLAT_NAME={facebook:"Facebook",instagram:"Instagram",linkedin:"LinkedIn",fbgroup:"Facebook Group"};
 function loadMarketing(){
   loadArticles();
   return api("marketing").then(function(d){
@@ -375,7 +375,8 @@ function postCard(p){
   var b='';
   if(!done&&!rej){
     if(auto)b+='<button class="btn sm" data-act="publish" data-id="'+p.id+'">Approve &amp; Post</button>';
-    b+='<button class="btn sm ghost" data-act="copy" data-id="'+p.id+'">Copy</button>';
+    if(p.platform==="fbgroup")b+='<button class="btn sm" data-act="copygroup" data-id="'+p.id+'">Copy &amp; open Group</button>';
+    else b+='<button class="btn sm ghost" data-act="copy" data-id="'+p.id+'">Copy</button>';
     if(p.platform==="linkedin"&&!auto)b+='<a class="btn sm ghost" href="https://www.linkedin.com/company/shell-key/" target="_blank" rel="noopener" style="text-decoration:none">Open LinkedIn</a>';
     b+='<a class="btn sm ghost" href="'+esc(p.image)+'" download target="_blank" rel="noopener" style="text-decoration:none">'+(isVideo(p.image)?"Video":"Image")+'</a>';
     b+='<button class="btn sm ghost" data-act="save" data-id="'+p.id+'">Save edits</button>';
@@ -397,6 +398,13 @@ function postCard(p){
 function postAction(id,act,btn){
   var text=$("pt"+id)?$("pt"+id).value:"";
   var busy=function(on){btn.disabled=on;if(on){btn.dataset.l=btn.textContent;btn.textContent="Working…";}else if(btn.dataset.l)btn.textContent=btn.dataset.l;};
+  if(act==="copygroup"){   // open the Group first (pop-up blockers allow it on a click), then copy
+    window.open(SETUP.fb_group_url||"https://www.facebook.com/groups/","_blank","noopener");
+    var gdone=function(){toast("Copied. Paste it in your Facebook Group, post it, then press Mark as posted.");};
+    if(navigator.clipboard)navigator.clipboard.writeText(text).then(gdone,function(){$("pt"+id).select();document.execCommand("copy");gdone();});
+    else{$("pt"+id).select();document.execCommand("copy");gdone();}
+    return;
+  }
   if(act==="copy"){
     var done=function(){toast("Copied. Paste it on "+(PLAT_NAME[(POSTS.find(function(p){return p.id===id;})||{}).platform]||"the site"));};
     if(navigator.clipboard)navigator.clipboard.writeText(text).then(done,function(){$("pt"+id).select();document.execCommand("copy");done();});
