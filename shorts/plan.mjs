@@ -103,12 +103,13 @@ const fmtHour = h => `${((h + 11) % 12) + 1}${h < 12 ? " AM" : " PM"}`;
 await updateViews();
 const stats = slotStats();
 // Plan the day on its first run; only times that haven't passed yet can be picked
-if (!log.days[today]) { log.days[today] = chooseToday(stats.filter(s => s.slot >= hour - 1)); changed = true; }
+if (!log.days[today]) { log.days[today] = chooseToday(stats.filter(s => s.slot >= hour - 2)); changed = true; }
 const plan = log.days[today];
 
-// Post now if this hour (or the hour before, in case GitHub started late) is one of today's slots and it hasn't gone out
+// Post now if one of today's slots started in the last 2 hours and hasn't gone out
+// (GitHub's timer often runs late or skips runs, so a missed slot catches up).
 const postedToday = log.posts.filter(p => p.date === today).map(p => p.slot);
-const slotNow = [hour, hour - 1].find(h => plan.slots.includes(h) && !postedToday.includes(h));
+const slotNow = [hour, hour - 1, hour - 2].find(h => plan.slots.includes(h) && !postedToday.includes(h));
 const nextProduct = CONFIG.products[log.posts.length % CONFIG.products.length].slug;
 
 // Results table on the run page

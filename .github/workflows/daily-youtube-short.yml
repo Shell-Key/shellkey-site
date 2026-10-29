@@ -7,7 +7,7 @@ name: Daily YouTube Short
 
 on:
   schedule:
-    - cron: "41 * * * *"     # every hour at :41; the plan decides whether to post
+    - cron: "7,27,47 * * * *"   # every 20 minutes (GitHub often skips runs); the plan decides whether to post
   workflow_dispatch:
     inputs:
       product:
