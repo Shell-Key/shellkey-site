@@ -1649,7 +1649,8 @@ def build_robots():
             "Allow: /\n"
             "Disallow: /crm.html\n"
             "Disallow: /api/\n\n"
-            f"Sitemap: {SITE}/sitemap.xml\n")
+            f"Sitemap: {SITE}/sitemap.xml\n"
+            f"Sitemap: {SITE}/sitemap-articles.xml\n")
 
 
 def stamp_index():
@@ -1686,6 +1687,32 @@ def build_catalog():
             "export const CATALOG = " + body + ";\n")
 
 
+ARTICLE_CSS = """  <style>
+    .article{max-width:760px;margin:0 auto}
+    .article h1{font-size:clamp(28px,4vw,40px);line-height:1.15;margin:8px 0 10px}
+    .article .lede{font-size:19px;color:var(--muted,#b8c4d9);margin-bottom:22px}
+    .article h2{font-size:24px;margin:30px 0 8px}
+    .article p,.article li{font-size:17px;line-height:1.65}
+    .article ul{padding-left:22px}
+    .article .cta{margin:34px 0 10px;padding:22px;border:1px solid rgba(124,255,0,.45);border-radius:16px;background:rgba(124,255,0,.07)}
+    .article .meta{font-size:14px;color:var(--muted,#b8c4d9)}
+    .article-list{list-style:none;padding:0;display:grid;gap:14px;max-width:760px;margin:0 auto}
+    .article-list a{display:block;padding:18px 20px;border:1px solid rgba(255,255,255,.12);border-radius:14px;text-decoration:none}
+    .article-list a:hover{border-color:rgba(124,255,0,.6)}
+    .article-list b{display:block;font-size:19px;margin-bottom:4px}
+  </style>
+"""
+
+def build_article_template():
+    """Page shell for the weekly articles. functions/articles/*.js fill the
+    {{PLACEHOLDERS}} (title, description, path, body) so articles match the site."""
+    h = head("{{TITLE}}", "{{DESC}}", root="/", path="{{PATH}}")
+    h = h.replace("</head>", ARTICLE_CSS + "</head>", 1)
+    return (h + NAV.format(root="/", store_on="") +
+            "  <main>\n    <section class=\"section\">\n      <div class=\"container\">\n{{BODY}}\n      </div>\n    </section>\n  </main>\n" +
+            FOOTER.format(root="/") + SCRIPT.format(root="/", build=BUILD) + "</body>\n</html>\n")
+
+
 def main():
     os.makedirs(OUT_PRODUCTS, exist_ok=True)
     stamp_index()
@@ -1713,6 +1740,10 @@ def main():
     with open("request.html", "w", encoding="utf-8") as f:
         f.write(build_request())
     print("wrote request.html")
+
+    with open("article-template.html", "w", encoding="utf-8") as f:
+        f.write(build_article_template())
+    print("wrote article-template.html (weekly articles page shell)")
 
     wanted = set()
     for p in PRODUCTS:

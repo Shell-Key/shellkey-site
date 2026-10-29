@@ -14,3 +14,5 @@
   Cache-Control: public, max-age=300
 /demos/*
   Cache-Control: public, max-age=0, must-revalidate
+/article-template.html
+  X-Robots-Tag: noindex

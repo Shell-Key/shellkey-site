@@ -19,6 +19,7 @@
 //   POST  /api/crm/linkedin/disconnect
 import { json, bad, readJson, clean, authed } from "../../_lib.js";
 import { setupStatus, today, writeDailyPosts, publishPost, results, PLATFORMS } from "../../_agent.js";
+import { writeWeeklyArticle, listArticles, ensureArticlesTable } from "../../_articles.js";
 import { linkedinStatus, startUrl as linkedinStartUrl, setSetting } from "../../_linkedin.js";
 
 const POST_STATUSES = ["draft", "approved", "posted", "rejected"];
@@ -161,6 +162,24 @@ export async function onRequest({ request, env, params }) {
       await db.prepare("UPDATE posts SET " + sets.join(", ") + " WHERE id=?").bind(...vals).run();
       return json({ ok: true });
     }
+  }
+
+  // ---------------------------------------------------------------- weekly articles
+  if (route === "articles" && request.method === "GET") {
+    try { return json({ ok: true, articles: await listArticles(db) }); }
+    catch (e) { return bad(String(e.message || e), 500); }
+  }
+  if (route === "article" && !id && request.method === "POST") {      // "Write an article now"
+    const b = (await readJson(request)) || {};
+    try { return json(await writeWeeklyArticle(env, { force: true, slug: clean(b.slug, 80) })); }
+    catch (e) { return bad(String(e.message || e), 500); }
+  }
+  if (route === "article" && id && request.method === "PATCH") {      // Hide / Show
+    const b = (await readJson(request)) || {};
+    if (!["published", "hidden"].includes(b.status)) return bad("Bad status");
+    await ensureArticlesTable(db);
+    await db.prepare("UPDATE articles SET status=? WHERE id=?").bind(b.status, id).run();
+    return json({ ok: true });
   }
 
   if (route === "results" && request.method === "GET") {

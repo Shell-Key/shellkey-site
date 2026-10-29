@@ -171,6 +171,9 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
       </div>
       <div class="note" id="mktHelp">Every morning the agent picks one product and writes a Facebook, Instagram and LinkedIn post about it. Read each one, fix anything you want right in the box, then press <b>Approve &amp; Post</b>. If Facebook or Instagram is not connected yet, press <b>Copy</b>, paste it yourself, then press <b>Mark as posted</b> so the Results tab can track it.</div>
       <div id="postsWrap"></div>
+      <div class="dayhead" style="margin-top:28px"><h3>Weekly articles</h3><span class="legend">A new how-to article goes live on shellkey.company/articles every Monday.</span></div>
+      <div class="toolbar"><button class="btn ghost" id="artBtn">Write an article now</button></div>
+      <div id="artWrap"></div>
     </section>
 
     <section id="tab-results" class="hidden">
@@ -336,6 +339,7 @@ function loadSales(){
 var POSTS=[];var SETUP={};
 var PLAT_NAME={facebook:"Facebook",instagram:"Instagram",linkedin:"LinkedIn"};
 function loadMarketing(){
+  loadArticles();
   return api("marketing").then(function(d){
     var st=d.setup||{};SETUP=st;
     var chips=[["tables","Marketing tables"],["claude","Claude writer"],["facebook","Facebook auto-post"],["instagram","Instagram auto-post"],["linkedin","LinkedIn auto-post"+(st.linkedin&&st.linkedin_days_left!=null?" ("+st.linkedin_days_left+" days left)":"")],["timer_key","Daily timer key"]];
@@ -419,6 +423,30 @@ $("writeBtn").onclick=function(){
     .catch(function(){b.disabled=false;loadMarketing();});
 };
 $("mktRefresh").onclick=loadMarketing;
+
+/* ---------- weekly articles ---------- */
+function loadArticles(){
+  return api("articles").then(function(d){
+    var list=(d&&d.articles)||[];
+    if(!list.length){$("artWrap").innerHTML='<div class="empty">No articles yet. The first one is written on Monday, or press <b>Write an article now</b>.</div>';return;}
+    $("artWrap").innerHTML='<div class="pgrid">'+list.map(function(a){
+      var on=a.status==="published";
+      return'<div class="pcard'+(on?"":" st-rejected")+'"><div class="top"><span class="pill p-'+(on?"posted":"rejected")+'">'+(on?"live":"hidden")+'</span><span class="meta">'+esc(fmtDate(a.created_at))+' · '+esc(a.item_label||"")+'</span></div>'
+        +'<b>'+esc(a.title)+'</b><div class="row" style="margin:0">'
+        +'<a class="btn sm ghost" href="/articles/'+esc(a.slug)+'" target="_blank" rel="noopener" style="text-decoration:none">View</a>'
+        +'<button class="btn sm ghost" data-art="'+a.id+'" data-st="'+(on?"hidden":"published")+'">'+(on?"Hide":"Show")+'</button></div></div>';
+    }).join("")+'</div>';
+    $("artWrap").querySelectorAll("[data-art]").forEach(function(b){b.onclick=function(){
+      api("article/"+b.dataset.art,{method:"PATCH",body:{status:b.dataset.st}}).then(loadArticles);
+    };});
+  }).catch(function(){});
+}
+$("artBtn").onclick=function(){
+  var b=$("artBtn");b.disabled=true;b.textContent="Writing… (about a minute)";
+  api("article",{method:"POST",body:{}}).then(function(r){b.disabled=false;b.textContent="Write an article now";
+    if(!r.ok)alert(r.error||"The article could not be written.");else if(r.url)window.open(r.url,"_blank");loadArticles();})
+    .catch(function(){b.disabled=false;b.textContent="Write an article now";});
+};
 $("liBtn").onclick=function(){
   api("linkedin/start",{method:"POST"}).then(function(r){if(r.ok&&r.url)location.href=r.url;else alert(r.error||"Could not start the LinkedIn sign-in.");});
 };

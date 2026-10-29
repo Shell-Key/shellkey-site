@@ -199,6 +199,10 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
     created.push({ id, platform });
   }
 
+  // Plus today's Reels (Facebook + Instagram) from the newest YouTube Short
+  let reels = [];
+  try { reels = await addReels(env, day); created.push(...reels); } catch (e) { console.log("reels:", e.message); }
+
   const s = setupStatus(env);
   const li = await linkedinStatus(env);
   const connected = { facebook: s.facebook, instagram: s.instagram, linkedin: li.connected };
@@ -215,6 +219,7 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
     auto && posted.length ? "Posted automatically: " + posted.join(", ") + ". Anything else is waiting for you."
          : "Open the Marketing tab, read them, fix anything you want, and press Approve & Post.",
   ];
+  if (reels.length) lines.push("", "Reels: today's YouTube Short also goes to Facebook and Instagram as a Reel" + (auto ? "." : " (press Approve & Post on the Reel cards)."));
   if (liVideo) lines.push("", "LinkedIn today is a VIDEO post. Download the video:", liVideo, "Then on the Shell Key LinkedIn page: Start a post > Video, add the video, and paste the LinkedIn text from the Marketing tab.");
   else lines.push("", "LinkedIn today is an IMAGE post" + (videoDay ? " (no new Short was found for a video)." : ". Tomorrow is a video post."));
   if (li.connected && li.days_left <= 7) lines.push("", `LinkedIn sign-in runs out in ${li.days_left} day(s). Press Reconnect LinkedIn on the Marketing tab.`);
@@ -230,6 +235,72 @@ async function graph(env, path, params) {
   return d;
 }
 
+// ---------------------------------------------------------------- Reels (the newest YouTube Short on Facebook + Instagram)
+const isMp4 = (u) => /\.mp4(\?|$)/i.test(u || "");
+// GitHub release links redirect to a short-lived file address; Facebook needs the real file address
+async function directVideoUrl(url) {
+  const r = await fetch(url, { redirect: "manual" });
+  return r.headers.get("location") || url;
+}
+async function graphGet(env, path, params) {
+  const r = await fetch((env.GRAPH_URL || GRAPH) + path + "?" + new URLSearchParams(params));
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok || d.error) throw new Error((d.error && d.error.message) || "Facebook said " + r.status);
+  return d;
+}
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+async function postInstagramReel(env, p) {
+  const video_url = await directVideoUrl(p.image);
+  const c = await graph(env, `/${env.IG_USER_ID}/media`, { media_type: "REELS", video_url, caption: p.body, share_to_feed: "true", access_token: env.FB_PAGE_TOKEN });
+  for (let i = 0; i < 36; i++) {            // Instagram processes the video first (usually under a minute)
+    await wait(5000);
+    const st = await graphGet(env, `/${c.id}`, { fields: "status_code,status", access_token: env.FB_PAGE_TOKEN });
+    if (st.status_code === "FINISHED") break;
+    if (st.status_code === "ERROR" || st.status_code === "EXPIRED") throw new Error("Instagram couldn't process the video: " + (st.status || st.status_code));
+    if (i === 35) throw new Error("Instagram is still processing the video; press Approve & Post again in a few minutes.");
+  }
+  const d = await graph(env, `/${env.IG_USER_ID}/media_publish`, { creation_id: c.id, access_token: env.FB_PAGE_TOKEN });
+  return d.id || "";
+}
+
+async function postFacebookReel(env, p) {
+  const token = env.FB_PAGE_TOKEN;
+  const start = await graph(env, `/${env.FB_PAGE_ID}/video_reels`, { upload_phase: "start", access_token: token });
+  const version = ((env.GRAPH_URL || GRAPH).match(/v\d+\.\d+/) || ["v26.0"])[0];
+  const up = await fetch(`https://rupload.facebook.com/video-upload/${version}/${start.video_id}`, {
+    method: "POST", headers: { authorization: "OAuth " + token, file_url: await directVideoUrl(p.image) },
+  });
+  const ud = await up.json().catch(() => ({}));
+  if (!up.ok || ud.success === false) throw new Error("Facebook couldn't take the video: " + JSON.stringify(ud).slice(0, 200));
+  await graph(env, `/${env.FB_PAGE_ID}/video_reels`, { upload_phase: "finish", video_id: start.video_id, video_state: "PUBLISHED", description: p.body, access_token: token });
+  return start.video_id;
+}
+
+// Once a day: the newest public Short that hasn't been a Reel yet becomes a Facebook Reel and an Instagram Reel
+async function addReels(env, day) {
+  const short = await latestShort(env);
+  if (!short) return [];
+  const used = await env.DB.prepare("SELECT COUNT(*) n FROM posts WHERE image=? AND platform IN ('facebook','instagram')").bind(short.videoUrl).first();
+  if (used.n) return [];
+  const product = CATALOG.find((p) => p.slug === short.slug);
+  if (!product) return [];
+  const created = [];
+  for (const platform of ["facebook", "instagram"]) {
+    const r = await env.DB.prepare("INSERT INTO posts (day, platform, item, item_label, angle, body, image) VALUES (?,?,?,?,?,?,?)")
+      .bind(day, platform, product.slug, product.name, "reel", "(writing)", short.videoUrl).run();
+    const id = r.meta.last_row_id, campaign = "p" + id;
+    const link = `${product.url}?utm_source=${platform}&utm_medium=reel&utm_campaign=${campaign}`;
+    const tag = product.tagline || product.name;
+    const body = platform === "instagram"
+      ? `${tag}\nTry the free demo. Link in bio.\n\n#ShellKey #ProjectControls #Construction #Engineering #Reels`
+      : `${tag}\nTry the free demo 👇\n${link}`;
+    await env.DB.prepare("UPDATE posts SET body=?, link=?, campaign=? WHERE id=?").bind(body, link, campaign, id).run();
+    created.push({ id, platform });
+  }
+  return created;
+}
+
 export async function publishPost(env, id) {
   const db = env.DB;
   const p = await db.prepare("SELECT * FROM posts WHERE id=?").bind(id).first();
@@ -240,15 +311,21 @@ export async function publishPost(env, id) {
   try {
     if (p.platform === "facebook") {
       if (!s.facebook) throw new Error("Facebook is not connected yet. Copy the post, paste it on your Page, then press Mark as posted.");
-      const d = await graph(env, `/${env.FB_PAGE_ID}/feed`, { message: p.body, link: p.link, access_token: env.FB_PAGE_TOKEN });
-      remote = d.id || "";
+      if (isMp4(p.image)) remote = await postFacebookReel(env, p);
+      else {
+        const d = await graph(env, `/${env.FB_PAGE_ID}/feed`, { message: p.body, link: p.link, access_token: env.FB_PAGE_TOKEN });
+        remote = d.id || "";
+      }
     } else if (p.platform === "instagram") {
       if (!s.instagram) throw new Error("Instagram is not connected yet. Save the image, post it from your phone, then press Mark as posted.");
-      const c = await graph(env, `/${env.IG_USER_ID}/media`, { image_url: p.image, caption: p.body, access_token: env.FB_PAGE_TOKEN });
-      const d = await graph(env, `/${env.IG_USER_ID}/media_publish`, { creation_id: c.id, access_token: env.FB_PAGE_TOKEN });
-      remote = d.id || "";
+      if (isMp4(p.image)) remote = await postInstagramReel(env, p);
+      else {
+        const c = await graph(env, `/${env.IG_USER_ID}/media`, { image_url: p.image, caption: p.body, access_token: env.FB_PAGE_TOKEN });
+        const d = await graph(env, `/${env.IG_USER_ID}/media_publish`, { creation_id: c.id, access_token: env.FB_PAGE_TOKEN });
+        remote = d.id || "";
+      }
     } else if (p.platform === "linkedin") {
-      if (/\.mp4(\?|$)/i.test(p.image || "")) throw new Error("LinkedIn video posts go up by hand for now: press Video to download it, post it on the Shell Key page, then press Mark as posted.");
+      if (isMp4(p.image)) throw new Error("LinkedIn video posts go up by hand for now: press Video to download it, post it on the Shell Key page, then press Mark as posted.");
       remote = await postToLinkedIn(env, p);
     } else {
       throw new Error("Unknown platform " + p.platform);

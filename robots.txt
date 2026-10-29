@@ -4,3 +4,4 @@ Disallow: /crm.html
 Disallow: /api/
 
 Sitemap: https://shellkey.company/sitemap.xml
+Sitemap: https://shellkey.company/sitemap-articles.xml
