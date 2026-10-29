@@ -107,7 +107,7 @@ async function askClaude(env, system, user) {
     },
     body: JSON.stringify({
       model: env.CLAUDE_MODEL || MODEL,
-      max_tokens: 1000,
+      max_tokens: 2000,
       system,
       messages: [{ role: "user", content: user }],
     }),
@@ -118,9 +118,28 @@ async function askClaude(env, system, user) {
 }
 
 function parseJson(text) {
-  const start = text.indexOf("{"), end = text.lastIndexOf("}");
+  // The JSON starts at the first '{"' (not a {LINK} placeholder) and ends at the last '}'
+  const start = text.search(/\{\s*"/), end = text.lastIndexOf("}");
   if (start < 0 || end < start) throw new Error("Claude did not return JSON");
-  return JSON.parse(text.slice(start, end + 1));
+  const raw = text.slice(start, end + 1);
+  try { return JSON.parse(raw); }
+  catch {
+    // Line breaks typed inside the post text are not allowed in JSON: escape them and try again
+    let out = "", inStr = false, esc = false;
+    for (const ch of raw) {
+      if (inStr && !esc && (ch === "\n" || ch === "\r")) { out += ch === "\n" ? "\\n" : ""; continue; }
+      if (ch === '"' && !esc) inStr = !inStr;
+      esc = ch === "\\" && !esc;
+      out += ch;
+    }
+    return JSON.parse(out);
+  }
+}
+
+// Ask Claude for the posts; if the answer can't be read, ask once more
+async function askPosts(env, system, user) {
+  try { return parseJson(await askClaude(env, system, user)); }
+  catch { return parseJson(await askClaude(env, system, user + "\n\nReply with valid JSON only, every post on one line, \\n for line breaks.")); }
 }
 
 function systemPrompt() {
@@ -176,11 +195,11 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
     recent.length ? "RECENT POSTS. Do not repeat their openings or phrasing:\n" + recent.map((r) => "- " + r.body.slice(0, 160).replace(/\s+/g, " ")).join("\n") : "",
   ].join("\n");
 
-  let out = parseJson(await askClaude(env, systemPrompt(), user));
+  let out = await askPosts(env, systemPrompt(), user);
   // Posts must stay short. If any came back long, ask once more for shorter ones.
   const tooLong = PLATFORMS.filter((pl) => words(out[pl]) > LIMIT[pl]);
   if (tooLong.length) {
-    out = { ...out, ...parseJson(await askClaude(env, systemPrompt(), user +
+    out = { ...out, ...(await askPosts(env, systemPrompt(), user +
       `\n\nYour last version was too long for: ${tooLong.join(", ")}. Rewrite ALL posts much shorter: 2 or 3 short lines each, no paragraphs.`)) };
   }
   const image = BRAND.site + "/" + (product.social || product.img);
