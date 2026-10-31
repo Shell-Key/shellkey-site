@@ -88,6 +88,15 @@
    ],
    "mode": "testing",
    "ranked": false
+  },
+  "2026-10-31": {
+   "slots": [
+    21,
+    6,
+    8
+   ],
+   "mode": "testing",
+   "ranked": false
   }
  }
 }
