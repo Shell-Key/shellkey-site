@@ -121,6 +121,15 @@
    ],
    "mode": "testing",
    "ranked": false
+  },
+  "2026-11-01": {
+   "slots": [
+    8,
+    11,
+    19
+   ],
+   "mode": "testing",
+   "ranked": false
   }
  }
 }
