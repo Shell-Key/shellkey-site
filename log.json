@@ -95,6 +95,18 @@
    "privacy": "public",
    "views48": null,
    "videoUrl": "https://github.com/Shell-Key/shellkey-site/releases/download/shorts/api-653-im-20261101-1628.mp4"
+  },
+  {
+   "id": "fqyuQz2pFVk",
+   "url": "https://youtube.com/shorts/fqyuQz2pFVk",
+   "slug": "aws-cwi-im",
+   "title": "AWS-CWI IM: try the free demo #Shorts",
+   "slot": 8,
+   "date": "2026-11-02",
+   "postedAt": "2026-11-02T15:36:05.546Z",
+   "privacy": "public",
+   "views48": null,
+   "videoUrl": "https://github.com/Shell-Key/shellkey-site/releases/download/shorts/aws-cwi-im-20261102-1536.mp4"
   }
  ],
  "days": {
@@ -139,6 +151,15 @@
     8,
     11,
     19
+   ],
+   "mode": "testing",
+   "ranked": false
+  },
+  "2026-11-02": {
+   "slots": [
+    11,
+    21,
+    8
    ],
    "mode": "testing",
    "ranked": false
