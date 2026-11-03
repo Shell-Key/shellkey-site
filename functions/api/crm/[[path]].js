@@ -17,7 +17,7 @@
 //   DELETE /api/crm/spend/:id
 //   POST  /api/crm/linkedin/start        returns the LinkedIn sign-in link
 //   POST  /api/crm/linkedin/disconnect
-import { json, bad, readJson, clean, authed } from "../../_lib.js";
+import { json, bad, readJson, clean, authed, lastEvents, logEvent } from "../../_lib.js";
 import { setupStatus, today, writeDailyPosts, publishPost, results, PLATFORMS } from "../../_agent.js";
 import { writeWeeklyArticle, listArticles, ensureArticlesTable } from "../../_articles.js";
 import { linkedinStatus, startUrl as linkedinStartUrl, setSetting } from "../../_linkedin.js";
@@ -127,13 +127,17 @@ export async function onRequest({ request, env, params }) {
     catch (e) { tables = false; }
     const li = await linkedinStatus(env);
     return json({ ok: true, setup: Object.assign(setupStatus(env), { tables, linkedin: li.connected, linkedin_app: li.app,
-      linkedin_days_left: li.days_left, linkedin_name: li.name }), today: today(), posts });
+      linkedin_days_left: li.days_left, linkedin_name: li.name, email: !!env.RESEND_API_KEY }), today: today(), posts,
+      last: await lastEvents(env) });
   }
 
   if (route === "write" && request.method === "POST") {
     const b = (await readJson(request)) || {};
-    try { return json(await writeDailyPosts(env, { force: !!b.force, slug: clean(b.slug, 80) })); }
-    catch (e) { return bad(String(e.message || e), 500); }
+    try {
+      const r = await writeDailyPosts(env, { force: !!b.force, slug: clean(b.slug, 80) });
+      await logEvent(env, "morning_run", true, "CRM button: " + (r.skipped ? "today's posts were already written" : `wrote ${(r.created || []).length} posts about ${r.product}`));
+      return json(r);
+    } catch (e) { await logEvent(env, "morning_run", false, "CRM button failed: " + String(e.message || e)); return bad(String(e.message || e), 500); }
   }
 
   if (route === "linkedin" && request.method === "POST") {

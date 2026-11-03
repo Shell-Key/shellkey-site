@@ -2,7 +2,7 @@
 // Authorization: Bearer <AGENT_KEY> (the timer) or Bearer <CRM_KEY> (you, from the CRM).
 // Body (optional): {"force": true} writes another set even if today's already exist,
 //                  {"slug": "bid-board"} writes about that product instead of the agent's pick.
-import { json, bad, readJson, authed } from "../../_lib.js";
+import { json, bad, readJson, authed, logEvent } from "../../_lib.js";
 import { writeDailyPosts } from "../../_agent.js";
 import { writeWeeklyArticle } from "../../_articles.js";
 
@@ -20,8 +20,12 @@ export async function onRequestPost({ request, env }) {
     // Mondays: the weekly article (never lets an article problem stop the daily posts)
     let article;
     try { article = await writeWeeklyArticle(env); } catch (e) { article = { ok: false, error: String(e.message || e) }; }
+    const who = agentKeyOk(request, env) ? "Timer" : "CRM button";
+    await logEvent(env, "morning_run", true, posts.skipped ? `${who}: today's posts were already written`
+      : `${who}: wrote ${(posts.created || []).length} posts about ${posts.product}`);
     return json({ ...posts, article });
   } catch (e) {
+    await logEvent(env, "morning_run", false, "Failed: " + String(e.message || e));
     return bad(String(e.message || e), 500);
   }
 }

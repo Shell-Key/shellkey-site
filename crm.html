@@ -183,6 +183,7 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 
     <section id="tab-marketing" class="hidden">
       <div class="setup" id="setupChips"></div>
+      <div class="note" id="runStatus" style="font-size:13px"></div>
       <div class="toolbar">
         <button class="btn" id="writeBtn">Write today's posts</button>
         <button class="btn ghost" id="mktRefresh">Refresh</button>
@@ -366,9 +367,12 @@ function loadMarketing(){
   loadArticles();
   return api("marketing").then(function(d){
     var st=d.setup||{};SETUP=st;
-    var chips=[["tables","Marketing tables"],["claude","Claude writer"],["facebook","Facebook auto-post"],["instagram","Instagram auto-post"],["linkedin","LinkedIn auto-post"+(st.linkedin&&st.linkedin_days_left!=null?" ("+st.linkedin_days_left+" days left)":"")],["timer_key","Daily timer key"]];
+    var chips=[["tables","Marketing tables"],["claude","Claude writer"],["facebook","Facebook auto-post"],["instagram","Instagram auto-post"],["linkedin","LinkedIn auto-post"+(st.linkedin&&st.linkedin_days_left!=null?" ("+st.linkedin_days_left+" days left)":"")],["timer_key","Daily timer key"],["email","Email alerts"]];
     $("setupChips").innerHTML=chips.map(function(c){return'<span class="chip '+(st[c[0]]?"ok":"no")+'" title="'+(st[c[0]]?"Connected":"Not set up yet. See MARKETING-SETUP.md")+'">'+(st[c[0]]?"✓ ":"○ ")+esc(c[1])+'</span>';}).join("")
       +'<span class="chip'+(st.auto_post?" ok":"")+'">'+(st.auto_post?"Auto-post ON":"Approval first")+'</span>';
+    var L=d.last||{},fmt=function(e){return new Date(e.at.replace(" ","T")+"Z").toLocaleString("en-US",{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});};
+    var line=function(label,e,none){return'<div><b>'+label+':</b> '+(e?'<span style="color:var('+(e.ok?'--green':'--red')+')">'+(e.ok?"✓ ":"✗ ")+esc(fmt(e))+'</span> · '+esc(e.detail||""):'<span style="color:var(--text2)">'+none+'</span>')+'</div>';};
+    $("runStatus").innerHTML=line("Last morning run",L.morning_run,"None recorded yet (shows after the next run)")+line("Last email",L.email,"None recorded yet");
     var lb=$("liBtn");lb.textContent=st.linkedin?"Reconnect LinkedIn":"Connect LinkedIn";
     lb.classList.toggle("hidden",!st.linkedin_app&&!st.linkedin);
     if(st.linkedin&&st.linkedin_days_left<=7){lb.textContent="Reconnect LinkedIn (runs out in "+st.linkedin_days_left+" days)";lb.classList.remove("ghost");}
