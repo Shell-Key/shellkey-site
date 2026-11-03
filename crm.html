@@ -113,11 +113,12 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
   </header>
 
   <div id="login" class="login hidden">
-    <h2>Shell Key CRM</h2>
-    <p style="color:var(--text2)">Enter the CRM key you set in Cloudflare (Pages → Settings → Variables → <code>CRM_KEY</code>).</p>
-    <input id="keyInput" type="password" placeholder="CRM key" autocomplete="current-password" />
-    <button class="btn" id="keyBtn">Open CRM</button>
-    <p id="loginErr" style="color:var(--red);display:none">That key was refused.</p>
+    <h2>Shell Key Admin</h2>
+    <p style="color:var(--text2)">Sign in to the CRM. Your browser can save this password so you only type it once.</p>
+    <input id="userInput" type="email" value="Kirby.Billiot@shellkey.company" autocomplete="username" readonly style="opacity:.75" />
+    <input id="keyInput" type="password" placeholder="Password (your CRM key)" autocomplete="current-password" />
+    <button class="btn" id="keyBtn">Sign in</button>
+    <p id="loginErr" style="color:var(--red);display:none">That password was refused.</p>
   </div>
 
   <div id="app" class="hidden">
