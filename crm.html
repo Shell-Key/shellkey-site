@@ -95,12 +95,20 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 .btn.sm{padding:7px 11px;font-size:13px}
 .note{background:rgba(124,255,0,.06);border:1px solid rgba(124,255,0,.3);border-radius:var(--radius);padding:12px 14px;font-size:14px;color:var(--text2);margin:10px 0}
 .roi-pos{color:var(--green);font-weight:800} .roi-neg{color:var(--red);font-weight:800}
+.home-link{display:inline-flex;align-items:center;border-radius:8px}
+.home-link:hover{opacity:.8}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:1000}
+.modal-bg.hidden{display:none}
+.modal{background:#0d1f3c;border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:24px 26px;max-width:360px;width:90%;text-align:center}
+.modal h3{margin:0 0 8px}
+.modal p{color:var(--text2);margin:0 0 18px}
+.modal .row{display:flex;gap:10px;justify-content:center}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <img src="assets/img/logo/ShellKeyWhiteTrace.png" alt="Shell Key" />
+    <a href="/" title="Back to shellkey.company" class="home-link"><img src="assets/img/logo/ShellKeyWhiteTrace.png" alt="Shell Key home" /></a>
     <h1>CRM</h1>
     <div class="tabs" id="tabs">
       <button class="tab on" data-tab="pipeline">Pipeline</button>
@@ -111,6 +119,17 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
       <button class="tab ghost" id="logout" title="Forget the key on this browser">Sign out</button>
     </div>
   </header>
+
+  <div id="logoutBox" class="modal-bg hidden" role="dialog" aria-modal="true" aria-labelledby="logoutTitle">
+    <div class="modal">
+      <h3 id="logoutTitle">Sign out of the CRM?</h3>
+      <p>You'll need your password to get back in on this browser.</p>
+      <div class="row">
+        <button class="btn ghost" id="logoutNo">Stay signed in</button>
+        <button class="btn" id="logoutYes">Sign out</button>
+      </div>
+    </div>
+  </div>
 
   <div id="login" class="login hidden">
     <h2>Shell Key Admin</h2>
@@ -222,7 +241,11 @@ function api(path,opts){
   return fetch(API+path,opts).then(function(r){if(r.status===401){logout();throw new Error("unauthorized");}return r.json();});
 }
 function logout(){KEY=null;try{localStorage.removeItem("sk_crm_key");}catch(e){}$("app").classList.add("hidden");$("login").classList.remove("hidden");}
-$("logout").onclick=logout;
+$("logout").onclick=function(){$("logoutBox").classList.remove("hidden");$("logoutNo").focus();};
+$("logoutNo").onclick=function(){$("logoutBox").classList.add("hidden");};
+$("logoutYes").onclick=function(){$("logoutBox").classList.add("hidden");logout();};
+$("logoutBox").addEventListener("click",function(e){if(e.target===this)this.classList.add("hidden");});
+document.addEventListener("keydown",function(e){if(e.key==="Escape")$("logoutBox").classList.add("hidden");});
 $("keyBtn").onclick=function(){KEY=$("keyInput").value.trim();api("stats").then(function(){try{localStorage.setItem("sk_crm_key",KEY);}catch(e){}start();}).catch(function(){$("loginErr").style.display="block";});};
 $("keyInput").addEventListener("keydown",function(e){if(e.key==="Enter")$("keyBtn").click();});
 
