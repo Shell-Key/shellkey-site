@@ -103,6 +103,24 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 .modal h3{margin:0 0 8px}
 .modal p{color:var(--text2);margin:0 0 18px}
 .modal .row{display:flex;gap:10px;justify-content:center}
+/* ==============================================================
+   SECTION: SINGLE VISITOR REPORT TABLE STYLING
+   PURPOSE: Full-width table with no scattered side-by-side cards.
+   SAFE TO EDIT: margin, spacing and responsive breakpoint.
+   DO NOT CHANGE: CRM theme variables or generic table classes.
+   ============================================================== */
+.visitor-report-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:22px 0 10px}
+.visitor-report-controls label{font-weight:700;color:var(--accent)}
+.visitor-report-controls select{min-width:230px;max-width:100%}
+.visitor-report-tablewrap{width:100%;margin-top:10px}
+.visitor-report-tablewrap table{width:100%;min-width:0;table-layout:fixed}
+.visitor-report-tablewrap th,.visitor-report-tablewrap td{overflow-wrap:anywhere;white-space:normal}
+.visitor-report-tablewrap tr.filters input{min-width:0;width:100%}
+@media(max-width:760px){
+  .visitor-report-tablewrap{overflow-x:auto}
+  .visitor-report-tablewrap table{min-width:680px;table-layout:auto}
+}
+/* =============== END SINGLE VISITOR TABLE STYLE =============== */
 </style>
 </head>
 <body>
@@ -166,13 +184,34 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
         <span class="legend">Green bars = unique visitors, blue = page views. Hover a bar for the date.</span>
       </div>
       <div class="bars" id="bars"></div>
-      <div class="grid2" style="margin-top:14px">
-        <div><h3>Top pages</h3><div class="tablewrap"><table id="pagesTable"></table></div></div>
-        <div><h3>Where they came from</h3><div class="tablewrap"><table id="refsTable"></table></div>
-             <h3>Countries</h3><div class="tablewrap"><table id="countriesTable"></table></div></div>
+      <!-- ==========================================================
+           SECTION: VISITOR REPORT SELECTOR — ONE TABLE AT A TIME
+           PURPOSE: Replace four scattered visitor tables with ONE
+                    full-width table controlled by a dropdown.
+           PSEUDOCODE:
+             1. User chooses Top Pages, Traffic Sources, Countries,
+                or Visitor Sessions from the dropdown.
+             2. JavaScript reads the existing /api/crm/visits data.
+             3. Only the chosen report is drawn in visitorReportTable.
+             4. Existing sorting, column filtering and lead-click
+                behavior remain available.
+           SAFE TO EDIT: Dropdown label and visible option text.
+           DO NOT CHANGE: option values, element IDs, API routes.
+           ========================================================== -->
+      <div class="visitor-report-controls">
+        <label for="visitorReportSelect">Visitor report</label>
+        <select id="visitorReportSelect" aria-label="Choose visitor report">
+          <option value="pages">Top Pages</option>
+          <option value="sources">Traffic Sources</option>
+          <option value="countries">Countries</option>
+          <option value="sessions">Visitor Sessions</option>
+        </select>
       </div>
-      <h3>Sessions (click one with a lead to open it)</h3>
-      <div class="tablewrap"><table id="sessionsTable"></table></div>
+      <div id="visitorReportHelp" class="legend">Pages viewed on your website.</div>
+      <div class="tablewrap visitor-report-tablewrap">
+        <table id="visitorReportTable" aria-label="Selected visitor report"></table>
+      </div>
+      <!-- ============= END VISITOR REPORT SELECTOR ============= -->
     </section>
 
     <!-- SALES -->
@@ -331,24 +370,95 @@ function openLead(row){
   });
 }
 
-/* ---------- visitors ---------- */
+/* ==============================================================
+   SECTION: VISITOR REPORT SWITCHING — ONE TABLE, FOUR DATASETS
+   PURPOSE:
+     Show exactly one full-width visitor report at a time.
+   PSEUDOCODE:
+     1. Retrieve visitor data using the existing CRM API.
+     2. Preserve the visitor chart and date filter.
+     3. Read the report dropdown (pages / sources / countries / sessions).
+     4. Select the matching columns and records.
+     5. Render the chosen data into the same table element.
+     6. When switching reports, reset only the report table's filters
+        and sorting; the rest of the CRM is not affected.
+   SAFE TO EDIT:
+     - Help text for each report.
+     - Column display names (label: values).
+   DO NOT CHANGE:
+     - API path, dropdown values, data field keys or element IDs.
+     - openLead callback (allows clicking sessions tied to a lead).
+   ============================================================== */
+var visitorReportData = null;
+var activeVisitorReport = null;
+
+function showVisitorReport(){
+  if (!visitorReportData) return;
+  var selected = $("visitorReportSelect").value;
+  var table = $("visitorReportTable");
+  var data = visitorReportData;
+  var columns = [];
+  var rows = [];
+  var onRow = null;
+  var help = "";
+
+  if (selected === "pages") {
+    columns = [
+      {key:"page",label:"Page"},
+      {key:"views",label:"Views",val:function(r){return r.views;}},
+      {key:"visitors",label:"Visitors",val:function(r){return r.visitors;}}
+    ];
+    rows = data.pages || [];
+    help = "Pages viewed on your website.";
+  } else if (selected === "sources") {
+    columns = [
+      {key:"ref",label:"Referrer",clip:true,val:function(r){return r.ref || "(direct)";}},
+      {key:"n",label:"Views",val:function(r){return r.n;}}
+    ];
+    rows = data.refs || [];
+    help = "Where your website traffic came from.";
+  } else if (selected === "countries") {
+    columns = [
+      {key:"country",label:"Country"},
+      {key:"n",label:"Visitors",val:function(r){return r.n;}}
+    ];
+    rows = data.countries || [];
+    help = "Visitor counts grouped by country.";
+  } else if (selected === "sessions") {
+    columns = [
+      {key:"last_at",label:"Last seen",render:function(r){return esc(fmtDate(r.last_at));}},
+      {key:"lead_name",label:"Lead",render:function(r){return r.lead_id?'<span class="pill s-new">'+esc(r.lead_name||"#"+r.lead_id)+'</span>':'<span style="color:var(--text2)">anonymous</span>'; }},
+      {key:"hits",label:"Pages",val:function(r){return r.hits;}},
+      {key:"checkouts",label:"Checkout clicks",val:function(r){return r.checkouts;},render:function(r){return r.checkouts?'<b style="color:var(--accent)">'+r.checkouts+'</b>':"";}},
+      {key:"country",label:"Ctry"},
+      {key:"device",label:"Device"},
+      {key:"ref",label:"From",clip:true,val:function(r){return(r.ref||"").replace(/^https?:\/\//,"")||"(direct)";}},
+      {key:"path",label:"Path",clip:true}
+    ];
+    rows = data.sessions || [];
+    onRow = function(r){if(r.lead_id)openLead({id:r.lead_id});};
+    help = "Choose a session linked to a lead to view its details.";
+  }
+
+  if (selected !== activeVisitorReport) {
+    table._state = {sort:null,dir:1,filters:{}};
+    activeVisitorReport = selected;
+  }
+  $("visitorReportHelp").textContent = help;
+  renderTable(table,columns,rows,onRow);
+}
+
 function loadVisitors(){
   api("visits?days="+$("days").value).then(function(d){
+    visitorReportData = d;
     var max=Math.max.apply(null,d.daily.map(function(x){return x.views;}).concat([1]));
     $("bars").innerHTML=d.daily.map(function(x){return'<div class="bar" style="height:'+Math.round(x.views/max*100)+'%" data-t="'+esc(x.d)+': '+x.views+' views, '+x.visitors+' visitors"><div class="bar v" style="position:absolute;bottom:0;left:0;right:0;height:'+Math.round(x.visitors/x.views*100)+'%"></div></div>';}).join("")||'<div class="empty" style="width:100%">No visits recorded yet. Open the site in another tab and refresh.</div>';
-    renderTable($("pagesTable"),[{key:"page",label:"Page"},{key:"views",label:"Views",val:function(r){return r.views;}},{key:"visitors",label:"Visitors",val:function(r){return r.visitors;}}],d.pages);
-    renderTable($("refsTable"),[{key:"ref",label:"Referrer",clip:true},{key:"n",label:"Views",val:function(r){return r.n;}}],d.refs);
-    renderTable($("countriesTable"),[{key:"country",label:"Country"},{key:"n",label:"Visitors",val:function(r){return r.n;}}],d.countries);
-    renderTable($("sessionsTable"),[
-      {key:"last_at",label:"Last seen",render:function(r){return esc(fmtDate(r.last_at));}},
-      {key:"lead_name",label:"Lead",render:function(r){return r.lead_id?'<span class="pill s-new">'+esc(r.lead_name||"#"+r.lead_id)+'</span>':'<span style="color:var(--text2)">anonymous</span>';}},
-      {key:"hits",label:"Pages",val:function(r){return r.hits;}},{key:"checkouts",label:"Checkout clicks",val:function(r){return r.checkouts;},render:function(r){return r.checkouts?'<b style="color:var(--accent)">'+r.checkouts+'</b>':"";}},
-      {key:"country",label:"Ctry"},{key:"device",label:"Device"},{key:"ref",label:"From",clip:true,val:function(r){return(r.ref||"").replace(/^https?:\/\//,"")||"(direct)";}},
-      {key:"path",label:"Path",clip:true}
-    ],d.sessions,function(r){if(r.lead_id)openLead({id:r.lead_id});});
-  });
+    showVisitorReport();
+  }).catch(function(){toast("Could not load visitor analytics");});
 }
 $("days").onchange=loadVisitors;
+$("visitorReportSelect").onchange=showVisitorReport;
+/* ================== END VISITOR REPORT SWITCHING ============== */
 
 /* ---------- sales ---------- */
 function loadSales(){
@@ -461,22 +571,148 @@ $("writeBtn").onclick=function(){
 $("mktRefresh").onclick=loadMarketing;
 
 /* ---------- weekly articles ---------- */
+/* =======================================================================
+   SHELL KEY MARKETING — ARTICLE DISTRIBUTION COMMANDS
+   PURPOSE: Make sharing an existing Shell Key article simple, one channel
+            at a time, without changing the original social-post workflow.
+
+   PSEUDOCODE:
+   1. Load already published articles from the existing CRM API.
+   2. For each article, display a small "Share article" control.
+   3. Choose one destination: LinkedIn, Facebook, X, Reddit or Email.
+   4. Construct a unique tracked article URL for that destination.
+   5. Copy a short caption and tracked link and open the chosen site.
+   6. Record visits/leads with existing website tracking; show the
+      results inside the Article Distribution Performance table below.
+
+   SAFE TO CHANGE:
+   - Names and ordering inside ARTICLE_CHANNELS.
+   - Caption wording inside articleCaption().
+   - Help instructions shown in the article cards.
+
+   IMPORTANT LIMITS:
+   - "Copy & open" does not publish. The platform still requires a
+     human to paste/confirm unless we configure its publishing API.
+   - Facebook/LinkedIn link-share dialogs may provide preview images if
+     the article has valid Open Graph image metadata. Not guaranteed.
+   - Don't auto-post to groups or forums without permission.
+   - Article results count tracked visits/leads, NOT native impressions.
+   ======================================================================= */
+/* =============================================================
+   ARTICLE SHARING — ENVIRONMENT & DESTINATION SAFETY
+   PURPOSE:
+     A development article lives only in the Preview D1 database.
+     NEVER generate a production link for an unpromoted article.
+     LinkedIn/Facebook sharing dialogs default to personal accounts;
+     open the company's page instead for manual company publishing.
+
+   PSEUDOCODE:
+     1. Detect whether this CRM is running on a Pages preview.
+     2. Build test links from the preview domain; live links from
+        shellkey.company only after the article exists in live CRM.
+     3. Disable social/email share actions on the preview.
+     4. Copy the short caption and open the correct posting location
+        only on the live website.
+
+   SAFE TO EDIT: Platform labels, company-page URL, hook wording.
+   DO NOT EDIT: isArticlePreview(), URL tracking parameters or
+                preview safety checks without verifying deployment.
+   ============================================================= */
+var ARTICLE_CHANNELS = {
+  linkedin: {label:"Shell Key LinkedIn Company Page", url:"https://www.linkedin.com/company/shell-key/"},
+  facebook: {label:"Shell Key Facebook Page", url:"https://www.facebook.com/ShellKeyCompany"},
+  fbgroup: {label:"Facebook Group (manual)", url:"https://www.facebook.com/share/g/1JXMxNfGbZ/"},
+  x: {label:"X / Twitter", url:"https://x.com/compose/post"},
+  reddit: {label:"Reddit (community rules apply)", url:"https://www.reddit.com/submit"},
+  email: {label:"Email", url:""}
+};
+function isArticlePreview(){
+  // pages.dev deployment URLs are development/testing locations, not live article URLs.
+  return /(^|\.)pages\.dev$/i.test(location.hostname);
+}
+function articleTrackedLink(a,channel){
+  var origin=isArticlePreview()?location.origin:"https://shellkey.company";
+  var base=origin+"/articles/"+encodeURIComponent(a.slug);
+  return base+"?utm_source="+encodeURIComponent(channel)+"&utm_medium=article_share&utm_campaign="+encodeURIComponent("article_"+a.id+"_"+channel);
+}
+function articleCaption(a,channel){
+  var title=a.title||"Shell Key project controls guide";
+  // Keep marketing copy short and avoid unfounded results or promises.
+  return "Need a more reliable project schedule?\n"+title+"\nRead the guide: "+articleTrackedLink(a,channel);
+}
+function articleDestination(a,channel){
+  var link=articleTrackedLink(a,channel),title=a.title||"Shell Key article";
+  // Do not use the LinkedIn/Facebook sharer dialog: it can default to
+  // the personal account even when the Shell Key company page exists.
+  if(channel==="linkedin" || channel==="facebook" || channel==="fbgroup")return ARTICLE_CHANNELS[channel].url;
+  if(channel==="x")return "https://twitter.com/intent/tweet?text="+encodeURIComponent(title)+"&url="+encodeURIComponent(link);
+  if(channel==="reddit")return "https://www.reddit.com/submit?url="+encodeURIComponent(link)+"&title="+encodeURIComponent(title);
+  return "mailto:?subject="+encodeURIComponent(title)+"&body="+encodeURIComponent(articleCaption(a,channel));
+}
+/* ================= END ARTICLE SHARING SAFETY =================== */
+function articleCopy(text){
+  if(navigator.clipboard && window.isSecureContext)return navigator.clipboard.writeText(text);
+  var t=document.createElement("textarea");t.value=text;t.style.position="fixed";t.style.left="-10000px";document.body.appendChild(t);t.select();
+  var ok=document.execCommand("copy");t.remove();return ok?Promise.resolve():Promise.reject(new Error("Clipboard unavailable"));
+}
+function articleShareOptions(){
+  return Object.keys(ARTICLE_CHANNELS).map(function(k){return '<option value="'+k+'">'+ARTICLE_CHANNELS[k].label+'</option>';}).join("");
+}
+function loadArticleDistributionResults(){
+  var box=$("articleDistResults");if(!box)return;
+  api("article-distribution?days=90").then(function(r){
+    if(!r.ok)throw new Error(r.error||"No results");
+    if(!r.rows || !r.rows.length){box.innerHTML='<span class="legend">No article link visits yet. Share an article using the controls above to start tracking.</span>';return;}
+    box.innerHTML='<div class="tablewrap"><table style="min-width:0"><thead><tr><th>Channel</th><th>Article</th><th>Visitors</th><th>Page views</th><th>Leads</th></tr></thead><tbody>'+
+      r.rows.map(function(x){return '<tr><td>'+esc(x.channel)+'</td><td>'+esc(x.title||x.slug||'Article')+'</td><td>'+Number(x.visitors||0)+'</td><td>'+Number(x.views||0)+'</td><td>'+Number(x.leads||0)+'</td></tr>';}).join('')+'</tbody></table></div>'+
+      '<p class="legend">Measured from tracked website links, not social-platform impressions. Favor channels producing qualified leads; keep testing others.</p>';
+  }).catch(function(){box.innerHTML='<span class="legend">Article tracking report not available yet. Ensure the updated CRM API is deployed.</span>';});
+}
 function loadArticles(){
   return api("articles").then(function(d){
     var list=(d&&d.articles)||[];
-    if(!list.length){$("artWrap").innerHTML='<div class="empty">No articles yet. The first one is written on Monday, or press <b>Write an article now</b>.</div>';return;}
+    if(!list.length){$("artWrap").innerHTML='<div class="empty">No articles yet. Press <b>Write an article now</b> to make one.</div>';loadArticleDistributionResults();return;}
+    var visible=list.filter(function(a){return a.status==="published";});
     $("artWrap").innerHTML='<div class="pgrid">'+list.map(function(a){
       var on=a.status==="published";
-      return'<div class="pcard'+(on?"":" st-rejected")+'"><div class="top"><span class="pill p-'+(on?"posted":"rejected")+'">'+(on?"live":"hidden")+'</span><span class="meta">'+esc(fmtDate(a.created_at))+' · '+esc(a.item_label||"")+'</span></div>'
+      return '<div class="pcard'+(on?'':' st-rejected')+'" data-article-card="'+a.id+'">'
+        +'<div class="top"><span class="pill p-'+(on?'posted':'rejected')+'">'+(on?'live':'hidden')+'</span><span class="meta">'+esc(fmtDate(a.created_at))+' · '+esc(a.item_label||'')+'</span></div>'
         +'<b>'+esc(a.title)+'</b><div class="row" style="margin:0">'
-        +'<a class="btn sm ghost" href="/articles/'+esc(a.slug)+'" target="_blank" rel="noopener" style="text-decoration:none">View</a>'
-        +'<button class="btn sm ghost" data-art="'+a.id+'" data-st="'+(on?"hidden":"published")+'">'+(on?"Hide":"Show")+'</button></div></div>';
-    }).join("")+'</div>';
+        +'<a class="btn sm ghost" href="/articles/'+encodeURIComponent(a.slug)+'" target="_blank" rel="noopener" style="text-decoration:none">View</a>'
+        +'<button class="btn sm ghost" data-art="'+a.id+'" data-st="'+(on?'hidden':'published')+'">'+(on?'Hide':'Show')+'</button></div>'
+        +(on?'<div class="article-share"><label class="legend" for="art-channel-'+a.id+'">Where to share this article</label>'
+          +'<select id="art-channel-'+a.id+'" class="article-channel" data-share-id="'+a.id+'" style="width:100%">'+articleShareOptions()+'</select>'
+          +'<div class="row"><button class="btn sm" data-art-action="share" data-id="'+a.id+'"'+(isArticlePreview()?' disabled title="Preview articles cannot be shared publicly"':'')+'>Copy caption &amp; open</button>'
+          +'<button class="btn sm ghost" data-art-action="url" data-id="'+a.id+'">Copy '+(isArticlePreview()?'PREVIEW test URL':'article URL')+'</button></div>'
+          +'<span class="legend">'+(isArticlePreview()?'TEST ONLY: This article is in the Preview database, not shellkey.company. Public sharing is disabled until it is published in production.':'This opens the Shell Key company page when available; paste the copied caption in its post editor. It does not publish automatically.')+'</span></div>':'')
+        +'</div>';
+    }).join('')+'</div>'+'<h3 style="margin-top:24px">Article distribution results</h3><div id="articleDistResults"></div>';
     $("artWrap").querySelectorAll("[data-art]").forEach(function(b){b.onclick=function(){
       api("article/"+b.dataset.art,{method:"PATCH",body:{status:b.dataset.st}}).then(loadArticles);
     };});
-  }).catch(function(){});
+    var byId={};list.forEach(function(a){byId[a.id]=a;});
+    $("artWrap").querySelectorAll("[data-art-action]").forEach(function(b){b.onclick=function(){
+      var a=byId[b.dataset.id], sel=$("art-channel-"+a.id),channel=sel.value;
+      if(b.dataset.artAction==="url"){
+        articleCopy(articleTrackedLink(a,channel)).then(function(){toast("Tracked article link copied");}).catch(function(){alert("Copy failed. Open the article and copy its address.");});return;
+      }
+      // SAFETY: Never send development-only article links to live social channels.
+      if(isArticlePreview()){
+        alert("This article is only in the development database. Publish or recreate it in the live Shell Key CRM before sharing publicly. You can use Copy PREVIEW test URL to inspect it.");
+        return;
+      }
+      // Opening the window in this click event avoids most browser popup blockers.
+      var dest=articleDestination(a,channel);
+      if(channel==="email")window.location.href=dest;
+      else window.open(dest,"_blank","noopener,noreferrer");
+      articleCopy(articleCaption(a,channel)).then(function(){toast("Caption and link copied. Paste at destination.");})
+        .catch(function(){alert("Destination opened, but copying failed. Use Copy article URL instead.");});
+    };});
+    loadArticleDistributionResults();
+  }).catch(function(){ });
 }
+/* ================== END ARTICLE DISTRIBUTION ========================== */
+
 $("artBtn").onclick=function(){
   var b=$("artBtn");b.disabled=true;b.textContent="Writing… (about a minute)";
   api("article",{method:"POST",body:{}}).then(function(r){b.disabled=false;b.textContent="Write an article now";
