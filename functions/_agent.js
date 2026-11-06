@@ -19,6 +19,42 @@ import { notify } from "./_lib.js";
 import { linkedinStatus, postToLinkedIn } from "./_linkedin.js";
 
 export const PLATFORMS = ["facebook", "instagram", "linkedin"];
+
+/* ================================================================
+   MARKETING CONFIGURATION - PROJECT CONTROLS SERVICES
+   PURPOSE: Treat Shell Key staffing/scheduling support as a service
+   offer alongside the catalog products (without editing generated
+   _catalog.js, which build_store.py overwrites).
+
+   PSEUDOCODE:
+   1. Include the service in normal post rotation.
+   2. Offer a reporting portal with qualifying ongoing scheduling work.
+   3. Send leads to the scheduling inquiry form on the homepage.
+
+   SAFE TO EDIT: name, tagline, short, bullets, social image.
+   DO NOT CHANGE: slug or url unless corresponding tracking and
+   homepage destinations are also updated.
+   ================================================================ */
+const PROJECT_CONTROLS_SERVICE = {
+  slug: "project-controls-specialist",
+  cat: "services",
+  name: "Project Controls Specialist + Reporting Portal",
+  tagline: "Professional project controls support without full-time overhead.",
+  short: "Contract Primavera P6 and Microsoft Project scheduling, schedule updates, critical path and milestone analysis, and reporting. A branded project reporting portal is included at no additional cost for qualifying ongoing scheduling assignments, starting at 10 hours per week.",
+  bullets: [
+    "Contract project controls and master scheduling specialists",
+    "P6 and MS Project schedule development and updates",
+    "Critical path, milestone and variance reporting",
+    "Project reporting portal included with qualifying ongoing support",
+    "Start with 10 hours per week; request a consultation"
+  ],
+  status: "quote", demo: false, buyable: false, price: "",
+  img: "assets/img/hero/Home.png",
+  social: "assets/img/hero/Home.png",
+  url: "https://shellkey.company/#contact"
+};
+const MARKETING_OFFERS = [...CATALOG, PROJECT_CONTROLS_SERVICE];
+/* =================== END SERVICE CONFIGURATION =================== */
 const MODEL = "claude-sonnet-5-5";
 const GRAPH = "https://graph.facebook.com/v26.0";
 const SHORT = { facebook: "fb", instagram: "ig", linkedin: "li", fbgroup: "fg" };
@@ -55,7 +91,8 @@ async function pickProduct(db, day) {
     if (!last[slug]) return 60;
     return Math.max(0, Math.round((Date.parse(day) - Date.parse(last[slug])) / 86400000));
   };
-  const pool = CATALOG.filter((p) => !BRAND.never.includes(p.slug) && BRAND.post_categories.includes(p.cat));
+  const pool = MARKETING_OFFERS.filter((p) => !BRAND.never.includes(p.slug) &&
+    (BRAND.post_categories.includes(p.cat) || p.slug === PROJECT_CONTROLS_SERVICE.slug));
   let best = null, bestScore = -1;
   for (const p of pool) {
     let s = 0;
@@ -64,6 +101,9 @@ async function pickProduct(db, day) {
     else s += 3;                                   // coming soon: an occasional teaser, not a regular
     if (p.demo) s += 15;
     if (BRAND.focus.includes(p.slug)) s += 20;
+    // Give our professional service a regular opportunity to bring in
+    // consulting clients, but still rotate and avoid consecutive repeats.
+    if (p.slug === PROJECT_CONTROLS_SERVICE.slug) s += 28;
     s += Math.min(daysSince(p.slug), 30) * 3;      // waiting time matters most
     if (daysSince(p.slug) < 7) s -= 100;           // never the same product twice in a week
     if (s > bestScore) { best = p; bestScore = s; }
@@ -95,7 +135,84 @@ function pickAngle(product, day) {
 }
 
 // Word limits (not counting hashtags or the link); a post over this gets rewritten once
-const LIMIT = { facebook: 40, instagram: 40, linkedin: 45 };
+/* ================================================================
+   CAMPAIGN LEARNING / A-B TESTING
+   PURPOSE: Use recorded UTM visits and leads to guide future hooks.
+   PSEUDOCODE:
+   1. Read last 90 days of actual tracked clicks by campaign/angle.
+   2. Favor an angle with repeatable lead results (not just views).
+   3. Keep testing other angles regularly; don't invent metrics.
+   SAFE TO EDIT: 90 days, 3-post minimum, exploration cadence.
+   ================================================================ */
+async function chooseTestAngle(db, product, day) {
+  const baseline = pickAngle(product, day);
+  const dayNumber = Math.floor(Date.parse(day) / 86400000);
+  // Explore 2 of every 3 days; only exploit a measured best on day 3.
+  if (dayNumber % 3 !== 0) return baseline;
+  try {
+    const rows = (await db.prepare(`
+      SELECT p.angle, COUNT(DISTINCT p.id) AS n,
+        COUNT(DISTINCT v.sid) AS clicks,
+        COUNT(DISTINCT l.id) AS leads
+      FROM posts p
+      LEFT JOIN visits v ON v.utm_campaign = p.campaign
+      LEFT JOIN leads l ON l.sid = v.sid
+      WHERE p.item = ? AND p.status = 'posted'
+        AND p.day >= date('now','-90 days')
+        AND p.angle IS NOT NULL
+      GROUP BY p.angle
+    `).bind(product.slug).all()).results;
+    const proven = rows.filter(r => Number(r.n) >= 3 && Number(r.clicks) >= 12);
+    if (!proven.length) return baseline;
+    proven.sort((a, b) =>
+      ((Number(b.leads) + 1) / (Number(b.clicks) + 10)) -
+      ((Number(a.leads) + 1) / (Number(a.clicks) + 10)));
+    const winner = BRAND.angles.find(a => a.split(':')[0] === proven[0].angle);
+    return winner || baseline;
+  } catch (e) {
+    // A temporarily unavailable analytics table must not stop drafts.
+    console.log('Marketing angle feedback unavailable:', e.message);
+    return baseline;
+  }
+}
+/* ================= END CAMPAIGN LEARNING ========================== */
+
+/* ================================================================
+   SHORT POST & ORIGINALITY CONTROLS
+   PURPOSE: Always produce short, distinct copy before saving drafts.
+   The URL/hashtags are excluded from the word limit.
+   SAFE TO EDIT: maximum words per platform below.
+   ================================================================ */
+const LIMIT = { facebook: 32, instagram: 32, linkedin: 36 };
+const normalizeCopy = (s) => String(s || "").toLowerCase()
+  .replace(/https?:\/\/\S+|\{LINK\}|#\w+/g, " ")
+  .replace(/[^a-z0-9 ]+/g, " ").replace(/\s+/g, " ").trim();
+function tooSimilar(a, b) {
+  const x = normalizeCopy(a), y = normalizeCopy(b);
+  if (!x || !y) return false;
+  if (x === y) return true;
+  const xWords = new Set(x.split(" ")), yWords = new Set(y.split(" "));
+  const common = [...xWords].filter(w => yWords.has(w)).length;
+  return common / Math.max(1, new Set([...xWords, ...yWords]).size) >= 0.72;
+}
+function problems(out, recent) {
+  const errors = [];
+  for (const pl of PLATFORMS) {
+    const body = String(out[pl] || "").trim();
+    if (!body || words(body) > LIMIT[pl]) errors.push(`${pl}: missing or longer than ${LIMIT[pl]} words`);
+    if (recent.some(r => r.platform === pl && tooSimilar(body, r.body)))
+      errors.push(`${pl}: repeats a recent post`);
+  }
+  return errors;
+}
+function trackedUrl(url, platform, campaign, medium = "social") {
+  const u = new URL(url);
+  u.searchParams.set("utm_source", platform);
+  u.searchParams.set("utm_medium", medium);
+  u.searchParams.set("utm_campaign", campaign);
+  return u.toString(); // Query parameters stay BEFORE #contact.
+}
+/* ================= END SHORT POST CONTROLS ======================== */
 function words(text) {
   return String(text || "").replace(/\{LINK\}|https?:\/\/\S+|#\w+/g, " ").split(/\s+/).filter(Boolean).length;
 }
@@ -156,7 +273,11 @@ function systemPrompt() {
     "", "NEVER", ...b.avoid.map((x) => "- " + x),
     "", "PLATFORM RULES", ...Object.entries(b.platforms).map(([k, v]) => `- ${k}: ${v}`),
     "", `Contact: ${b.phone} · ${b.email} · ${b.site}`,
-    "", "Where the link belongs, write exactly {LINK} on its own line. The system replaces it with a tracked link. Do not write any other URL except shellkey.company in the Instagram post.",
+    "", "Maximum 32 words on Facebook and Instagram; maximum 36 on LinkedIn. Keep the hook, outcome and call to action brief.",
+    "Every post must be newly phrased. Never reuse previous hooks, sentences or generic templates.",
+    "Focus on attracting new customers as well as showcasing software: P6 schedule help, project controls specialists and branded reporting portals included with qualifying ongoing assignments.",
+    "Use one relevant image supplied by the product/service record; do not claim that a demo video exists unless one is available.",
+    "Where the link belongs, write exactly {LINK} on its own line. The system replaces it with a tracked link. Do not write any other URL except shellkey.company in the Instagram post.",
     "Reply with JSON only, no other text: {\"facebook\": \"...\", \"instagram\": \"...\", \"linkedin\": \"...\"}",
   ].join("\n");
 }
@@ -175,14 +296,16 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
 
   const videoDay = isVideoDay(day);
   const short = videoDay ? await latestShort(env) : null;
-  const shortProduct = short && CATALOG.find((p) => p.slug === short.slug);
-  const product = slug ? CATALOG.find((p) => p.slug === slug) : (shortProduct || await pickProduct(db, day));
+  const shortProduct = short && MARKETING_OFFERS.find((p) => p.slug === short.slug);
+  const product = slug ? MARKETING_OFFERS.find((p) => p.slug === slug) : (shortProduct || await pickProduct(db, day));
   const liVideo = short && shortProduct && product.slug === short.slug ? short.videoUrl : "";
   if (!product) throw new Error("No product to post about");
-  const angle = pickAngle(product, day);
+  // Results feedback loop: only favor an angle after it has measurable
+  // traffic, while still rotating tests to avoid getting stuck on a winner.
+  const angle = await chooseTestAngle(db, product, day);
 
   const recent = (await db.prepare(
-    "SELECT platform, body FROM posts WHERE status != 'rejected' ORDER BY id DESC LIMIT 6").all()).results;
+    "SELECT platform, body FROM posts WHERE status != 'rejected' ORDER BY id DESC LIMIT 100").all()).results;
 
   const user = [
     `Today is ${day}. Write one post for each platform about this product.`,
@@ -200,11 +323,15 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
   ].join("\n");
 
   let out = await askPosts(env, systemPrompt(), user);
-  // Posts must stay short. If any came back long, ask once more for shorter ones.
-  const tooLong = PLATFORMS.filter((pl) => words(out[pl]) > LIMIT[pl]);
-  if (tooLong.length) {
-    out = { ...out, ...(await askPosts(env, systemPrompt(), user +
-      `\n\nYour last version was too long for: ${tooLong.join(", ")}. Rewrite ALL posts much shorter: 2 or 3 short lines each, no paragraphs.`)) };
+  // Validate BEFORE writing to D1, so duplicates/long posts are not saved.
+  // Ask for a complete rewrite once; if still invalid, show a clear error.
+  let issues = problems(out, recent);
+  if (issues.length) {
+    out = await askPosts(env, systemPrompt(), user +
+      `\n\nRewrite ALL three posts. Problems: ${issues.join('; ')}. ` +
+      "Every platform must use a distinct fresh hook; be brief and avoid past phrases.");
+    issues = problems(out, recent);
+    if (issues.length) throw new Error("Marketing drafts rejected: " + issues.join("; "));
   }
   const image = BRAND.site + "/" + (product.social || product.img);
   const created = [];
@@ -216,7 +343,7 @@ export async function writeDailyPosts(env, { force = false, slug = "" } = {}) {
     ).bind(day, platform, product.slug, product.name, angle.split(":")[0], text, platform === "linkedin" && liVideo ? liVideo : image).run();
     const id = r.meta.last_row_id;
     const campaign = "p" + id;
-    const link = `${product.url}?utm_source=${platform}&utm_medium=social&utm_campaign=${campaign}`;
+    const link = trackedUrl(product.url, platform, campaign);
     const body = platform === "instagram" ? text.replace(/\{LINK\}\s*/g, "") : (text.includes("{LINK}") ? text.replace(/\{LINK\}/g, link) : text + "\n\n" + link);
     await db.prepare("UPDATE posts SET body=?, link=?, campaign=? WHERE id=?").bind(body, link, campaign, id).run();
     created.push({ id, platform });
@@ -307,14 +434,14 @@ async function addReels(env, day) {
   if (!short) return [];
   const used = await env.DB.prepare("SELECT COUNT(*) n FROM posts WHERE image=? AND platform IN ('facebook','instagram')").bind(short.videoUrl).first();
   if (used.n) return [];
-  const product = CATALOG.find((p) => p.slug === short.slug);
+  const product = MARKETING_OFFERS.find((p) => p.slug === short.slug);
   if (!product) return [];
   const created = [];
   for (const platform of ["facebook", "instagram"]) {
     const r = await env.DB.prepare("INSERT INTO posts (day, platform, item, item_label, angle, body, image) VALUES (?,?,?,?,?,?,?)")
       .bind(day, platform, product.slug, product.name, "reel", "(writing)", short.videoUrl).run();
     const id = r.meta.last_row_id, campaign = "p" + id;
-    const link = `${product.url}?utm_source=${platform}&utm_medium=reel&utm_campaign=${campaign}`;
+    const link = trackedUrl(product.url, platform, campaign, "reel");
     const tag = product.tagline || product.name;
     const body = platform === "instagram"
       ? `${tag}\nTry the free demo. Link in bio.\n\n#ShellKey #ProjectControls #Construction #Engineering #Reels`
