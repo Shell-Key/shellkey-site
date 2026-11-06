@@ -229,11 +229,31 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
         <button class="btn ghost" id="liBtn" title="Lets Approve &amp; Post publish LinkedIn posts on the Shell Key company page. Works once LinkedIn approves the Community Management API.">Connect LinkedIn</button>
         <span class="legend" id="mktInfo"></span>
       </div>
-      <div class="note" id="mktHelp">Every morning the agent picks one product and writes a Facebook, Instagram and LinkedIn post about it, plus a copy of the Facebook post for your Facebook Group. Facebook doesn't let apps post into Groups, so on the Group card press <b>Copy &amp; open Group</b>, paste it in, post it, then press <b>Mark as posted</b>. Read each one, fix anything you want right in the box, then press <b>Approve &amp; Post</b>. If Facebook or Instagram is not connected yet, press <b>Copy</b>, paste it yourself, then press <b>Mark as posted</b> so the Results tab can track it.</div>
-      <div id="postsWrap"></div>
-      <div class="dayhead" style="margin-top:28px"><h3>Weekly articles</h3><span class="legend">A new how-to article goes live on shellkey.company/articles every Monday.</span></div>
+      <!-- ============================================================
+           SHELL KEY MARKETING — DAILY WORK QUEUE & ARTICLE SHORTCUT
+           PURPOSE:
+             Show articles immediately and show only posts needing action.
+           PSEUDOCODE:
+             1. Place article creation and sharing at the top.
+             2. Display draft/approved posts under "To post".
+             3. Hide posted/rejected posts unless the archive is opened.
+             4. Never delete completed posts: retain campaign tracking,
+                duplicate prevention, post history and reporting.
+           SAFE TO EDIT: Visible section titles and help text.
+           DO NOT CHANGE: IDs (postsWrap, artBtn, artWrap, showPostArchive)
+                          or status names used by the existing CRM API.
+           ============================================================ -->
+      <div class="dayhead" style="margin-top:20px"><h3>Articles — create &amp; share</h3><span class="legend">Create an article any time. Share live articles only after their links work on shellkey.company.</span></div>
       <div class="toolbar"><button class="btn ghost" id="artBtn">Write an article now</button></div>
       <div id="artWrap"></div>
+      <div class="dayhead" style="margin-top:28px"><h3>Marketing posts — to post</h3><span class="legend" id="postQueueCount">Posts needing your attention</span></div>
+      <div class="toolbar">
+        <label class="chip" for="showPostArchive" style="cursor:pointer"><input type="checkbox" id="showPostArchive" style="margin-right:7px;vertical-align:middle" /> Show posted / rejected archive</label>
+        <span class="legend">Completed posts are hidden, not deleted. Reuse Results for campaign performance.</span>
+      </div>
+      <div class="note" id="mktHelp">Only drafts and approved posts appear in your daily queue. Use <b>Approve &amp; Post</b> on connected platforms, or <b>Mark as posted</b> after posting manually. Completed or rejected posts remain saved in the archive for duplicate checks and campaign results.</div>
+      <div id="postsWrap"></div>
+      <!-- ============ END DAILY WORK QUEUE & ARTICLE SHORTCUT ============ -->
     </section>
 
     <section id="tab-results" class="hidden">
@@ -493,8 +513,25 @@ function loadMarketing(){
     var waiting=POSTS.filter(function(p){return p.status==="draft"||p.status==="approved";}).length;
     $("mktInfo").textContent=waiting?waiting+" post"+(waiting>1?"s":"")+" waiting for you":"Nothing waiting";
     if(!st.tables){$("postsWrap").innerHTML='<div class="empty">The marketing tables are not in the database yet. Run the new part of schema.sql in the D1 console (step 1 in MARKETING-SETUP.md), then refresh.</div>';return;}
-    if(!POSTS.length){$("postsWrap").innerHTML='<div class="empty">No posts yet. Press <b>Write today\'s posts</b> to make the first set.</div>';return;}
-    var days={};POSTS.forEach(function(p){(days[p.day]=days[p.day]||[]).push(p);});
+    /* ==============================================================
+       SECTION: ACTIVE MARKETING QUEUE AND ARCHIVE FILTER
+       PURPOSE: Do not make the owner scroll through completed posts.
+       PSEUDOCODE:
+         - Draft/approved = active items requiring an action.
+         - Posted/rejected = completed items; retain in DB.
+         - Show completed items only when archive checkbox is checked.
+       SAFE TO EDIT: Text below; leave status values unchanged.
+       ============================================================= */
+    var activePosts=POSTS.filter(function(p){return p.status==="draft" || p.status==="approved";});
+    var archivedPosts=POSTS.filter(function(p){return p.status==="posted" || p.status==="rejected";});
+    var archiveOn=$("showPostArchive").checked;
+    $("postQueueCount").textContent=activePosts.length+" waiting · "+archivedPosts.length+" archived";
+    var visiblePosts=archiveOn?POSTS:activePosts;
+    if(!visiblePosts.length){
+      $("postsWrap").innerHTML='<div class="empty">'+(POSTS.length?'You are caught up. All completed posts are safely saved. Use Show posted / rejected archive to review them.':'No posts yet. Press Write today\'s posts to make the first set.')+'</div>';
+      return;
+    }
+    var days={};visiblePosts.forEach(function(p){(days[p.day]=days[p.day]||[]).push(p);});
     var html="";
     Object.keys(days).sort().reverse().forEach(function(day){
       var list=days[day];
@@ -569,6 +606,8 @@ $("writeBtn").onclick=function(){
     .catch(function(){b.disabled=false;loadMarketing();});
 };
 $("mktRefresh").onclick=loadMarketing;
+/* Toggle the archived view without deleting or rewriting post records. */
+$("showPostArchive").onchange=loadMarketing;
 
 /* ---------- weekly articles ---------- */
 /* =======================================================================
@@ -598,31 +637,58 @@ $("mktRefresh").onclick=loadMarketing;
    - Don't auto-post to groups or forums without permission.
    - Article results count tracked visits/leads, NOT native impressions.
    ======================================================================= */
+/* =============================================================
+   ARTICLE SHARING — ENVIRONMENT & DESTINATION SAFETY
+   PURPOSE:
+     A development article lives only in the Preview D1 database.
+     NEVER generate a production link for an unpromoted article.
+     LinkedIn/Facebook sharing dialogs default to personal accounts;
+     open the company's page instead for manual company publishing.
+
+   PSEUDOCODE:
+     1. Detect whether this CRM is running on a Pages preview.
+     2. Build test links from the preview domain; live links from
+        shellkey.company only after the article exists in live CRM.
+     3. Disable social/email share actions on the preview.
+     4. Copy the short caption and open the correct posting location
+        only on the live website.
+
+   SAFE TO EDIT: Platform labels, company-page URL, hook wording.
+   DO NOT EDIT: isArticlePreview(), URL tracking parameters or
+                preview safety checks without verifying deployment.
+   ============================================================= */
 var ARTICLE_CHANNELS = {
-  linkedin: {label:"LinkedIn", url:"https://www.linkedin.com/feed/"},
-  facebook: {label:"Facebook Page", url:"https://www.facebook.com/"},
+  linkedin: {label:"Shell Key LinkedIn Company Page", url:"https://www.linkedin.com/company/shell-key/"},
+  facebook: {label:"Shell Key Facebook Page", url:"https://www.facebook.com/ShellKeyCompany"},
+  fbgroup: {label:"Facebook Group (manual)", url:"https://www.facebook.com/share/g/1JXMxNfGbZ/"},
   x: {label:"X / Twitter", url:"https://x.com/compose/post"},
-  reddit: {label:"Reddit", url:"https://www.reddit.com/submit"},
+  reddit: {label:"Reddit (community rules apply)", url:"https://www.reddit.com/submit"},
   email: {label:"Email", url:""}
 };
+function isArticlePreview(){
+  // pages.dev deployment URLs are development/testing locations, not live article URLs.
+  return /(^|\.)pages\.dev$/i.test(location.hostname);
+}
 function articleTrackedLink(a,channel){
-  var base="https://shellkey.company/articles/"+encodeURIComponent(a.slug);
+  var origin=isArticlePreview()?location.origin:"https://shellkey.company";
+  var base=origin+"/articles/"+encodeURIComponent(a.slug);
   return base+"?utm_source="+encodeURIComponent(channel)+"&utm_medium=article_share&utm_campaign="+encodeURIComponent("article_"+a.id+"_"+channel);
 }
 function articleCaption(a,channel){
-  var hook="Working on project controls or industrial execution?";
   var title=a.title||"Shell Key project controls guide";
-  // No invented results or customer claims. Keep the original article URL as the CTA.
-  return hook+"\n"+title+"\nRead the guide: "+articleTrackedLink(a,channel);
+  // Keep marketing copy short and avoid unfounded results or promises.
+  return "Need a more reliable project schedule?\n"+title+"\nRead the guide: "+articleTrackedLink(a,channel);
 }
 function articleDestination(a,channel){
-  var link=articleTrackedLink(a,channel), title=a.title||"Shell Key article";
-  if(channel==="linkedin")return "https://www.linkedin.com/sharing/share-offsite/?url="+encodeURIComponent(link);
-  if(channel==="facebook")return "https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(link);
+  var link=articleTrackedLink(a,channel),title=a.title||"Shell Key article";
+  // Do not use the LinkedIn/Facebook sharer dialog: it can default to
+  // the personal account even when the Shell Key company page exists.
+  if(channel==="linkedin" || channel==="facebook" || channel==="fbgroup")return ARTICLE_CHANNELS[channel].url;
   if(channel==="x")return "https://twitter.com/intent/tweet?text="+encodeURIComponent(title)+"&url="+encodeURIComponent(link);
   if(channel==="reddit")return "https://www.reddit.com/submit?url="+encodeURIComponent(link)+"&title="+encodeURIComponent(title);
   return "mailto:?subject="+encodeURIComponent(title)+"&body="+encodeURIComponent(articleCaption(a,channel));
 }
+/* ================= END ARTICLE SHARING SAFETY =================== */
 function articleCopy(text){
   if(navigator.clipboard && window.isSecureContext)return navigator.clipboard.writeText(text);
   var t=document.createElement("textarea");t.value=text;t.style.position="fixed";t.style.left="-10000px";document.body.appendChild(t);t.select();
@@ -655,9 +721,9 @@ function loadArticles(){
         +'<button class="btn sm ghost" data-art="'+a.id+'" data-st="'+(on?'hidden':'published')+'">'+(on?'Hide':'Show')+'</button></div>'
         +(on?'<div class="article-share"><label class="legend" for="art-channel-'+a.id+'">Where to share this article</label>'
           +'<select id="art-channel-'+a.id+'" class="article-channel" data-share-id="'+a.id+'" style="width:100%">'+articleShareOptions()+'</select>'
-          +'<div class="row"><button class="btn sm" data-art-action="share" data-id="'+a.id+'">Copy caption &amp; open</button>'
-          +'<button class="btn sm ghost" data-art-action="url" data-id="'+a.id+'">Copy article URL</button></div>'
-          +'<span class="legend">Paste the text and confirm on the destination site. Sharing permissions vary by platform.</span></div>':'')
+          +'<div class="row"><button class="btn sm" data-art-action="share" data-id="'+a.id+'"'+(isArticlePreview()?' disabled title="Preview articles cannot be shared publicly"':'')+'>Copy caption &amp; open</button>'
+          +'<button class="btn sm ghost" data-art-action="url" data-id="'+a.id+'">Copy '+(isArticlePreview()?'PREVIEW test URL':'article URL')+'</button></div>'
+          +'<span class="legend">'+(isArticlePreview()?'TEST ONLY: This article is in the Preview database, not shellkey.company. Public sharing is disabled until it is published in production.':'This opens the Shell Key company page when available; paste the copied caption in its post editor. It does not publish automatically.')+'</span></div>':'')
         +'</div>';
     }).join('')+'</div>'+'<h3 style="margin-top:24px">Article distribution results</h3><div id="articleDistResults"></div>';
     $("artWrap").querySelectorAll("[data-art]").forEach(function(b){b.onclick=function(){
@@ -668,6 +734,11 @@ function loadArticles(){
       var a=byId[b.dataset.id], sel=$("art-channel-"+a.id),channel=sel.value;
       if(b.dataset.artAction==="url"){
         articleCopy(articleTrackedLink(a,channel)).then(function(){toast("Tracked article link copied");}).catch(function(){alert("Copy failed. Open the article and copy its address.");});return;
+      }
+      // SAFETY: Never send development-only article links to live social channels.
+      if(isArticlePreview()){
+        alert("This article is only in the development database. Publish or recreate it in the live Shell Key CRM before sharing publicly. You can use Copy PREVIEW test URL to inspect it.");
+        return;
       }
       // Opening the window in this click event avoids most browser popup blockers.
       var dest=articleDestination(a,channel);
