@@ -68,8 +68,59 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 .bar{flex:1 0 12px;background:var(--blue);border-radius:3px 3px 0 0;position:relative;min-height:2px}
 .bar.v{background:var(--accent)}
 .bar:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:4px 8px;border-radius:6px;white-space:nowrap;font-size:12px;z-index:5}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media (max-width:900px){.grid2{grid-template-columns:1fr}}
+
+/* =====================================================
+   SHELL KEY CRM - VISITORS SCREEN LAYOUT
+
+   PURPOSE:
+   Keep visitor reporting tables aligned and contained.
+
+   PSEUDOCODE:
+   1. Display two equal columns on desktop.
+   2. Allow columns to shrink within the page.
+   3. Prevent small tables from forcing 900px widths.
+   4. Stack columns on narrower screens.
+
+   SAFE TO CHANGE:
+   - gap: spacing between columns
+   - 900px: mobile/tablet stacking breakpoint
+
+   DO NOT CHANGE:
+   - Table IDs or existing JavaScript functions.
+   ===================================================== */
+
+.grid2 {
+  display: grid;
+  grid-template-columns:
+    minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.grid2 > div {
+  min-width: 0;
+}
+
+/* Only affect tables inside the Visitors grid */
+#tab-visitors .grid2 table {
+  width: 100%;
+  min-width: 0;
+  table-layout: fixed;
+}
+
+#tab-visitors .grid2 th,
+#tab-visitors .grid2 td {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .grid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ========== END VISITORS LAYOUT ========== */
+
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#06210b;padding:10px 18px;border-radius:10px;font-weight:700;display:none;z-index:30}
 .hidden{display:none!important}
 .legend{font-size:12px;color:var(--text2);margin:6px 2px}
