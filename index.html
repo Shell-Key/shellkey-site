@@ -169,6 +169,93 @@
       </div>
     </section>
 
+    <!-- ============================================================
+         SHELL KEY WEBSITE — SCHEDULING SERVICE OFFER
+         PURPOSE: Promotes Shell Key's scheduling and project reporting.
+         PSEUDOCODE:
+           1. Display the scheduling service under the homepage banner.
+           2. Explain what is included and the business benefits.
+           3. Send prospective customers to the existing contact form.
+         SAFE TO EDIT: Headings, descriptions and bullet points below.
+         DO NOT CHANGE: Section ID, button's #contact link, or the
+           existing contact form JavaScript and field IDs.
+         ============================================================ -->
+    <style>
+      /* SECTION STYLE — SCHEDULING OFFER
+         PURPOSE: Uses existing navy, white and green Shell Key colors.
+         SAFE TO EDIT: Spacing, border radius and font sizing.
+         DO NOT CHANGE: Selector names unless HTML is updated too. */
+      #scheduling-service .sk-service-panel {
+        background: linear-gradient(135deg, #142344, #0b1630);
+        border: 1px solid rgba(255,255,255,.14);
+        border-radius: 18px;
+        padding: clamp(24px, 4vw, 44px);
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(235px, 1fr);
+        gap: clamp(24px, 4vw, 48px);
+        align-items: center;
+      }
+      #scheduling-service .sk-service-eyebrow {
+        text-transform: uppercase;
+        letter-spacing: .11em;
+        font-size: .78rem;
+        font-weight: 700;
+        color: #97e76a;
+      }
+      #scheduling-service h2 { margin: 10px 0 16px; }
+      #scheduling-service p { line-height: 1.7; }
+      #scheduling-service .sk-service-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 13px;
+      }
+      #scheduling-service .sk-service-list li {
+        padding-left: 26px;
+        position: relative;
+        line-height: 1.5;
+      }
+      #scheduling-service .sk-service-list li::before {
+        content: "✓";
+        color: #83e000;
+        font-weight: 800;
+        position: absolute;
+        left: 0;
+      }
+      #scheduling-service .sk-service-actions { margin-top: 22px; }
+      @media (max-width: 780px) {
+        #scheduling-service .sk-service-panel { grid-template-columns: 1fr; }
+      }
+      /* ================= END SECTION STYLE ======================== */
+    </style>
+    <section id="scheduling-service" class="section" aria-labelledby="scheduling-service-title">
+      <div class="container">
+        <div class="sk-service-panel">
+          <div>
+            <div class="sk-service-eyebrow">Professional scheduling support</div>
+            <h2 id="scheduling-service-title">Need a better project schedule without another full-time scheduler?</h2>
+            <p>Shell Key provides contract Primavera P6 and Microsoft Project master scheduling support for industrial construction, fabrication, shutdowns, and turnarounds. Get experienced scheduling and project controls support without adding a full-time position.</p>
+            <p><strong>Project reporting portal included at no additional cost</strong> with qualifying ongoing scheduling services, so your team can view progress, milestones, and schedule performance in one place.</p>
+            <div class="sk-service-actions">
+              <a class="btn btn-primary" href="#contact">Request Scheduling Support</a>
+            </div>
+          </div>
+          <div>
+            <h3>What Shell Key can provide</h3>
+            <ul class="sk-service-list">
+              <li>Primavera P6 and Microsoft Project schedule development and updates</li>
+              <li>Integrated engineering, procurement, construction and commissioning schedules</li>
+              <li>Critical path, milestone and variance reporting</li>
+              <li>Interactive project dashboards and reporting portals</li>
+              <li>Flexible contract support starting at 10 hours per week</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- =============== END SCHEDULING SERVICE OFFER ============== -->
+
     <!-- Dashboards -->
     <section id="dashboards" class="section">
       <div class="container">
@@ -517,6 +604,8 @@
                 <label>
                   <span>I'm interested in</span>
                   <select id="qInterest">
+                    <!-- SERVICE INQUIRY: New option for scheduling leads. Keep value unchanged for future CRM integrations. -->
+                    <option value="master-scheduling">Master Scheduling + Project Reporting</option>
                     <option value="dashboards">Executive dashboards / wall charts</option>
                     <option value="bid-board">Bid Board (Louisiana public bids)</option>
                     <option value="inspection-system">Inspection System (NDE / API)</option>
