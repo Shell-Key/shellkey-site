@@ -68,59 +68,8 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 .bar{flex:1 0 12px;background:var(--blue);border-radius:3px 3px 0 0;position:relative;min-height:2px}
 .bar.v{background:var(--accent)}
 .bar:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:4px 8px;border-radius:6px;white-space:nowrap;font-size:12px;z-index:5}
-
-/* =====================================================
-   SHELL KEY CRM - VISITORS SCREEN LAYOUT
-
-   PURPOSE:
-   Keep visitor reporting tables aligned and contained.
-
-   PSEUDOCODE:
-   1. Display two equal columns on desktop.
-   2. Allow columns to shrink within the page.
-   3. Prevent small tables from forcing 900px widths.
-   4. Stack columns on narrower screens.
-
-   SAFE TO CHANGE:
-   - gap: spacing between columns
-   - 900px: mobile/tablet stacking breakpoint
-
-   DO NOT CHANGE:
-   - Table IDs or existing JavaScript functions.
-   ===================================================== */
-
-.grid2 {
-  display: grid;
-  grid-template-columns:
-    minmax(0, 1fr) minmax(0, 1fr);
-  gap: 14px;
-}
-
-.grid2 > div {
-  min-width: 0;
-}
-
-/* Only affect tables inside the Visitors grid */
-#tab-visitors .grid2 table {
-  width: 100%;
-  min-width: 0;
-  table-layout: fixed;
-}
-
-#tab-visitors .grid2 th,
-#tab-visitors .grid2 td {
-  white-space: normal;
-  overflow-wrap: anywhere;
-}
-
-@media (max-width: 900px) {
-  .grid2 {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ========== END VISITORS LAYOUT ========== */
-
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:900px){.grid2{grid-template-columns:1fr}}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#06210b;padding:10px 18px;border-radius:10px;font-weight:700;display:none;z-index:30}
 .hidden{display:none!important}
 .legend{font-size:12px;color:var(--text2);margin:6px 2px}
@@ -154,6 +103,24 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 .modal h3{margin:0 0 8px}
 .modal p{color:var(--text2);margin:0 0 18px}
 .modal .row{display:flex;gap:10px;justify-content:center}
+/* ==============================================================
+   SECTION: SINGLE VISITOR REPORT TABLE STYLING
+   PURPOSE: Full-width table with no scattered side-by-side cards.
+   SAFE TO EDIT: margin, spacing and responsive breakpoint.
+   DO NOT CHANGE: CRM theme variables or generic table classes.
+   ============================================================== */
+.visitor-report-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:22px 0 10px}
+.visitor-report-controls label{font-weight:700;color:var(--accent)}
+.visitor-report-controls select{min-width:230px;max-width:100%}
+.visitor-report-tablewrap{width:100%;margin-top:10px}
+.visitor-report-tablewrap table{width:100%;min-width:0;table-layout:fixed}
+.visitor-report-tablewrap th,.visitor-report-tablewrap td{overflow-wrap:anywhere;white-space:normal}
+.visitor-report-tablewrap tr.filters input{min-width:0;width:100%}
+@media(max-width:760px){
+  .visitor-report-tablewrap{overflow-x:auto}
+  .visitor-report-tablewrap table{min-width:680px;table-layout:auto}
+}
+/* =============== END SINGLE VISITOR TABLE STYLE =============== */
 </style>
 </head>
 <body>
@@ -217,13 +184,34 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
         <span class="legend">Green bars = unique visitors, blue = page views. Hover a bar for the date.</span>
       </div>
       <div class="bars" id="bars"></div>
-      <div class="grid2" style="margin-top:14px">
-        <div><h3>Top pages</h3><div class="tablewrap"><table id="pagesTable"></table></div></div>
-        <div><h3>Where they came from</h3><div class="tablewrap"><table id="refsTable"></table></div>
-             <h3>Countries</h3><div class="tablewrap"><table id="countriesTable"></table></div></div>
+      <!-- ==========================================================
+           SECTION: VISITOR REPORT SELECTOR — ONE TABLE AT A TIME
+           PURPOSE: Replace four scattered visitor tables with ONE
+                    full-width table controlled by a dropdown.
+           PSEUDOCODE:
+             1. User chooses Top Pages, Traffic Sources, Countries,
+                or Visitor Sessions from the dropdown.
+             2. JavaScript reads the existing /api/crm/visits data.
+             3. Only the chosen report is drawn in visitorReportTable.
+             4. Existing sorting, column filtering and lead-click
+                behavior remain available.
+           SAFE TO EDIT: Dropdown label and visible option text.
+           DO NOT CHANGE: option values, element IDs, API routes.
+           ========================================================== -->
+      <div class="visitor-report-controls">
+        <label for="visitorReportSelect">Visitor report</label>
+        <select id="visitorReportSelect" aria-label="Choose visitor report">
+          <option value="pages">Top Pages</option>
+          <option value="sources">Traffic Sources</option>
+          <option value="countries">Countries</option>
+          <option value="sessions">Visitor Sessions</option>
+        </select>
       </div>
-      <h3>Sessions (click one with a lead to open it)</h3>
-      <div class="tablewrap"><table id="sessionsTable"></table></div>
+      <div id="visitorReportHelp" class="legend">Pages viewed on your website.</div>
+      <div class="tablewrap visitor-report-tablewrap">
+        <table id="visitorReportTable" aria-label="Selected visitor report"></table>
+      </div>
+      <!-- ============= END VISITOR REPORT SELECTOR ============= -->
     </section>
 
     <!-- SALES -->
@@ -382,24 +370,95 @@ function openLead(row){
   });
 }
 
-/* ---------- visitors ---------- */
+/* ==============================================================
+   SECTION: VISITOR REPORT SWITCHING — ONE TABLE, FOUR DATASETS
+   PURPOSE:
+     Show exactly one full-width visitor report at a time.
+   PSEUDOCODE:
+     1. Retrieve visitor data using the existing CRM API.
+     2. Preserve the visitor chart and date filter.
+     3. Read the report dropdown (pages / sources / countries / sessions).
+     4. Select the matching columns and records.
+     5. Render the chosen data into the same table element.
+     6. When switching reports, reset only the report table's filters
+        and sorting; the rest of the CRM is not affected.
+   SAFE TO EDIT:
+     - Help text for each report.
+     - Column display names (label: values).
+   DO NOT CHANGE:
+     - API path, dropdown values, data field keys or element IDs.
+     - openLead callback (allows clicking sessions tied to a lead).
+   ============================================================== */
+var visitorReportData = null;
+var activeVisitorReport = null;
+
+function showVisitorReport(){
+  if (!visitorReportData) return;
+  var selected = $("visitorReportSelect").value;
+  var table = $("visitorReportTable");
+  var data = visitorReportData;
+  var columns = [];
+  var rows = [];
+  var onRow = null;
+  var help = "";
+
+  if (selected === "pages") {
+    columns = [
+      {key:"page",label:"Page"},
+      {key:"views",label:"Views",val:function(r){return r.views;}},
+      {key:"visitors",label:"Visitors",val:function(r){return r.visitors;}}
+    ];
+    rows = data.pages || [];
+    help = "Pages viewed on your website.";
+  } else if (selected === "sources") {
+    columns = [
+      {key:"ref",label:"Referrer",clip:true,val:function(r){return r.ref || "(direct)";}},
+      {key:"n",label:"Views",val:function(r){return r.n;}}
+    ];
+    rows = data.refs || [];
+    help = "Where your website traffic came from.";
+  } else if (selected === "countries") {
+    columns = [
+      {key:"country",label:"Country"},
+      {key:"n",label:"Visitors",val:function(r){return r.n;}}
+    ];
+    rows = data.countries || [];
+    help = "Visitor counts grouped by country.";
+  } else if (selected === "sessions") {
+    columns = [
+      {key:"last_at",label:"Last seen",render:function(r){return esc(fmtDate(r.last_at));}},
+      {key:"lead_name",label:"Lead",render:function(r){return r.lead_id?'<span class="pill s-new">'+esc(r.lead_name||"#"+r.lead_id)+'</span>':'<span style="color:var(--text2)">anonymous</span>'; }},
+      {key:"hits",label:"Pages",val:function(r){return r.hits;}},
+      {key:"checkouts",label:"Checkout clicks",val:function(r){return r.checkouts;},render:function(r){return r.checkouts?'<b style="color:var(--accent)">'+r.checkouts+'</b>':"";}},
+      {key:"country",label:"Ctry"},
+      {key:"device",label:"Device"},
+      {key:"ref",label:"From",clip:true,val:function(r){return(r.ref||"").replace(/^https?:\/\//,"")||"(direct)";}},
+      {key:"path",label:"Path",clip:true}
+    ];
+    rows = data.sessions || [];
+    onRow = function(r){if(r.lead_id)openLead({id:r.lead_id});};
+    help = "Choose a session linked to a lead to view its details.";
+  }
+
+  if (selected !== activeVisitorReport) {
+    table._state = {sort:null,dir:1,filters:{}};
+    activeVisitorReport = selected;
+  }
+  $("visitorReportHelp").textContent = help;
+  renderTable(table,columns,rows,onRow);
+}
+
 function loadVisitors(){
   api("visits?days="+$("days").value).then(function(d){
+    visitorReportData = d;
     var max=Math.max.apply(null,d.daily.map(function(x){return x.views;}).concat([1]));
     $("bars").innerHTML=d.daily.map(function(x){return'<div class="bar" style="height:'+Math.round(x.views/max*100)+'%" data-t="'+esc(x.d)+': '+x.views+' views, '+x.visitors+' visitors"><div class="bar v" style="position:absolute;bottom:0;left:0;right:0;height:'+Math.round(x.visitors/x.views*100)+'%"></div></div>';}).join("")||'<div class="empty" style="width:100%">No visits recorded yet. Open the site in another tab and refresh.</div>';
-    renderTable($("pagesTable"),[{key:"page",label:"Page"},{key:"views",label:"Views",val:function(r){return r.views;}},{key:"visitors",label:"Visitors",val:function(r){return r.visitors;}}],d.pages);
-    renderTable($("refsTable"),[{key:"ref",label:"Referrer",clip:true},{key:"n",label:"Views",val:function(r){return r.n;}}],d.refs);
-    renderTable($("countriesTable"),[{key:"country",label:"Country"},{key:"n",label:"Visitors",val:function(r){return r.n;}}],d.countries);
-    renderTable($("sessionsTable"),[
-      {key:"last_at",label:"Last seen",render:function(r){return esc(fmtDate(r.last_at));}},
-      {key:"lead_name",label:"Lead",render:function(r){return r.lead_id?'<span class="pill s-new">'+esc(r.lead_name||"#"+r.lead_id)+'</span>':'<span style="color:var(--text2)">anonymous</span>';}},
-      {key:"hits",label:"Pages",val:function(r){return r.hits;}},{key:"checkouts",label:"Checkout clicks",val:function(r){return r.checkouts;},render:function(r){return r.checkouts?'<b style="color:var(--accent)">'+r.checkouts+'</b>':"";}},
-      {key:"country",label:"Ctry"},{key:"device",label:"Device"},{key:"ref",label:"From",clip:true,val:function(r){return(r.ref||"").replace(/^https?:\/\//,"")||"(direct)";}},
-      {key:"path",label:"Path",clip:true}
-    ],d.sessions,function(r){if(r.lead_id)openLead({id:r.lead_id});});
-  });
+    showVisitorReport();
+  }).catch(function(){toast("Could not load visitor analytics");});
 }
 $("days").onchange=loadVisitors;
+$("visitorReportSelect").onchange=showVisitorReport;
+/* ================== END VISITOR REPORT SWITCHING ============== */
 
 /* ---------- sales ---------- */
 function loadSales(){
