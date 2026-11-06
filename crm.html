@@ -571,22 +571,116 @@ $("writeBtn").onclick=function(){
 $("mktRefresh").onclick=loadMarketing;
 
 /* ---------- weekly articles ---------- */
+/* =======================================================================
+   SHELL KEY MARKETING — ARTICLE DISTRIBUTION COMMANDS
+   PURPOSE: Make sharing an existing Shell Key article simple, one channel
+            at a time, without changing the original social-post workflow.
+
+   PSEUDOCODE:
+   1. Load already published articles from the existing CRM API.
+   2. For each article, display a small "Share article" control.
+   3. Choose one destination: LinkedIn, Facebook, X, Reddit or Email.
+   4. Construct a unique tracked article URL for that destination.
+   5. Copy a short caption and tracked link and open the chosen site.
+   6. Record visits/leads with existing website tracking; show the
+      results inside the Article Distribution Performance table below.
+
+   SAFE TO CHANGE:
+   - Names and ordering inside ARTICLE_CHANNELS.
+   - Caption wording inside articleCaption().
+   - Help instructions shown in the article cards.
+
+   IMPORTANT LIMITS:
+   - "Copy & open" does not publish. The platform still requires a
+     human to paste/confirm unless we configure its publishing API.
+   - Facebook/LinkedIn link-share dialogs may provide preview images if
+     the article has valid Open Graph image metadata. Not guaranteed.
+   - Don't auto-post to groups or forums without permission.
+   - Article results count tracked visits/leads, NOT native impressions.
+   ======================================================================= */
+var ARTICLE_CHANNELS = {
+  linkedin: {label:"LinkedIn", url:"https://www.linkedin.com/feed/"},
+  facebook: {label:"Facebook Page", url:"https://www.facebook.com/"},
+  x: {label:"X / Twitter", url:"https://x.com/compose/post"},
+  reddit: {label:"Reddit", url:"https://www.reddit.com/submit"},
+  email: {label:"Email", url:""}
+};
+function articleTrackedLink(a,channel){
+  var base="https://shellkey.company/articles/"+encodeURIComponent(a.slug);
+  return base+"?utm_source="+encodeURIComponent(channel)+"&utm_medium=article_share&utm_campaign="+encodeURIComponent("article_"+a.id+"_"+channel);
+}
+function articleCaption(a,channel){
+  var hook="Working on project controls or industrial execution?";
+  var title=a.title||"Shell Key project controls guide";
+  // No invented results or customer claims. Keep the original article URL as the CTA.
+  return hook+"\n"+title+"\nRead the guide: "+articleTrackedLink(a,channel);
+}
+function articleDestination(a,channel){
+  var link=articleTrackedLink(a,channel), title=a.title||"Shell Key article";
+  if(channel==="linkedin")return "https://www.linkedin.com/sharing/share-offsite/?url="+encodeURIComponent(link);
+  if(channel==="facebook")return "https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(link);
+  if(channel==="x")return "https://twitter.com/intent/tweet?text="+encodeURIComponent(title)+"&url="+encodeURIComponent(link);
+  if(channel==="reddit")return "https://www.reddit.com/submit?url="+encodeURIComponent(link)+"&title="+encodeURIComponent(title);
+  return "mailto:?subject="+encodeURIComponent(title)+"&body="+encodeURIComponent(articleCaption(a,channel));
+}
+function articleCopy(text){
+  if(navigator.clipboard && window.isSecureContext)return navigator.clipboard.writeText(text);
+  var t=document.createElement("textarea");t.value=text;t.style.position="fixed";t.style.left="-10000px";document.body.appendChild(t);t.select();
+  var ok=document.execCommand("copy");t.remove();return ok?Promise.resolve():Promise.reject(new Error("Clipboard unavailable"));
+}
+function articleShareOptions(){
+  return Object.keys(ARTICLE_CHANNELS).map(function(k){return '<option value="'+k+'">'+ARTICLE_CHANNELS[k].label+'</option>';}).join("");
+}
+function loadArticleDistributionResults(){
+  var box=$("articleDistResults");if(!box)return;
+  api("article-distribution?days=90").then(function(r){
+    if(!r.ok)throw new Error(r.error||"No results");
+    if(!r.rows || !r.rows.length){box.innerHTML='<span class="legend">No article link visits yet. Share an article using the controls above to start tracking.</span>';return;}
+    box.innerHTML='<div class="tablewrap"><table style="min-width:0"><thead><tr><th>Channel</th><th>Article</th><th>Visitors</th><th>Page views</th><th>Leads</th></tr></thead><tbody>'+
+      r.rows.map(function(x){return '<tr><td>'+esc(x.channel)+'</td><td>'+esc(x.title||x.slug||'Article')+'</td><td>'+Number(x.visitors||0)+'</td><td>'+Number(x.views||0)+'</td><td>'+Number(x.leads||0)+'</td></tr>';}).join('')+'</tbody></table></div>'+
+      '<p class="legend">Measured from tracked website links, not social-platform impressions. Favor channels producing qualified leads; keep testing others.</p>';
+  }).catch(function(){box.innerHTML='<span class="legend">Article tracking report not available yet. Ensure the updated CRM API is deployed.</span>';});
+}
 function loadArticles(){
   return api("articles").then(function(d){
     var list=(d&&d.articles)||[];
-    if(!list.length){$("artWrap").innerHTML='<div class="empty">No articles yet. The first one is written on Monday, or press <b>Write an article now</b>.</div>';return;}
+    if(!list.length){$("artWrap").innerHTML='<div class="empty">No articles yet. Press <b>Write an article now</b> to make one.</div>';loadArticleDistributionResults();return;}
+    var visible=list.filter(function(a){return a.status==="published";});
     $("artWrap").innerHTML='<div class="pgrid">'+list.map(function(a){
       var on=a.status==="published";
-      return'<div class="pcard'+(on?"":" st-rejected")+'"><div class="top"><span class="pill p-'+(on?"posted":"rejected")+'">'+(on?"live":"hidden")+'</span><span class="meta">'+esc(fmtDate(a.created_at))+' · '+esc(a.item_label||"")+'</span></div>'
+      return '<div class="pcard'+(on?'':' st-rejected')+'" data-article-card="'+a.id+'">'
+        +'<div class="top"><span class="pill p-'+(on?'posted':'rejected')+'">'+(on?'live':'hidden')+'</span><span class="meta">'+esc(fmtDate(a.created_at))+' · '+esc(a.item_label||'')+'</span></div>'
         +'<b>'+esc(a.title)+'</b><div class="row" style="margin:0">'
-        +'<a class="btn sm ghost" href="/articles/'+esc(a.slug)+'" target="_blank" rel="noopener" style="text-decoration:none">View</a>'
-        +'<button class="btn sm ghost" data-art="'+a.id+'" data-st="'+(on?"hidden":"published")+'">'+(on?"Hide":"Show")+'</button></div></div>';
-    }).join("")+'</div>';
+        +'<a class="btn sm ghost" href="/articles/'+encodeURIComponent(a.slug)+'" target="_blank" rel="noopener" style="text-decoration:none">View</a>'
+        +'<button class="btn sm ghost" data-art="'+a.id+'" data-st="'+(on?'hidden':'published')+'">'+(on?'Hide':'Show')+'</button></div>'
+        +(on?'<div class="article-share"><label class="legend" for="art-channel-'+a.id+'">Where to share this article</label>'
+          +'<select id="art-channel-'+a.id+'" class="article-channel" data-share-id="'+a.id+'" style="width:100%">'+articleShareOptions()+'</select>'
+          +'<div class="row"><button class="btn sm" data-art-action="share" data-id="'+a.id+'">Copy caption &amp; open</button>'
+          +'<button class="btn sm ghost" data-art-action="url" data-id="'+a.id+'">Copy article URL</button></div>'
+          +'<span class="legend">Paste the text and confirm on the destination site. Sharing permissions vary by platform.</span></div>':'')
+        +'</div>';
+    }).join('')+'</div>'+'<h3 style="margin-top:24px">Article distribution results</h3><div id="articleDistResults"></div>';
     $("artWrap").querySelectorAll("[data-art]").forEach(function(b){b.onclick=function(){
       api("article/"+b.dataset.art,{method:"PATCH",body:{status:b.dataset.st}}).then(loadArticles);
     };});
-  }).catch(function(){});
+    var byId={};list.forEach(function(a){byId[a.id]=a;});
+    $("artWrap").querySelectorAll("[data-art-action]").forEach(function(b){b.onclick=function(){
+      var a=byId[b.dataset.id], sel=$("art-channel-"+a.id),channel=sel.value;
+      if(b.dataset.artAction==="url"){
+        articleCopy(articleTrackedLink(a,channel)).then(function(){toast("Tracked article link copied");}).catch(function(){alert("Copy failed. Open the article and copy its address.");});return;
+      }
+      // Opening the window in this click event avoids most browser popup blockers.
+      var dest=articleDestination(a,channel);
+      if(channel==="email")window.location.href=dest;
+      else window.open(dest,"_blank","noopener,noreferrer");
+      articleCopy(articleCaption(a,channel)).then(function(){toast("Caption and link copied. Paste at destination.");})
+        .catch(function(){alert("Destination opened, but copying failed. Use Copy article URL instead.");});
+    };});
+    loadArticleDistributionResults();
+  }).catch(function(){ });
 }
+/* ================== END ARTICLE DISTRIBUTION ========================== */
+
 $("artBtn").onclick=function(){
   var b=$("artBtn");b.disabled=true;b.textContent="Writing… (about a minute)";
   api("article",{method:"POST",body:{}}).then(function(r){b.disabled=false;b.textContent="Write an article now";
