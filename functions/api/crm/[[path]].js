@@ -168,6 +168,48 @@ export async function onRequest({ request, env, params }) {
     }
   }
 
+  // =====================================================================
+  // ARTICLE DISTRIBUTION RESULTS — READ ONLY
+  // PURPOSE: Attribute tracked article landing-page visits and leads to
+  //          the channel chosen in the article-share dropdown.
+  // PSEUDOCODE: 1. Find visits with article campaign tags.
+  //             2. Group by article and channel.
+  //             3. Count distinct visitor sessions and resulting leads.
+  //             4. Return summary for the CRM, never modify records.
+  // SAFE TO EDIT: Default lookback (90) or allowed maximum (365) days.
+  // =====================================================================
+  if (route === "article-distribution" && request.method === "GET") {
+    const days = Math.min(365, Math.max(1, parseInt(url.searchParams.get("days") || "90", 10) || 90));
+    const since = "-" + days + " days";
+    const rows = (await db.prepare(`
+      SELECT
+        v.utm_source AS channel,
+        v.utm_campaign AS campaign,
+        COUNT(*) AS views,
+        COUNT(DISTINCT v.sid) AS visitors,
+        (SELECT COUNT(DISTINCT l.id) FROM leads l WHERE l.sid IN
+          (SELECT DISTINCT v2.sid FROM visits v2 WHERE v2.utm_campaign=v.utm_campaign)) AS leads
+      FROM visits v
+      WHERE v.utm_campaign LIKE 'article_%'
+        AND v.at >= datetime('now', ?)
+      GROUP BY v.utm_campaign, v.utm_source
+      ORDER BY leads DESC, visitors DESC, views DESC
+      LIMIT 200
+    `).bind(since).all()).results || [];
+    // Campaign format is article_<article id>_<channel>.
+    const articleIds = [...new Set(rows.map(x => Number((x.campaign || "").match(/^article_(\d+)_/)?.[1] || 0)).filter(Boolean))];
+    const articleMap = new Map();
+    for (const id of articleIds) {
+      const a = await db.prepare("SELECT id, title, slug FROM articles WHERE id=?").bind(id).first().catch(() => null);
+      if (a) articleMap.set(id,a);
+    }
+    return json({ok:true,days,rows:rows.map(x=>{
+      const id = Number((x.campaign || "").match(/^article_(\d+)_/)?.[1] || 0);
+      return {...x,id,title:articleMap.get(id)?.title || "",slug:articleMap.get(id)?.slug || ""};
+    })});
+  }
+  // =================== END ARTICLE DISTRIBUTION RESULTS =================
+
   // ---------------------------------------------------------------- weekly articles
   if (route === "articles" && request.method === "GET") {
     try { return json({ ok: true, articles: await listArticles(db) }); }
