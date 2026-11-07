@@ -64,10 +64,36 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
 /* login */
 .login{max-width:420px;margin:80px auto;background:var(--panel);border:1px solid var(--stroke);border-radius:var(--radius);padding:28px;text-align:center}
 .login input{width:100%;margin:14px 0}
-.bars{display:flex;align-items:flex-end;gap:3px;height:120px;padding:10px;background:rgba(255,255,255,0.03);border:1px solid var(--stroke);border-radius:var(--radius);overflow-x:auto}
-.bar{flex:1 0 12px;background:var(--blue);border-radius:3px 3px 0 0;position:relative;min-height:2px}
-.bar.v{background:var(--accent)}
-.bar:hover::after{content:attr(data-t);position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:#000;color:#fff;padding:4px 8px;border-radius:6px;white-space:nowrap;font-size:12px;z-index:5}
+/* ==============================================================
+   SHELL KEY CRM - VISITOR ACTIVITY CHART
+   PURPOSE: Replace the oversized single green bar with a compact,
+            dated daily chart. Existing brand colors remain unchanged.
+   PSEUDOCODE:
+   1. Show no more than 14 recent calendar days, including zero days.
+   2. Draw one small BLUE bar for page views and one GREEN bar for
+      unique visitors, side by side for each day.
+   3. Keep a fixed chart height and limit each day's width.
+   4. Show exact counts in a hover tooltip and accessible label.
+   SAFE TO CHANGE: bar widths, chart height, gap, and font sizes.
+   DO NOT CHANGE: trafficChart ID or CSS class names used by JS.
+   ============================================================== */
+.traffic-panel{border:1px solid var(--stroke);border-radius:var(--radius);background:rgba(255,255,255,.025);padding:14px 16px;margin:8px 0 20px;max-width:100%}
+.traffic-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+.traffic-heading strong{font-size:14px}
+.traffic-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text2)}
+.traffic-key{width:10px;height:10px;display:inline-block;border-radius:2px;margin-right:5px}
+.traffic-key.views{background:var(--blue)} .traffic-key.visitors{background:var(--accent)}
+.traffic-chart-scroll{max-width:100%;overflow-x:auto}
+.traffic-chart{display:flex;justify-content:center;align-items:flex-end;gap:8px;min-height:166px;min-width:fit-content;border-bottom:1px solid var(--stroke);padding:8px 4px 0}
+.traffic-day{width:48px;flex:0 0 48px;text-align:center;position:relative}
+.traffic-bars{height:120px;display:flex;justify-content:center;gap:4px;align-items:flex-end;border-bottom:1px solid rgba(255,255,255,.16)}
+.traffic-bar{width:15px;max-height:110px;min-height:0;border-radius:3px 3px 0 0}
+.traffic-bar.views{background:var(--blue)} .traffic-bar.visitors{background:var(--accent)}
+.traffic-date{height:28px;padding-top:6px;white-space:nowrap;font-size:11px;color:var(--text2)}
+.traffic-day:hover::after,.traffic-day:focus-visible::after{content:attr(data-tooltip);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#020817;border:1px solid var(--stroke);border-radius:6px;padding:6px 9px;color:#fff;font-size:12px;white-space:nowrap;z-index:3;pointer-events:none}
+.traffic-summary{font-size:12px;color:var(--text2);margin-top:9px}
+@media(max-width:740px){.traffic-chart{justify-content:flex-start}.traffic-day{width:44px;flex-basis:44px}}
+/* ===================== END TRAFFIC CHART ===================== */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media (max-width:900px){.grid2{grid-template-columns:1fr}}
 .toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--accent);color:#06210b;padding:10px 18px;border-radius:10px;font-weight:700;display:none;z-index:30}
@@ -181,9 +207,17 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
     <section id="tab-visitors" class="hidden">
       <div class="toolbar">
         <select id="days"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option></select>
-        <span class="legend">Green bars = unique visitors, blue = page views. Hover a bar for the date.</span>
+        <span class="legend">Choose a reporting period. The chart displays up to 14 recent days.</span>
       </div>
-      <div class="bars" id="bars"></div>
+      <!-- TRAFFIC CHART: One compact, dated view; no oversized bars. -->
+      <div class="traffic-panel">
+        <div class="traffic-heading">
+          <strong>Daily Website Activity</strong>
+          <div class="traffic-legend"><span><i class="traffic-key views"></i>Page views</span><span><i class="traffic-key visitors"></i>Unique visitors</span></div>
+        </div>
+        <div class="traffic-chart-scroll"><div id="trafficChart" class="traffic-chart" role="img" aria-label="Daily website traffic chart"></div></div>
+        <div class="traffic-summary" id="trafficSummary">Loading visitor activity…</div>
+      </div>
       <!-- ==========================================================
            SECTION: VISITOR REPORT SELECTOR — ONE TABLE AT A TIME
            PURPOSE: Replace four scattered visitor tables with ONE
@@ -264,8 +298,30 @@ h3{font-size:15px;margin:18px 0 6px;color:var(--accent);text-transform:uppercase
       <div class="note">Clicks are people who came to the site from a post. Leads are form fills from those people. Sales are PayPal payments whose email matches one of those leads. Return shows only after you enter money spent on a boost. Free posts have no cost, so any sale from them is all profit.</div>
       <h3>By platform</h3>
       <div class="tablewrap"><table id="platTable"></table></div>
-      <h3>By post</h3>
+      <!-- ==========================================================
+           SHELL KEY CRM - RESULTS: POST HISTORY DISPLAY
+           PURPOSE: Keep the Results page short and easy to scan.
+           PSEUDOCODE:
+             1. Show the latest 10 posts by default.
+             2. Allow 5, 10, or All posts using a dropdown.
+             3. Keep older records in the database for reporting.
+           SAFE TO CHANGE: Visible option labels and default value.
+           DO NOT CHANGE: postHistoryLimit id or option values.
+           ========================================================== -->
+      <div class="row" style="justify-content:space-between;align-items:center;margin:18px 0 7px;gap:12px">
+        <h3 style="margin:0">By post</h3>
+        <label for="postHistoryLimit" class="legend" style="display:flex;align-items:center;gap:8px">
+          Show recent
+          <select id="postHistoryLimit" aria-label="Number of posts in results">
+            <option value="5">5 posts</option>
+            <option value="10" selected>10 posts</option>
+            <option value="all">All posts</option>
+          </select>
+        </label>
+      </div>
+      <div id="postHistoryInfo" class="legend" aria-live="polite"></div>
       <div class="tablewrap"><table id="postResTable"></table></div>
+      <!-- ============ END POST HISTORY DISPLAY ============ -->
       <h3>Money spent on boosts and ads</h3>
       <div class="toolbar">
         <input type="date" id="spDay" />
@@ -468,11 +524,52 @@ function showVisitorReport(){
   renderTable(table,columns,rows,onRow);
 }
 
+/* ==============================================================
+   VISITORS - RENDER COMPACT DAILY CHART
+   PURPOSE: Date labels, readable separate bars, no stretching.
+   PSEUDOCODE:
+   1. Build up to 14 calendar dates from the selected period.
+   2. Match API counts to those dates; missing dates get zero.
+   3. Scale short blue/green bars using the highest count.
+   4. Show exact day values on hover and accessible labels.
+   SAFE TO CHANGE: maximumDays=14; height multiplier=110.
+   DO NOT CHANGE: API field names d, views, visitors.
+   ============================================================== */
+function renderTrafficChart(daily){
+  var maximumDays=14;
+  var selectedDays=Math.min(maximumDays,Math.max(1,Number($("days").value)||30));
+  var byDate={};
+  daily.forEach(function(r){byDate[r.d]={views:Number(r.views)||0,visitors:Number(r.visitors)||0};});
+  var todayUtc=new Date();
+  var dateList=[];
+  for(var i=selectedDays-1;i>=0;i--){
+    var dt=new Date(Date.UTC(todayUtc.getUTCFullYear(),todayUtc.getUTCMonth(),todayUtc.getUTCDate()-i));
+    var key=dt.toISOString().slice(0,10);
+    var data=byDate[key]||{views:0,visitors:0};
+    dateList.push({key:key,dt:dt,views:data.views,visitors:data.visitors});
+  }
+  var max=Math.max(1,...dateList.map(function(x){return Math.max(x.views,x.visitors);}));
+  var datefmt=new Intl.DateTimeFormat("en-US",{month:"short",day:"numeric",timeZone:"UTC"});
+  $("trafficChart").innerHTML=dateList.map(function(x){
+    var label=datefmt.format(x.dt);
+    var tooltip=label+": "+x.views+" views, "+x.visitors+" visitors";
+    var viewsHeight=x.views?Math.max(3,Math.round(x.views/max*110)):0;
+    var visitorsHeight=x.visitors?Math.max(3,Math.round(x.visitors/max*110)):0;
+    return '<div class="traffic-day" tabindex="0" aria-label="'+esc(tooltip)+'" data-tooltip="'+esc(tooltip)+'">'
+      +'<div class="traffic-bars"><div class="traffic-bar views" style="height:'+viewsHeight+'px"></div>'
+      +'<div class="traffic-bar visitors" style="height:'+visitorsHeight+'px"></div></div>'
+      +'<div class="traffic-date">'+esc(label)+'</div></div>';
+  }).join("");
+  var sumViews=dateList.reduce(function(n,x){return n+x.views;},0);
+  var sumVisitors=dateList.reduce(function(n,x){return n+x.visitors;},0);
+  $("trafficSummary").textContent="Last "+selectedDays+" days shown • "+sumViews+" page views • "+sumVisitors+" daily unique-visitor counts. Hover over a day for details.";
+}
+/* ================== END COMPACT DAILY CHART =================== */
+
 function loadVisitors(){
   api("visits?days="+$("days").value).then(function(d){
     visitorReportData = d;
-    var max=Math.max.apply(null,d.daily.map(function(x){return x.views;}).concat([1]));
-    $("bars").innerHTML=d.daily.map(function(x){return'<div class="bar" style="height:'+Math.round(x.views/max*100)+'%" data-t="'+esc(x.d)+': '+x.views+' views, '+x.visitors+' visitors"><div class="bar v" style="position:absolute;bottom:0;left:0;right:0;height:'+Math.round(x.visitors/x.views*100)+'%"></div></div>';}).join("")||'<div class="empty" style="width:100%">No visits recorded yet. Open the site in another tab and refresh.</div>';
+    renderTrafficChart(d.daily||[]);
     showVisitorReport();
   }).catch(function(){toast("Could not load visitor analytics");});
 }
@@ -774,12 +871,33 @@ function loadResults(){
       numCol("posts","Posts"),numCol("clicks","Clicks"),numCol("checkouts","Checkout clicks"),numCol("leads","Leads"),numCol("sales","Sales"),
       moneyCol("revenue","Revenue"),moneyCol("spend","Spent"),{key:"roi",label:"Return",val:function(r){return r.roi==null?-1e9:r.roi;},render:function(r){return pct(r.roi);}}
     ],d.totals);
+    /* ==========================================================
+       RESULTS - SHOW RECENT POSTS FIRST
+       PURPOSE: Avoid scrolling through the entire post history.
+       PSEUDOCODE:
+         1. Receive the full post history from the existing API.
+         2. Sort newest posts first without altering saved records.
+         3. Show 5, 10 (default), or all records as selected.
+         4. Keep the full data for ad-spend dropdowns and totals.
+       SAFE TO CHANGE: Default selected option in the HTML.
+       DO NOT CHANGE: API data, original post IDs, or totals.
+       ========================================================== */
+    var allPostResults=(d.posts||[]).slice().sort(function(a,b){
+      var dateOrder=String(b.day||"").localeCompare(String(a.day||""));
+      return dateOrder || (Number(b.id||0)-Number(a.id||0));
+    });
+    var selectedLimit=$("postHistoryLimit").value;
+    var visiblePostResults=selectedLimit==="all" ? allPostResults
+      : allPostResults.slice(0, Number(selectedLimit)||10);
+    $("postHistoryInfo").textContent="Showing "+visiblePostResults.length+
+      " of "+allPostResults.length+" posts. Change to All posts to review history.";
     renderTable($("postResTable"),[
       {key:"day",label:"Day"},{key:"platform",label:"Platform",val:function(r){return PLAT_NAME[r.platform]||r.platform;}},
       {key:"item_label",label:"Product",clip:true},{key:"angle",label:"Type"},{key:"campaign",label:"Tag"},
       numCol("clicks","Clicks"),numCol("checkouts","Checkout clicks"),numCol("leads","Leads"),numCol("sales","Sales"),
       moneyCol("revenue","Revenue"),moneyCol("spend","Spent"),{key:"roi",label:"Return",val:function(r){return r.roi==null?-1e9:r.roi;},render:function(r){return pct(r.roi);}}
-    ],d.posts);
+    ],visiblePostResults);
+    /* ================= END RESULTS SHORTLIST =============== */
     var cur=$("spCamp").value;
     $("spCamp").innerHTML='<option value="">General (not one post)</option>'+d.posts.map(function(p){return'<option value="'+esc(p.campaign)+'">'+esc(p.day+" · "+(PLAT_NAME[p.platform]||p.platform)+" · "+(p.item_label||"")+" ("+p.campaign+")")+'</option>';}).join("");
     $("spCamp").value=cur;
@@ -792,6 +910,7 @@ function loadResults(){
   });
 }
 $("resDays").onchange=loadResults;$("resRefresh").onclick=loadResults;
+$("postHistoryLimit").onchange=loadResults; // Refresh only the selected Results view.
 $("spAdd").onclick=function(){
   api("spend",{method:"POST",body:{day:$("spDay").value,platform:$("spPlat").value,campaign:$("spCamp").value,amount:$("spAmt").value,note:$("spNote").value}})
     .then(function(r){if(!r.ok){alert(r.error);return;}$("spAmt").value="";$("spNote").value="";toast("Spend added");loadResults();});
