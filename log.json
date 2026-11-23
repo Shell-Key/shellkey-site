@@ -371,6 +371,18 @@
    "privacy": "public",
    "views48": null,
    "videoUrl": "https://github.com/Shell-Key/shellkey-site/releases/download/shorts/project-system-20261122-1704.mp4"
+  },
+  {
+   "id": "XyLQUb1Gl5g",
+   "url": "https://youtube.com/shorts/XyLQUb1Gl5g",
+   "slug": "family-finance",
+   "title": "Family Finance: try the free demo #Shorts",
+   "slot": 6,
+   "date": "2026-11-23",
+   "postedAt": "2026-11-23T12:14:31.965Z",
+   "privacy": "public",
+   "views48": null,
+   "videoUrl": "https://github.com/Shell-Key/shellkey-site/releases/download/shorts/family-finance-20261123-1214.mp4"
   }
  ],
  "days": {
@@ -604,6 +616,15 @@
     21,
     6,
     11
+   ],
+   "mode": "testing",
+   "ranked": false
+  },
+  "2026-11-23": {
+   "slots": [
+    21,
+    6,
+    15
    ],
    "mode": "testing",
    "ranked": false
