@@ -395,6 +395,18 @@
    "privacy": "public",
    "views48": null,
    "videoUrl": "https://github.com/Shell-Key/shellkey-site/releases/download/shorts/inspection-system-20261125-0338.mp4"
+  },
+  {
+   "id": "aStpgkEa6CA",
+   "url": "https://youtube.com/shorts/aStpgkEa6CA",
+   "slug": "api-1104-im",
+   "title": "API 1104 IM: try the free demo #Shorts",
+   "slot": 6,
+   "date": "2026-11-25",
+   "postedAt": "2026-11-25T13:33:06.718Z",
+   "privacy": "public",
+   "views48": null,
+   "videoUrl": "https://github.com/Shell-Key/shellkey-site/releases/download/shorts/api-1104-im-20261125-1333.mp4"
   }
  ],
  "days": {
@@ -646,6 +658,15 @@
     21,
     17,
     19
+   ],
+   "mode": "testing",
+   "ranked": false
+  },
+  "2026-11-25": {
+   "slots": [
+    19,
+    21,
+    6
    ],
    "mode": "testing",
    "ranked": false
